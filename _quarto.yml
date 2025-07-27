@@ -1,0 +1,37 @@
+project:
+  type: website
+
+website:
+  title: "Naoki Shibuya's Articles"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+  page-footer:
+    center: "© 2025, Naoki Shibuya"
+
+format:
+  html:
+    theme:
+      dark: [lightly, theme-dark.scss]
+      light: lightly
+    css: styles.css
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    number-sections: true
+    number-depth: 3
+    link-external-icon: true
+    link-external-newwindow: true
+    link-external-nofollow: true
+page-layout: article
+editor:
+  render-on-save: true
+jupyter: python3
+execute:
+  freeze: auto
+filters:
+  - newpagelink.lua
+highlight-style: dracula
+title-block-banner: false

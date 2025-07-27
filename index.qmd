@@ -1,0 +1,18 @@
+---
+listing:
+  contents: "blog"
+  sort: "date desc"
+  type: grid
+  categories: true
+  sort-ui: true
+  filter-ui: true
+  fields: [image, title, subtitle, date]
+  grid-item-border: true
+  grid-item-align: center
+  page-size: 9
+  feed: false
+page-layout: full
+format:
+  html:
+    katex: true
+---

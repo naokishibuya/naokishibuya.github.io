@@ -1,0 +1,57 @@
+/*-- scss:defaults --*/
+// Base document colors
+$body-bg: #181818;
+$body-color: #c7c7c7;
+$link-color: #75AADB;
+
+// Code blocks
+$code-block-bg-alpha: -.8;
+
+main > p > img:first-child {
+    box-shadow: none!important;
+}
+
+.math.display mjx-container {
+    background-color: #212529;
+    color: #d7d7d7;
+    border-radius: 5px;
+}
+
+.quarto-grid-item {
+    background-color: #2e2b5b!important;
+    box-shadow: none!important;
+}
+
+.category.active {
+    color: red;
+}
+
+p {
+    font-weight: 300;
+}
+
+a {
+    font-weight: lighter;
+}
+
+body strong {
+    font-weight: 700;
+    color: lightgray;
+}
+
+code:not(.sourceCode) {
+    color: lightgray!important;
+    background-color: rgb(40, 40, 40)!important;
+}
+
+/* YouTube videos, etc. */
+iframe {
+    border-radius: none!important;
+    box-shadow: none!important;
+}
+
+/* Mermaid */
+.mermaid .path, .arrowheadPath {
+    stroke:#0f0 !important;
+    fill: #0f0 !important;
+}
