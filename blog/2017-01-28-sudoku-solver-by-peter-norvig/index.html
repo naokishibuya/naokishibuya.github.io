@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2017-01-28">
+
+<title>Beautiful Sudoku Solver by Peter Norvig – Naoki Shibuya’s Articles</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya’s Articles</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-rule-of-sudoku" id="toc-the-rule-of-sudoku" class="nav-link active" data-scroll-target="#the-rule-of-sudoku"><span class="header-section-number">1</span> The Rule of Sudoku</a>
+  <ul class="collapse">
+  <li><a href="#squares" id="toc-squares" class="nav-link" data-scroll-target="#squares"><span class="header-section-number">1.1</span> Squares</a></li>
+  <li><a href="#the-digits-rows-and-cols" id="toc-the-digits-rows-and-cols" class="nav-link" data-scroll-target="#the-digits-rows-and-cols"><span class="header-section-number">1.2</span> The digits, rows and cols</a></li>
+  <li><a href="#the-cross-function" id="toc-the-cross-function" class="nav-link" data-scroll-target="#the-cross-function"><span class="header-section-number">1.3</span> The cross&nbsp;function</a></li>
+  <li><a href="#unit-list" id="toc-unit-list" class="nav-link" data-scroll-target="#unit-list"><span class="header-section-number">1.4</span> Unit List</a></li>
+  <li><a href="#the-rule-of-sudoku-once-again" id="toc-the-rule-of-sudoku-once-again" class="nav-link" data-scroll-target="#the-rule-of-sudoku-once-again"><span class="header-section-number">1.5</span> The Rule of Sudoku (Once&nbsp;Again)</a></li>
+  <li><a href="#peers" id="toc-peers" class="nav-link" data-scroll-target="#peers"><span class="header-section-number">1.6</span> Peers</a></li>
+  <li><a href="#unit-testing-squares-units-and-peers" id="toc-unit-testing-squares-units-and-peers" class="nav-link" data-scroll-target="#unit-testing-squares-units-and-peers"><span class="header-section-number">1.7</span> Unit Testing Squares, Units and Peers</a></li>
+  </ul></li>
+  <li><a href="#initial-representation-of-sudoku-puzzle" id="toc-initial-representation-of-sudoku-puzzle" class="nav-link" data-scroll-target="#initial-representation-of-sudoku-puzzle"><span class="header-section-number">2</span> Initial Representation of Sudoku&nbsp;Puzzle</a></li>
+  <li><a href="#constraint-propagation" id="toc-constraint-propagation" class="nav-link" data-scroll-target="#constraint-propagation"><span class="header-section-number">3</span> Constraint Propagation</a>
+  <ul class="collapse">
+  <li><a href="#the-parse_grid-function" id="toc-the-parse_grid-function" class="nav-link" data-scroll-target="#the-parse_grid-function"><span class="header-section-number">3.1</span> The parse_grid function</a></li>
+  <li><a href="#the-assign-functions" id="toc-the-assign-functions" class="nav-link" data-scroll-target="#the-assign-functions"><span class="header-section-number">3.2</span> The assign functions</a></li>
+  <li><a href="#the-eliminate-function" id="toc-the-eliminate-function" class="nav-link" data-scroll-target="#the-eliminate-function"><span class="header-section-number">3.3</span> The eliminate function</a></li>
+  <li><a href="#the-display-function" id="toc-the-display-function" class="nav-link" data-scroll-target="#the-display-function"><span class="header-section-number">3.4</span> The display function</a></li>
+  </ul></li>
+  <li><a href="#search" id="toc-search" class="nav-link" data-scroll-target="#search"><span class="header-section-number">4</span> Search</a>
+  <ul class="collapse">
+  <li><a href="#the-solve-function" id="toc-the-solve-function" class="nav-link" data-scroll-target="#the-solve-function"><span class="header-section-number">4.1</span> The solve function</a></li>
+  <li><a href="#the-search-function" id="toc-the-search-function" class="nav-link" data-scroll-target="#the-search-function"><span class="header-section-number">4.2</span> The search&nbsp;function</a></li>
+  </ul></li>
+  <li><a href="#the-complete-solver-code" id="toc-the-complete-solver-code" class="nav-link" data-scroll-target="#the-complete-solver-code"><span class="header-section-number">5</span> The Complete Solver Code</a></li>
+  <li><a href="#why" id="toc-why" class="nav-link" data-scroll-target="#why"><span class="header-section-number">6</span> Why?</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7</span> Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">8</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Beautiful Sudoku Solver by Peter Norvig</h1>
+<p class="subtitle lead">Python code that solves any Sudoku puzzles systematically</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Algorithms</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 28, 2017</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Beautiful Sudoku Solver by Peter Norvig: Python code that solves any Sudoku puzzles systematically"></p>
+<p>I recently came across Peter Norvig’s <a href="http://www.norvig.com/sudoku.html" rel="noopener" target="_blank">Solving Every Sudoku Puzzle</a>. I was impressed with his concise and beautiful Sudoku Solver Python code that solves any Sudoku puzzles systematically.</p>
+<p>However, some people may struggle to understand the concise code and cannot appreciate the beauty. I will break down his article and explain the code step-by-step.</p>
+<p><strong>Note</strong>: the original article by Peter uses Python 2, but I’m using Python 3 in this article. In some places, I changed the indentation of Peter’s code, but I did not alter his program logic.</p>
+<section id="the-rule-of-sudoku" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-rule-of-sudoku"><span class="header-section-number">1</span> The Rule of Sudoku</h2>
+<p>If you are unfamiliar with Sudoku, I recommend visiting <a href="http://www.sudokudragon.com/sudoku.htm" target="_blank">Sudoku Dragon</a> and reading their Sudoku rule description.</p>
+<p>Peter gives a beautiful summary of its rule in one sentence.</p>
+<blockquote class="blockquote">
+<p>A puzzle is solved if the squares in each unit are filled with a permutation of the digits 1 to 9.</p>
+</blockquote>
+<p>It may not be obvious at first glance if you don’t know what <strong>squares</strong> and <strong>units</strong> are.</p>
+<section id="squares" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="squares"><span class="header-section-number">1.1</span> Squares</h3>
+<blockquote class="blockquote">
+<p>A Sudoku puzzle is a grid of 81 squares; the majority of enthusiasts label the columns 1–9, the rows A-I, and call a collection of nine squares (column, row, or box) a <em>unit</em>.</p>
+</blockquote>
+<pre><code>A1 A2 A3| A4 A5 A6| A7 A8 A9
+B1 B2 B3| B4 B5 B6| B7 B8 B9
+C1 C2 C3| C4 C5 C6| C7 C8 C9
+--------+---------+---------
+D1 D2 D3| D4 D5 D6| D7 D8 D9
+E1 E2 E3| E4 E5 E6| E7 E8 E9
+F1 F2 F3| F4 F5 F6| F7 F8 F9
+--------+---------+---------
+G1 G2 G3| G4 G5 G6| G7 G8 G9
+H1 H2 H3| H4 H5 H6| H7 H8 H9
+I1 I2 I3| I4 I5 I6| I7 I8 I9</code></pre>
+<p>So, C2 is a square at the intersection of the third row (which is C) and the second column (which is 2).</p>
+</section>
+<section id="the-digits-rows-and-cols" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="the-digits-rows-and-cols"><span class="header-section-number">1.2</span> The digits, rows and cols</h3>
+<p>Peter defines digits, rows, and cols as strings.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>digits   <span class="op">=</span> <span class="st">'123456789'</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>rows     <span class="op">=</span> <span class="st">'ABCDEFGHI'</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>cols     <span class="op">=</span> digits</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A string can be treated as a list of characters, and you can access each element using for loop.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> digits:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It should output the below:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">1</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">2</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">3</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">5</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">6</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">7</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">8</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ex">9</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You might be wondering why Peter defines <code>cols = digits</code>. Why do we need two names for the same thing? After all, they are both the same character sequence. It will be clear as you read further in his program. You will appreciate that Peter uses digits and cols appropriately for better readability.</p>
+<p>For now, just remember the following. When you see digits in his code, you should consider them a list of digits from ‘1’ to ‘9’. When you see cols, you should consider it a list of column identifiers from ‘1’ to ‘9’. Both are exactly the same values, but their semantics are different.</p>
+</section>
+<section id="the-cross-function" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="the-cross-function"><span class="header-section-number">1.3</span> The cross&nbsp;function</h3>
+<p>A list of squares can be composed in the following code:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>squares <span class="op">=</span> []</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> rows:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> b <span class="kw">in</span> cols:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        squares.append(a<span class="op">+</span>b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In the above code, <code>a+b</code> is not a mathematical operation. It is a string concatenation operation. The character from a and the character from b are concatenated (i.e.&nbsp;joined). For example, when <code>a=’A’</code> and <code>b=’1'</code>, <code>a+b</code> yields <code>‘A1’</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">print</span>(squares)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>[<span class="st">'A1'</span>, <span class="st">'A2'</span>, <span class="st">'A3'</span>, <span class="st">'A4'</span>, <span class="st">'A5'</span>, <span class="st">'A6'</span>, <span class="st">'A7'</span>, <span class="st">'A8'</span>, <span class="st">'A9'</span>, <span class="st">'B1'</span>, <span class="st">'B2'</span>, <span class="st">'B3'</span>, <span class="st">'B4'</span>, <span class="st">'B5'</span>, <span class="st">'B6'</span>, <span class="st">'B7'</span>, <span class="st">'B8'</span>, <span class="st">'B9'</span>, <span class="st">'C1'</span>, <span class="st">'C2'</span>, <span class="st">'C3'</span>, <span class="st">'C4'</span>, <span class="st">'C5'</span>, <span class="st">'C6'</span>, <span class="st">'C7'</span>, <span class="st">'C8'</span>, <span class="st">'C9'</span>, <span class="st">'D1'</span>, <span class="st">'D2'</span>, <span class="st">'D3'</span>, <span class="st">'D4'</span>, <span class="st">'D5'</span>, <span class="st">'D6'</span>, <span class="st">'D7'</span>, <span class="st">'D8'</span>, <span class="st">'D9'</span>, <span class="st">'E1'</span>, <span class="st">'E2'</span>, <span class="st">'E3'</span>, <span class="st">'E4'</span>, <span class="st">'E5'</span>, <span class="st">'E6'</span>, <span class="st">'E7'</span>, <span class="st">'E8'</span>, <span class="st">'E9'</span>, <span class="st">'F1'</span>, <span class="st">'F2'</span>, <span class="st">'F3'</span>, <span class="st">'F4'</span>, <span class="st">'F5'</span>, <span class="st">'F6'</span>, <span class="st">'F7'</span>, <span class="st">'F8'</span>, <span class="st">'F9'</span>, <span class="st">'G1'</span>, <span class="st">'G2'</span>, <span class="st">'G3'</span>, <span class="st">'G4'</span>, <span class="st">'G5'</span>, <span class="st">'G6'</span>, <span class="st">'G7'</span>, <span class="st">'G8'</span>, <span class="st">'G9'</span>, <span class="st">'H1'</span>, <span class="st">'H2'</span>, <span class="st">'H3'</span>, <span class="st">'H4'</span>, <span class="st">'H5'</span>, <span class="st">'H6'</span>, <span class="st">'H7'</span>, <span class="st">'H8'</span>, <span class="st">'H9'</span>, <span class="st">'I1'</span>, <span class="st">'I2'</span>, <span class="st">'I3'</span>, <span class="st">'I4'</span>, <span class="st">'I5'</span>, <span class="st">'I6'</span>, <span class="st">'I7'</span>, <span class="st">'I8'</span>, <span class="st">'I9'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can use the list comprehension technique to make it more concise.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>squares <span class="op">=</span> [a<span class="op">+</span>b <span class="cf">for</span> a <span class="kw">in</span> rows <span class="cf">for</span> b <span class="kw">in</span> cols]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Finally, the below shows Peter’s code. He defines a function <code>cross</code> to make the code more readable.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cross(A, B):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Cross product of elements in A and elements in B."</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [a<span class="op">+</span>b <span class="cf">for</span> a <span class="kw">in</span> A <span class="cf">for</span> b <span class="kw">in</span> B]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>squares <span class="op">=</span> cross(rows, cols)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Therefore, the function <code>cross</code> generates all cross products of characters from rows and cols. The <code>squares</code> variable points to a list of all the 81 squares.</p>
+</section>
+<section id="unit-list" class="level3" data-number="1.4">
+<h3 data-number="1.4" class="anchored" data-anchor-id="unit-list"><span class="header-section-number">1.4</span> Unit List</h3>
+<blockquote class="blockquote">
+<p>Every square has exactly 3 units</p>
+</blockquote>
+<p>There are 81 squares on the Sudoku board and each square has exactly 3 units (no less, no more).</p>
+<p>For example, the 3 units of the square C2 are shown below:</p>
+<p><strong>The column-unit of C2</strong></p>
+<pre><code>
+    A2    |          |
+    B2    |          |
+    <strong>C2</strong>    |          |
+----------+----------+---------
+    D2    |          |
+    E2    |          |
+    F2    |          |
+----------+----------+---------
+    G2    |          |
+    H2    |          |
+    I2    |          |
+</code></pre>
+<p><strong>The row-unit of C2</strong></p>
+<pre><code>
+          |          |
+          |          |
+ C1 <strong>C2</strong> C3 | C4 C5 C6 | C7 C8 C9
+----------+----------+---------
+          |          |
+          |          |
+          |          |
+----------+----------+---------
+          |          |
+          |          |
+          |          |
+</code></pre>
+<p><strong>The box unit of C2</strong></p>
+<pre><code>
+ A1 A2 A3 |          |
+ B1 B2 B3 |          |
+ C1 <strong>C2</strong> C3 |          |
+----------+----------+---------
+          |          |
+          |          |
+          |          |
+----------+----------+---------
+          |          |
+          |          |
+          |          |
+</code></pre>
+<p>The column, the row, and the box (3x3 area) that contains square C2 are the 3 units of square C2.</p>
+<p>In total, there are 27 units on the Sudoku board. They are 9 column units, 9 row units, and 9 box units.</p>
+<p>We can use the function <code>cross</code> to generate the 9 column units:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> [cross(rows, c) <span class="cf">for</span> c <span class="kw">in</span> cols]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>[[<span class="st">'A1'</span>, <span class="st">'B1'</span>, <span class="st">'C1'</span>, <span class="st">'D1'</span>, <span class="st">'E1'</span>, <span class="st">'F1'</span>, <span class="st">'G1'</span>, <span class="st">'H1'</span>, <span class="st">'I1'</span>],</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A2'</span>, <span class="st">'B2'</span>, <span class="st">'C2'</span>, <span class="st">'D2'</span>, <span class="st">'E2'</span>, <span class="st">'F2'</span>, <span class="st">'G2'</span>, <span class="st">'H2'</span>, <span class="st">'I2'</span>],</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A3'</span>, <span class="st">'B3'</span>, <span class="st">'C3'</span>, <span class="st">'D3'</span>, <span class="st">'E3'</span>, <span class="st">'F3'</span>, <span class="st">'G3'</span>, <span class="st">'H3'</span>, <span class="st">'I3'</span>],</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A4'</span>, <span class="st">'B4'</span>, <span class="st">'C4'</span>, <span class="st">'D4'</span>, <span class="st">'E4'</span>, <span class="st">'F4'</span>, <span class="st">'G4'</span>, <span class="st">'H4'</span>, <span class="st">'I4'</span>],</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A5'</span>, <span class="st">'B5'</span>, <span class="st">'C5'</span>, <span class="st">'D5'</span>, <span class="st">'E5'</span>, <span class="st">'F5'</span>, <span class="st">'G5'</span>, <span class="st">'H5'</span>, <span class="st">'I5'</span>],</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A6'</span>, <span class="st">'B6'</span>, <span class="st">'C6'</span>, <span class="st">'D6'</span>, <span class="st">'E6'</span>, <span class="st">'F6'</span>, <span class="st">'G6'</span>, <span class="st">'H6'</span>, <span class="st">'I6'</span>],</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A7'</span>, <span class="st">'B7'</span>, <span class="st">'C7'</span>, <span class="st">'D7'</span>, <span class="st">'E7'</span>, <span class="st">'F7'</span>, <span class="st">'G7'</span>, <span class="st">'H7'</span>, <span class="st">'I7'</span>],</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A8'</span>, <span class="st">'B8'</span>, <span class="st">'C8'</span>, <span class="st">'D8'</span>, <span class="st">'E8'</span>, <span class="st">'F8'</span>, <span class="st">'G8'</span>, <span class="st">'H8'</span>, <span class="st">'I8'</span>],</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A9'</span>, <span class="st">'B9'</span>, <span class="st">'C9'</span>, <span class="st">'D9'</span>, <span class="st">'E9'</span>, <span class="st">'F9'</span>, <span class="st">'G9'</span>, <span class="st">'H9'</span>, <span class="st">'I9'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Similarly, we can generate the 9 row units:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> [cross(r, cols) <span class="cf">for</span> r <span class="kw">in</span> rows]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>[[<span class="st">'A1'</span>, <span class="st">'A2'</span>, <span class="st">'A3'</span>, <span class="st">'A4'</span>, <span class="st">'A5'</span>, <span class="st">'A6'</span>, <span class="st">'A7'</span>, <span class="st">'A8'</span>, <span class="st">'A9'</span>],</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a> [<span class="st">'B1'</span>, <span class="st">'B2'</span>, <span class="st">'B3'</span>, <span class="st">'B4'</span>, <span class="st">'B5'</span>, <span class="st">'B6'</span>, <span class="st">'B7'</span>, <span class="st">'B8'</span>, <span class="st">'B9'</span>],</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a> [<span class="st">'C1'</span>, <span class="st">'C2'</span>, <span class="st">'C3'</span>, <span class="st">'C4'</span>, <span class="st">'C5'</span>, <span class="st">'C6'</span>, <span class="st">'C7'</span>, <span class="st">'C8'</span>, <span class="st">'C9'</span>],</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a> [<span class="st">'D1'</span>, <span class="st">'D2'</span>, <span class="st">'D3'</span>, <span class="st">'D4'</span>, <span class="st">'D5'</span>, <span class="st">'D6'</span>, <span class="st">'D7'</span>, <span class="st">'D8'</span>, <span class="st">'D9'</span>],</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a> [<span class="st">'E1'</span>, <span class="st">'E2'</span>, <span class="st">'E3'</span>, <span class="st">'E4'</span>, <span class="st">'E5'</span>, <span class="st">'E6'</span>, <span class="st">'E7'</span>, <span class="st">'E8'</span>, <span class="st">'E9'</span>],</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a> [<span class="st">'F1'</span>, <span class="st">'F2'</span>, <span class="st">'F3'</span>, <span class="st">'F4'</span>, <span class="st">'F5'</span>, <span class="st">'F6'</span>, <span class="st">'F7'</span>, <span class="st">'F8'</span>, <span class="st">'F9'</span>],</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a> [<span class="st">'G1'</span>, <span class="st">'G2'</span>, <span class="st">'G3'</span>, <span class="st">'G4'</span>, <span class="st">'G5'</span>, <span class="st">'G6'</span>, <span class="st">'G7'</span>, <span class="st">'G8'</span>, <span class="st">'G9'</span>],</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a> [<span class="st">'H1'</span>, <span class="st">'H2'</span>, <span class="st">'H3'</span>, <span class="st">'H4'</span>, <span class="st">'H5'</span>, <span class="st">'H6'</span>, <span class="st">'H7'</span>, <span class="st">'H8'</span>, <span class="st">'H9'</span>],</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a> [<span class="st">'I1'</span>, <span class="st">'I2'</span>, <span class="st">'I3'</span>, <span class="st">'I4'</span>, <span class="st">'I5'</span>, <span class="st">'I6'</span>, <span class="st">'I7'</span>, <span class="st">'I8'</span>, <span class="st">'I9'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For the 9 box units, we break rows and cols into 3 groups and generate cross products.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> [cross(rs, cs) <span class="cf">for</span> rs <span class="kw">in</span> (<span class="st">'ABC'</span>,<span class="st">'DEF'</span>,<span class="st">'GHI'</span>) <span class="cf">for</span> cs <span class="kw">in</span> (<span class="st">'123'</span>,<span class="st">'456'</span>,<span class="st">'789'</span>)]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>[[<span class="st">'A1'</span>, <span class="st">'A2'</span>, <span class="st">'A3'</span>, <span class="st">'B1'</span>, <span class="st">'B2'</span>, <span class="st">'B3'</span>, <span class="st">'C1'</span>, <span class="st">'C2'</span>, <span class="st">'C3'</span>],</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A4'</span>, <span class="st">'A5'</span>, <span class="st">'A6'</span>, <span class="st">'B4'</span>, <span class="st">'B5'</span>, <span class="st">'B6'</span>, <span class="st">'C4'</span>, <span class="st">'C5'</span>, <span class="st">'C6'</span>],</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A7'</span>, <span class="st">'A8'</span>, <span class="st">'A9'</span>, <span class="st">'B7'</span>, <span class="st">'B8'</span>, <span class="st">'B9'</span>, <span class="st">'C7'</span>, <span class="st">'C8'</span>, <span class="st">'C9'</span>],</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a> [<span class="st">'D1'</span>, <span class="st">'D2'</span>, <span class="st">'D3'</span>, <span class="st">'E1'</span>, <span class="st">'E2'</span>, <span class="st">'E3'</span>, <span class="st">'F1'</span>, <span class="st">'F2'</span>, <span class="st">'F3'</span>],</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a> [<span class="st">'D4'</span>, <span class="st">'D5'</span>, <span class="st">'D6'</span>, <span class="st">'E4'</span>, <span class="st">'E5'</span>, <span class="st">'E6'</span>, <span class="st">'F4'</span>, <span class="st">'F5'</span>, <span class="st">'F6'</span>],</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a> [<span class="st">'D7'</span>, <span class="st">'D8'</span>, <span class="st">'D9'</span>, <span class="st">'E7'</span>, <span class="st">'E8'</span>, <span class="st">'E9'</span>, <span class="st">'F7'</span>, <span class="st">'F8'</span>, <span class="st">'F9'</span>],</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a> [<span class="st">'G1'</span>, <span class="st">'G2'</span>, <span class="st">'G3'</span>, <span class="st">'H1'</span>, <span class="st">'H2'</span>, <span class="st">'H3'</span>, <span class="st">'I1'</span>, <span class="st">'I2'</span>, <span class="st">'I3'</span>],</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a> [<span class="st">'G4'</span>, <span class="st">'G5'</span>, <span class="st">'G6'</span>, <span class="st">'H4'</span>, <span class="st">'H5'</span>, <span class="st">'H6'</span>, <span class="st">'I4'</span>, <span class="st">'I5'</span>, <span class="st">'I6'</span>],</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a> [<span class="st">'G7'</span>, <span class="st">'G8'</span>, <span class="st">'G9'</span>, <span class="st">'H7'</span>, <span class="st">'H8'</span>, <span class="st">'H9'</span>, <span class="st">'I7'</span>, <span class="st">'I8'</span>, <span class="st">'I9'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We combine all 3 groups of the units into one list. Peter defines <code>unitlist</code> as follows:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>unitlist <span class="op">=</span> ([cross(rows, c) <span class="cf">for</span> c <span class="kw">in</span> cols] <span class="op">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>            [cross(r, cols) <span class="cf">for</span> r <span class="kw">in</span> rows] <span class="op">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>            [cross(rs, cs) <span class="cf">for</span> rs <span class="kw">in</span> (<span class="st">'ABC'</span>,<span class="st">'DEF'</span>,<span class="st">'GHI'</span>) <span class="cf">for</span> cs <span class="kw">in</span> (<span class="st">'123'</span>,<span class="st">'456'</span>,<span class="st">'789'</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s see the number of units:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">print</span>(<span class="bu">len</span>(unitlist))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="dv">27</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We know that there are 3 units for each square. This can be expressed in a Python dictionary as follows:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>units <span class="op">=</span> {}</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> squares:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> u <span class="kw">in</span> unitlist:</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> s <span class="kw">in</span> u:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> s <span class="kw">not</span> <span class="kw">in</span> units:</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                units[s] <span class="op">=</span> []</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>            units[s].append(u)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This dictionary uses square values as keys and a list of units as values. For example, the 3 units of ‘C2’ can be accessed as follows:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> units[<span class="st">'C2'</span>]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>[[<span class="st">'A2'</span>, <span class="st">'B2'</span>, <span class="st">'C2'</span>, <span class="st">'D2'</span>, <span class="st">'E2'</span>, <span class="st">'F2'</span>, <span class="st">'G2'</span>, <span class="st">'H2'</span>, <span class="st">'I2'</span>],</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a> [<span class="st">'C1'</span>, <span class="st">'C2'</span>, <span class="st">'C3'</span>, <span class="st">'C4'</span>, <span class="st">'C5'</span>, <span class="st">'C6'</span>, <span class="st">'C7'</span>, <span class="st">'C8'</span>, <span class="st">'C9'</span>],</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a> [<span class="st">'A1'</span>, <span class="st">'A2'</span>, <span class="st">'A3'</span>, <span class="st">'B1'</span>, <span class="st">'B2'</span>, <span class="st">'B3'</span>, <span class="st">'C1'</span>, <span class="st">'C2'</span>, <span class="st">'C3'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Peter uses much more concise code to achieve the same.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>units <span class="op">=</span> <span class="bu">dict</span>((s, [u <span class="cf">for</span> u <span class="kw">in</span> unitlist <span class="cf">if</span> s <span class="kw">in</span> u]) <span class="cf">for</span> s <span class="kw">in</span> squares)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="the-rule-of-sudoku-once-again" class="level3" data-number="1.5">
+<h3 data-number="1.5" class="anchored" data-anchor-id="the-rule-of-sudoku-once-again"><span class="header-section-number">1.5</span> The Rule of Sudoku (Once&nbsp;Again)</h3>
+<p>Now that you know <strong>squares</strong> and <strong>units</strong>, we are ready to appreciate Peter’s definition of the Sudoku rule:</p>
+<blockquote class="blockquote">
+<p>　A puzzle is solved if the squares in each unit are filled with a permutation of the digits 1 to 9.</p>
+</blockquote>
+<p>If it is not yet very clear, you should really visit <a href="http://www.sudokudragon.com/sudoku.htm" target="_blank">Sudoku Dragon</a> and read their description of the Sudoku rule. Otherwise, it will not make any sense to read what comes after here.</p>
+</section>
+<section id="peers" class="level3" data-number="1.6">
+<h3 data-number="1.6" class="anchored" data-anchor-id="peers"><span class="header-section-number">1.6</span> Peers</h3>
+<p>There is one more terminology we need to introduce before talking about Peter’s Sudoku Solver. It’s called <strong>peers</strong>.</p>
+<p>Let me give an example first. The peers of <code>C2</code> are all squares in the related 3 units except for <code>C2</code> itself.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>C2_peers <span class="op">=</span> <span class="bu">set</span>()         <span class="co"># keep unique values using set</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> unit <span class="kw">in</span> units[<span class="st">'C2'</span>]: <span class="co"># the 3 units of C2:</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> square <span class="kw">in</span> unit:  <span class="co"># all squares in the current unit</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> square <span class="op">!=</span> <span class="st">'C2'</span>:</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>            C2_peers.add(square)<span class="op">&lt;/</span>code<span class="op">&gt;&lt;/</span>pre<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s examine the values of C2_peers:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">print</span>(C2_peers)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>{<span class="st">'E2'</span>, <span class="st">'C7'</span>, <span class="st">'A3'</span>, <span class="st">'D2'</span>, <span class="st">'C1'</span>, <span class="st">'A2'</span>, <span class="st">'B3'</span>, <span class="st">'A1'</span>, <span class="st">'G2'</span>, <span class="st">'I2'</span>, <span class="st">'C5'</span>, <span class="st">'C4'</span>, <span class="st">'H2'</span>, <span class="st">'C3'</span>, <span class="st">'B1'</span>, <span class="st">'B2'</span>, <span class="st">'C9'</span>, <span class="st">'C6'</span>, <span class="st">'F2'</span>, <span class="st">'C8'</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can store all peers for all squares in a Python dictionary as follows:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>peers <span class="op">=</span> {}</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> squares:</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    unit_set <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> unit <span class="kw">in</span> units[s]:</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> square <span class="kw">in</span> unit:</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> square <span class="op">!=</span> s:</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                unit_set.add(square)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    peers[s] <span class="op">=</span> unit_set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For example, all peers of <code>C2</code> can be accessed as follows:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">print</span>(peers[<span class="st">'C2'</span>])</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>{<span class="st">'E2'</span>, <span class="st">'C7'</span>, <span class="st">'A3'</span>, <span class="st">'D2'</span>, <span class="st">'C1'</span>, <span class="st">'A2'</span>, <span class="st">'B3'</span>, <span class="st">'A1'</span>, <span class="st">'G2'</span>, <span class="st">'I2'</span>, <span class="st">'C5'</span>, <span class="st">'C4'</span>, <span class="st">'H2'</span>, <span class="st">'C3'</span>, <span class="st">'B1'</span>, <span class="st">'B2'</span>, <span class="st">'C9'</span>, <span class="st">'C6'</span>, <span class="st">'F2'</span>, <span class="st">'C8'</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The above code has 3 <code>for-loop</code> statements. Can we simplify this using Python’s built-in function?</p>
+<p>The answer is yes but you need to know how the Python list addition works. Let’s take a look at the following example.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> a <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> b <span class="op">=</span> [<span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">6</span>]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> a<span class="op">+</span>b</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The addition of two Python lists is a combined list. Now, the same thing can be achieved using the built-in function sum.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">sum</span>([a, b], [])</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The function <code>sum</code> takes two arguments. The first argument is an iterable object, and the second argument is the initial value. The function <code>sum</code> will use the second value as the initial value and append each element of the first argument to it. For more details, please refer to the Python online documentation: <a href="https://docs.python.org/3/library/functions.html#sum" target="_blank">https://docs.python.org/3/library/functions.html#sum</a>.</p>
+<p>The same result can be achieved by the following:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> [] <span class="op">+</span> a <span class="op">+</span> b</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>But using the function <code>sum</code> is more convenient when you have a list of items.</p>
+<p>You might have noticed that there are two ’3’s in the combined list. This was deliberate. We can use a <code>set</code> object to have unique values.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">set</span>(<span class="bu">sum</span>([a, b], []))</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>{<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">6</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Suppose you want to remove 4 from this set, you can subtract a set that contains only 4.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">set</span>(<span class="bu">sum</span>([a, b], [])) <span class="op">-</span> <span class="bu">set</span>([<span class="dv">4</span>])</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>{<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">6</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now, we are ready to simplify the 3 <code>for-loop</code> operations into one statement. Peter uses the following statement to express all peers for all squares in a dictionary.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>peers <span class="op">=</span> <span class="bu">dict</span>((s, <span class="bu">set</span>(<span class="bu">sum</span>(units[s],[]))<span class="op">-</span><span class="bu">set</span>([s])) <span class="cf">for</span> s <span class="kw">in</span> squares)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note: <code>units[s]</code> returns a list of 3 units, each of which is a list of squares. The sum function will combine all 3 unit lists into one list, which is a list of all squares in the 3 units. Using set, we keep the unique square values excluding the original square that is used to fetch all 3 units. Finally, the list of squares is stored in the dictionary using the original square as the key.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">print</span>(peers[<span class="st">'C2'</span>])</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>{<span class="st">'B3'</span>, <span class="st">'A2'</span>, <span class="st">'A1'</span>, <span class="st">'G2'</span>, <span class="st">'C5'</span>, <span class="st">'H2'</span>, <span class="st">'B2'</span>, <span class="st">'E2'</span>, <span class="st">'C7'</span>, <span class="st">'D2'</span>, <span class="st">'C1'</span>, <span class="st">'A3'</span>, <span class="st">'I2'</span>, <span class="st">'C4'</span>, <span class="st">'C3'</span>, <span class="st">'B1'</span>, <span class="st">'C9'</span>, <span class="st">'C6'</span>, <span class="st">'F2'</span>, <span class="st">'C8'</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Each square has exactly 20 peers.</p>
+</section>
+<section id="unit-testing-squares-units-and-peers" class="level3" data-number="1.7">
+<h3 data-number="1.7" class="anchored" data-anchor-id="unit-testing-squares-units-and-peers"><span class="header-section-number">1.7</span> Unit Testing Squares, Units and Peers</h3>
+<p>After defining squares, units, and peers, Peter tests the values.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test():</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"A set of unit tests."</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(squares) <span class="op">==</span> <span class="dv">81</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(unitlist) <span class="op">==</span> <span class="dv">27</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">all</span>(<span class="bu">len</span>(units[s]) <span class="op">==</span> <span class="dv">3</span> <span class="cf">for</span> s <span class="kw">in</span> squares)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">all</span>(<span class="bu">len</span>(peers[s]) <span class="op">==</span> <span class="dv">20</span> <span class="cf">for</span> s <span class="kw">in</span> squares)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> units[<span class="st">'C2'</span>] <span class="op">==</span> [</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>      [<span class="st">'A2'</span>, <span class="st">'B2'</span>, <span class="st">'C2'</span>, <span class="st">'D2'</span>, <span class="st">'E2'</span>, <span class="st">'F2'</span>, <span class="st">'G2'</span>, <span class="st">'H2'</span>, <span class="st">'I2'</span>],</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>      [<span class="st">'C1'</span>, <span class="st">'C2'</span>, <span class="st">'C3'</span>, <span class="st">'C4'</span>, <span class="st">'C5'</span>, <span class="st">'C6'</span>, <span class="st">'C7'</span>, <span class="st">'C8'</span>, <span class="st">'C9'</span>],</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>      [<span class="st">'A1'</span>, <span class="st">'A2'</span>, <span class="st">'A3'</span>, <span class="st">'B1'</span>, <span class="st">'B2'</span>, <span class="st">'B3'</span>, <span class="st">'C1'</span>, <span class="st">'C2'</span>, <span class="st">'C3'</span>]]</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> peers[<span class="st">'C2'</span>] <span class="op">==</span> <span class="bu">set</span>(</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>      [<span class="st">'A2'</span>, <span class="st">'B2'</span>, <span class="st">'D2'</span>, <span class="st">'E2'</span>, <span class="st">'F2'</span>, <span class="st">'G2'</span>, <span class="st">'H2'</span>, <span class="st">'I2'</span>,</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>       <span class="st">'C1'</span>, <span class="st">'C3'</span>, <span class="st">'C4'</span>, <span class="st">'C5'</span>, <span class="st">'C6'</span>, <span class="st">'C7'</span>, <span class="st">'C8'</span>, <span class="st">'C9'</span>,</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>       <span class="st">'A1'</span>, <span class="st">'A3'</span>, <span class="st">'B1'</span>, <span class="st">'B3'</span>])</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'All tests pass.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s run the test.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> test()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>All tests <span class="cf">pass</span>.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="initial-representation-of-sudoku-puzzle" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="initial-representation-of-sudoku-puzzle"><span class="header-section-number">2</span> Initial Representation of Sudoku&nbsp;Puzzle</h2>
+<p>Peter’s Sudoku Solver accepts the various representations as input.</p>
+<p>The following string is one such example:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">"4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The first 9 characters make up the first row, the second 9 characters make up the second row, and so on. All dots are interpreted as empty squares.</p>
+<p>Below is another representation:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="co">400000805</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co">030000000</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co">000700000</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="co">020000060</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="co">000080400</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="co">000010000</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="co">000603070</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="co">500200000</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="co">104000000"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Here, all zero characters are interpreted as empty squares. New lines are ignored.</p>
+<p>Below is yet another example:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co">4 . . |. . . |8 . 5</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co">. 3 . |. . . |. . .</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co">. . . |7 . . |. . .</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co">------+------+------</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="co">. 2 . |. . . |. 6 .</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co">. . . |. 8 . |4 . .</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="co">. . . |. 1 . |. . .</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="co">------+------+------</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="co">. . . |6 . 3 |. 7 .</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="co">5 . . |2 . . |. . .</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a><span class="co">1 . 4 |. . . |. . .</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Anything other than ‘0’, ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’, ‘9’ and ‘.’ are ignored such as ‘|’ and ‘+’.</p>
+<p>Suppose we want to parse the following initial values stored in grid1:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>grid1 <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="st">4 . . |. . . |8 . 5</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="st">. 3 . |. . . |. . .</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="st">. . . |7 . . |. . .</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="st">------+------+------</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="st">. 2 . |. . . |. 6 .</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="st">. . . |. 8 . |4 . .</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="st">. . . |. 1 . |. . .</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="st">------+------+------</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="st">. . . |6 . 3 |. 7 .</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="st">5 . . |2 . . |. . .</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="st">1 . 4 |. . . |. . .</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The following will extract only the values we need.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>grid1_chars <span class="op">=</span> []</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> c <span class="kw">in</span> grid1:</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c <span class="kw">in</span> digits <span class="kw">or</span> c <span class="kw">in</span> <span class="st">'0.'</span>:</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>        grid1_chars.append(c)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(grid1_chars) <span class="op">==</span> <span class="dv">81</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s examine the grid1_chars:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="bu">print</span>(grid1_chars)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>[<span class="st">'4'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'8'</span>, <span class="st">'.'</span>, <span class="st">'5'</span>, <span class="st">'.'</span>, <span class="st">'3'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'7'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'2'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'6'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'8'</span>, <span class="st">'.'</span>, <span class="st">'4'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'1'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'6'</span>, <span class="st">'.'</span>, <span class="st">'3'</span>, <span class="st">'.'</span>, <span class="st">'7'</span>, <span class="st">'.'</span>, <span class="st">'5'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'2'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'1'</span>, <span class="st">'.'</span>, <span class="st">'4'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>, <span class="st">'.'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then, we can store the values in a dictionary using each square as a key and the corresponding value in char values as a value.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>grid1_values <span class="op">=</span> {}</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, v <span class="kw">in</span> <span class="bu">zip</span>(squares, grid1_chars):</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    grid1_values[k] <span class="op">=</span> v</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>zip</code> here takes two lists and creates iterable tuples. For more details, please refer to the Python online documentation: <a href="https://docs.python.org/3/library/functions.html#zip" target="_blank">https://docs.python.org/3/library/functions.html#zip</a>.</p>
+<p>Peter put all the above into a function as follows:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> grid_values(grid):</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Convert grid into a dict of {square: char} with '0' or '.' for empties."</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    chars <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> grid <span class="cf">if</span> c <span class="kw">in</span> digits <span class="kw">or</span> c <span class="kw">in</span> <span class="st">'0.'</span>]</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(chars) <span class="op">==</span> <span class="dv">81</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">dict</span>(<span class="bu">zip</span>(squares, chars))<span class="op">&lt;/</span>code<span class="op">&gt;&lt;/</span>pre<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For example, you can call it like below:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> grid1_values <span class="op">=</span> grid_values(grid1)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> grid1_values[<span class="st">'A1'</span>]</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="co">'4'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="constraint-propagation" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="constraint-propagation"><span class="header-section-number">3</span> Constraint Propagation</h2>
+<p>Knowing initial values for all squares (a digit value or an empty value), we can apply constraints to each square by eliminating impossible values for them. Peter lists two simple rules:</p>
+<blockquote class="blockquote">
+<p>(1) If a square has only one possible value, then eliminate that value from the square’s peers.<br>
+(2) If a unit has only one possible place for a value, then put the value there.</p>
+</blockquote>
+<p>Let’s take one step back and imagine that we don’t know the initial values. In this case, all squares can potentially have any digits. We can express this state as follows:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>values <span class="op">=</span> <span class="bu">dict</span>((s, digits) <span class="cf">for</span> s <span class="kw">in</span> squares)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>values</code> is a dictionary that associates each square to all digit values (‘123456789’). As soon as we know the initial values, we can eliminate impossible values from other squares.</p>
+<p>As an example of strategy (1), ‘A1’ is ‘4’ in grid1_values. That means ‘A1’ can only have ‘4’ as its value, and we can remove ‘4’ from its peers.</p>
+<p>As an example of strategy (2), as none of A2 through I2 except ‘F2’ has ‘4’ as a possible value in grid1_values, ‘4’ must belong to ‘F2’ and we can eliminate ‘4’ from the peers of ‘F2’.</p>
+<p>So, while we assign initial values for each square, we also eliminate them from the peers.</p>
+<blockquote class="blockquote">
+<p>This process is called constraint propagation.</p>
+</blockquote>
+<section id="the-parse_grid-function" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="the-parse_grid-function"><span class="header-section-number">3.1</span> The parse_grid function</h3>
+<p>The outcome of this parsing process leaves only possible values for each square. Peter defines a function to handle this as follows:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_grid(grid):</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Convert grid to a dict of possible values, {square: digits}, or</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co">    return False if a contradiction is detected."""</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">## To start, every square can be any digit; then assign values from the grid.</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="bu">dict</span>((s, digits) <span class="cf">for</span> s <span class="kw">in</span> squares)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> s,d <span class="kw">in</span> grid_values(grid).items():</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> d <span class="kw">in</span> digits <span class="kw">and</span> <span class="kw">not</span> assign(values, s, d):</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span> <span class="co">## (Fail if we can't assign d to square s.)</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In the above function,</p>
+<ul>
+<li>values are given digits as the initial value in a dictionary where each square is used as a key.</li>
+<li>The given grid contains the initial representation of Sudoku puzzle.</li>
+<li>We use grid_values function to extract only relevant values (digits, ‘0’ and ‘.’).</li>
+<li>For each square with initial digit value, we call the assign function to assign the value to the square while eliminating it from the peers</li>
+<li>If something goes wrong in the assign function, it returns False to signify the failure</li>
+<li>If no errors, the function returns the values dictionary back to the caller</li>
+</ul>
+<p>The assign function is not yet defined here. Other than that, the parse_grid function should be self-explanatory if you read it line by line.</p>
+</section>
+<section id="the-assign-functions" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="the-assign-functions"><span class="header-section-number">3.2</span> The assign functions</h3>
+<p>The function assign(values, s, d) updates the incoming values by eliminating the other values than d from the square s calling the function to eliminate(values, s, d).</p>
+<p>If any <code>eliminate</code> call returns False, the function <code>assign</code> returns False indicating that there is a contradiction.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> assign(values, s, d):</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Eliminate all the other values (except d) from values[s] and propagate.</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Return values, except return False if a contradiction is detected."""</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    other_values <span class="op">=</span> values[s].replace(d, <span class="st">''</span>)</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">all</span>(eliminate(values, s, d2) <span class="cf">for</span> d2 <span class="kw">in</span> other_values):</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="the-eliminate-function" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="the-eliminate-function"><span class="header-section-number">3.3</span> The eliminate function</h3>
+<p>So what does the eliminate function do?</p>
+<ul>
+<li>It removes the given value d from values[s] which is a list of potential values for s.</li>
+<li>If there is no values left in values[s] (that is we don’t have any potential value for that square), returns False</li>
+<li>When there is only one potential value for s, it removes the value from all the peers of s (the value is for s and the peers can not have it to satisfy the Sudoku rule) <strong>&lt;== strategy (1)</strong></li>
+<li>Make sure the given value d has a place elsewhere (i.e., if no square has d as a potential value, we can not solve the puzzle). If this test fails, it returns False</li>
+<li>Where there is only one place for the value d, remove it from the peers <strong>&lt;== strategy (2)</strong></li>
+</ul>
+<p>The function is a bit lengthy but if you have followed the discussion so far, you should be able to understand it.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> eliminate(values, s, d):</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Eliminate d from values[s]; propagate when values or places &amp;lt;= 2.</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Return values, except return False if a contradiction is detected."""</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> d <span class="kw">not</span> <span class="kw">in</span> values[s]:</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values <span class="co">## Already eliminated</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    values[s] <span class="op">=</span> values[s].replace(d,<span class="st">''</span>)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">## (1) If a square s is reduced to one value d2, then eliminate d2 from the peers.</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(values[s]) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span> <span class="co">## Contradiction: removed last value</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> <span class="bu">len</span>(values[s]) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>        d2 <span class="op">=</span> values[s]</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="bu">all</span>(eliminate(values, s2, d2) <span class="cf">for</span> s2 <span class="kw">in</span> peers[s]):</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">## (2) If a unit u is reduced to only one place for a value d, then put it there.</span></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> u <span class="kw">in</span> units[s]:</span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>        dplaces <span class="op">=</span> [s <span class="cf">for</span> s <span class="kw">in</span> u <span class="cf">if</span> d <span class="kw">in</span> values[s]]</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(dplaces) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span> <span class="co">## Contradiction: no place for this value</span></span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="bu">len</span>(dplaces) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>            <span class="co"># d can only be in one place in unit; assign it there</span></span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> assign(values, dplaces[<span class="dv">0</span>], d):</span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="the-display-function" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="the-display-function"><span class="header-section-number">3.4</span> The display function</h3>
+<p>By calling parse_grid, we know what are the potential values for each square. Naturally, we want to display the result.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> display(values):</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Display these values as a 2-D grid."</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    width <span class="op">=</span> <span class="dv">1</span><span class="op">+</span><span class="bu">max</span>(<span class="bu">len</span>(values[s]) <span class="cf">for</span> s <span class="kw">in</span> squares)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    line <span class="op">=</span> <span class="st">'+'</span>.join([<span class="st">'-'</span><span class="op">*</span>(width<span class="op">*</span><span class="dv">3</span>)]<span class="op">*</span><span class="dv">3</span>)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> rows:</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">''</span>.join(values[r<span class="op">+</span>c].center(width)<span class="op">+</span>(<span class="st">'|'</span> <span class="cf">if</span> c <span class="kw">in</span> <span class="st">'36'</span> <span class="cf">else</span> <span class="st">''</span>) <span class="cf">for</span> c <span class="kw">in</span> cols))</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> r <span class="kw">in</span> <span class="st">'CF'</span>:</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(line)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I’m not going to explain the details of this function. If you are curious, play with it by changing here and there, and you’ll know how it works.</p>
+<p>Below is an example output.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> grid2 <span class="op">=</span> <span class="st">'4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> display(parse_grid(grid2))</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>   <span class="dv">4</span>      <span class="dv">1679</span>   <span class="dv">12679</span>  <span class="op">|</span>  <span class="dv">139</span>     <span class="dv">2369</span>    <span class="dv">269</span>   <span class="op">|</span>   <span class="dv">8</span>      <span class="dv">1239</span>     <span class="dv">5</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a> <span class="dv">26789</span>     <span class="dv">3</span>    <span class="dv">1256789</span> <span class="op">|</span> <span class="dv">14589</span>   <span class="dv">24569</span>   <span class="dv">245689</span> <span class="op">|</span> <span class="dv">12679</span>    <span class="dv">1249</span>   <span class="dv">124679</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2689</span>   <span class="dv">15689</span>   <span class="dv">125689</span> <span class="op">|</span>   <span class="dv">7</span>     <span class="dv">234569</span>  <span class="dv">245689</span> <span class="op">|</span> <span class="dv">12369</span>   <span class="dv">12349</span>   <span class="dv">123469</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="op">------------------------+------------------------+------------------------</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3789</span>     <span class="dv">2</span>     <span class="dv">15789</span>  <span class="op">|</span>  <span class="dv">3459</span>   <span class="dv">34579</span>    <span class="dv">4579</span>  <span class="op">|</span> <span class="dv">13579</span>     <span class="dv">6</span>     <span class="dv">13789</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3679</span>   <span class="dv">15679</span>   <span class="dv">15679</span>  <span class="op">|</span>  <span class="dv">359</span>      <span class="dv">8</span>     <span class="dv">25679</span>  <span class="op">|</span>   <span class="dv">4</span>     <span class="dv">12359</span>   <span class="dv">12379</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a> <span class="dv">36789</span>     <span class="dv">4</span>     <span class="dv">56789</span>  <span class="op">|</span>  <span class="dv">359</span>      <span class="dv">1</span>     <span class="dv">25679</span>  <span class="op">|</span> <span class="dv">23579</span>   <span class="dv">23589</span>   <span class="dv">23789</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a><span class="op">------------------------+------------------------+------------------------</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>  <span class="dv">289</span>      <span class="dv">89</span>     <span class="dv">289</span>   <span class="op">|</span>   <span class="dv">6</span>      <span class="dv">459</span>      <span class="dv">3</span>    <span class="op">|</span>  <span class="dv">1259</span>     <span class="dv">7</span>     <span class="dv">12489</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>   <span class="dv">5</span>      <span class="dv">6789</span>     <span class="dv">3</span>    <span class="op">|</span>   <span class="dv">2</span>      <span class="dv">479</span>      <span class="dv">1</span>    <span class="op">|</span>   <span class="dv">69</span>     <span class="dv">489</span>     <span class="dv">4689</span></span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>   <span class="dv">1</span>      <span class="dv">6789</span>     <span class="dv">4</span>    <span class="op">|</span>  <span class="dv">589</span>     <span class="dv">579</span>     <span class="dv">5789</span>  <span class="op">|</span> <span class="dv">23569</span>   <span class="dv">23589</span>   <span class="dv">23689</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So, for example, the square <code>C2</code> has <code>15689</code> as a list of possible values.</p>
+<p>Can we enhance the eliminate function further to remove more values by implementing strategies like the <a href="http://www.sudokudragon.com/sudokustrategy.htm" target="_blank">naked twins</a>?</p>
+<p>It’s possible to pursue that route. But Peter says otherwise:</p>
+<blockquote class="blockquote">
+<p>Coding up strategies like this is a possible route, but would require hundreds of lines of code (there are dozens of these strategies), and we’d never be sure if we could solve every puzzle.</p>
+</blockquote>
+</section>
+</section>
+<section id="search" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="search"><span class="header-section-number">4</span> Search</h2>
+<p>So, what is the alternative to solving every Sudoku puzzle?</p>
+<blockquote class="blockquote">
+<p>The other route is to search for a solution: to systematically try all possibilities until we hit one that works. The code for this is less than a dozen lines…</p>
+</blockquote>
+<p>Sounds nice. But…Peter continues:</p>
+<blockquote class="blockquote">
+<p>…we run another risk: that it might take forever to run. Consider that in the grid2 above, A2 has 4 possibilities (1679) and A3 has 5 possibilities (12679); together that’s 20, and if we keep multiplying, we get 4.62838344192 × 1038 possibilities for the whole puzzle.</p>
+</blockquote>
+<p>Peter further explains his search algorithm:</p>
+<ul>
+<li>first make sure we haven’t already found a solution or a contradiction, and if not,</li>
+<li>choose one unfilled square and consider all its possible values.</li>
+<li>One at a time, try assigning the square each value, and searching from the resulting position.</li>
+</ul>
+<blockquote class="blockquote">
+<p>we search for a value d such that we can successfully search for a solution from the result of assigning square s to d.&nbsp;If the search leads to an failed position, go back and consider another value of d.&nbsp;This is a recursive search, and we call it a depth-first search because we (recursively) consider all possibilities under values[s] = d before we consider a different value for s.</p>
+</blockquote>
+<p>Finally, Peter explains how to choose which square to start exploring which is called <strong>variable ordering</strong>:</p>
+<blockquote class="blockquote">
+<p>we will use a common heuristic called minimum remaining values, which means that we choose the (or one of the) square with the minimum number of possible values. Why? Consider grid2 above. Suppose we chose B3 first. It has 7 possibilities (1256789), so we’d expect to guess wrong with probability 6/7. If instead we chose G2, which only has 2 possibilities (89), we’d expect to be wrong with probability only 1/2. Thus we choose the square with the fewest possibilities and the best chance of guessing right.</p>
+</blockquote>
+<p>For <strong>value ordering</strong> (Which digit do we try first for the square?), Peter says:</p>
+<blockquote class="blockquote">
+<p>we won’t do anything special; we’ll consider the digits in numeric order.</p>
+</blockquote>
+<p>The following sections explain Peter’s search algorithm.</p>
+<section id="the-solve-function" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="the-solve-function"><span class="header-section-number">4.1</span> The solve function</h3>
+<div class="sourceCode" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> solve(grid):</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> search(parse_grid(grid))<span class="op">&lt;/</span>code<span class="op">&gt;&lt;/</span>pre<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The solve function parses the initial representation and calls the search function.</p>
+</section>
+<section id="the-search-function" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="the-search-function"><span class="header-section-number">4.2</span> The search&nbsp;function</h3>
+<div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> search(values):</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Using depth-first search and propagation, try all possible values."</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> values <span class="kw">is</span> <span class="va">False</span>:</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span> <span class="co">## Failed earlier</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">all</span>(<span class="bu">len</span>(values[s]) <span class="op">==</span> <span class="dv">1</span> <span class="cf">for</span> s <span class="kw">in</span> squares):</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values <span class="co">## Solved!</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">## Chose the unfilled square s with the fewest possibilities</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    n,s <span class="op">=</span> <span class="bu">min</span>((<span class="bu">len</span>(values[s]), s) <span class="cf">for</span> s <span class="kw">in</span> squares <span class="cf">if</span> <span class="bu">len</span>(values[s]) <span class="op">&amp;</span>gt<span class="op">;</span> <span class="dv">1</span>)</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> some(search(assign(values.copy(), s, d)) <span class="cf">for</span> d <span class="kw">in</span> values[s])<span class="op">&lt;/</span>code<span class="op">&gt;&lt;/</span>pre<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>If every square has exactly one value, the puzzle is solved.</li>
+<li>Select a square with minimum number of potential values, and call assign to eliminate a potential value from the peers</li>
+<li>Call the search function recursively by passing the values after the above elimination</li>
+</ul>
+<p>Note: values are copied and passed down to the <code>assign</code> call to avoid book-keeping complexity.</p>
+<p>If one of the attempts succeeds, we solved the puzzle. To check this, the function some is used.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> some(seq):</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Return some element of seq that is true."</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> e <span class="kw">in</span> seq:</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> e: <span class="cf">return</span> e</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">False</span><span class="op">&lt;/</span>code<span class="op">&gt;&lt;/</span>pre<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>That’s all. We have a Solver that works for any Sudoku.</p>
+</section>
+</section>
+<section id="the-complete-solver-code" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="the-complete-solver-code"><span class="header-section-number">5</span> The Complete Solver Code</h2>
+<p>For your reference, I put Peter’s complete Sudoku Solver code here.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cross(A, B):</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Cross product of elements in A and elements in B."</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [a<span class="op">+</span>b <span class="cf">for</span> a <span class="kw">in</span> A <span class="cf">for</span> b <span class="kw">in</span> B]</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>digits   <span class="op">=</span> <span class="st">'123456789'</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>rows     <span class="op">=</span> <span class="st">'ABCDEFGHI'</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>cols     <span class="op">=</span> digits</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>squares  <span class="op">=</span> cross(rows, cols)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>unitlist <span class="op">=</span> ([cross(rows, c) <span class="cf">for</span> c <span class="kw">in</span> cols] <span class="op">+</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>            [cross(r, cols) <span class="cf">for</span> r <span class="kw">in</span> rows] <span class="op">+</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>            [cross(rs, cs) <span class="cf">for</span> rs <span class="kw">in</span> (<span class="st">'ABC'</span>,<span class="st">'DEF'</span>,<span class="st">'GHI'</span>) <span class="cf">for</span> cs <span class="kw">in</span> (<span class="st">'123'</span>,<span class="st">'456'</span>,<span class="st">'789'</span>)])</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>units <span class="op">=</span> <span class="bu">dict</span>((s, [u <span class="cf">for</span> u <span class="kw">in</span> unitlist <span class="cf">if</span> s <span class="kw">in</span> u])</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>             <span class="cf">for</span> s <span class="kw">in</span> squares)</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>peers <span class="op">=</span> <span class="bu">dict</span>((s, <span class="bu">set</span>(<span class="bu">sum</span>(units[s],[]))<span class="op">-</span><span class="bu">set</span>([s]))</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>             <span class="cf">for</span> s <span class="kw">in</span> squares)</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_grid(grid):</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Convert grid to a dict of possible values, {square: digits}, or</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="co">    return False if a contradiction is detected."""</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">## To start, every square can be any digit; then assign values from the grid.</span></span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="bu">dict</span>((s, digits) <span class="cf">for</span> s <span class="kw">in</span> squares)</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> s,d <span class="kw">in</span> grid_values(grid).items():</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> d <span class="kw">in</span> digits <span class="kw">and</span> <span class="kw">not</span> assign(values, s, d):</span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span> <span class="co">## (Fail if we can't assign d to square s.)</span></span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> values</span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> grid_values(grid):</span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Convert grid into a dict of {square: char} with '0' or '.' for empties."</span></span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a>    chars <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> grid <span class="cf">if</span> c <span class="kw">in</span> digits <span class="kw">or</span> c <span class="kw">in</span> <span class="st">'0.'</span>]</span>
+<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(chars) <span class="op">==</span> <span class="dv">81</span></span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">dict</span>(<span class="bu">zip</span>(squares, chars))</span>
+<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> assign(values, s, d):</span>
+<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Eliminate all the other values (except d) from values[s] and propagate.</span></span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a><span class="co">    Return values, except return False if a contradiction is detected."""</span></span>
+<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a>    other_values <span class="op">=</span> values[s].replace(d, <span class="st">''</span>)</span>
+<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">all</span>(eliminate(values, s, d2) <span class="cf">for</span> d2 <span class="kw">in</span> other_values):</span>
+<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values</span>
+<span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> eliminate(values, s, d):</span>
+<span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Eliminate d from values[s]; propagate when values or places &amp;lt;= 2.</span></span>
+<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a><span class="co">    Return values, except return False if a contradiction is detected."""</span></span>
+<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> d <span class="kw">not</span> <span class="kw">in</span> values[s]:</span>
+<span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values <span class="co">## Already eliminated</span></span>
+<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>    values[s] <span class="op">=</span> values[s].replace(d,<span class="st">''</span>)</span>
+<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">## (1) If a square s is reduced to one value d2, then eliminate d2 from the peers.</span></span>
+<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(values[s]) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span> <span class="co">## Contradiction: removed last value</span></span>
+<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> <span class="bu">len</span>(values[s]) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a>        d2 <span class="op">=</span> values[s]</span>
+<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="bu">all</span>(eliminate(values, s2, d2) <span class="cf">for</span> s2 <span class="kw">in</span> peers[s]):</span>
+<span id="cb48-54"><a href="#cb48-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a>    <span class="co">## (2) If a unit u is reduced to only one place for a value d, then put it there.</span></span>
+<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> u <span class="kw">in</span> units[s]:</span>
+<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a>        dplaces <span class="op">=</span> [s <span class="cf">for</span> s <span class="kw">in</span> u <span class="cf">if</span> d <span class="kw">in</span> values[s]]</span>
+<span id="cb48-58"><a href="#cb48-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(dplaces) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span> <span class="co">## Contradiction: no place for this value</span></span>
+<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="bu">len</span>(dplaces) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb48-61"><a href="#cb48-61" aria-hidden="true" tabindex="-1"></a>            <span class="co"># d can only be in one place in unit; assign it there</span></span>
+<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> assign(values, dplaces[<span class="dv">0</span>], d):</span>
+<span id="cb48-63"><a href="#cb48-63" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb48-64"><a href="#cb48-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> values</span>
+<span id="cb48-65"><a href="#cb48-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-66"><a href="#cb48-66" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> solve(grid): <span class="cf">return</span> search(parse_grid(grid))</span>
+<span id="cb48-67"><a href="#cb48-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-68"><a href="#cb48-68" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> search(values):</span>
+<span id="cb48-69"><a href="#cb48-69" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Using depth-first search and propagation, try all possible values."</span></span>
+<span id="cb48-70"><a href="#cb48-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> values <span class="kw">is</span> <span class="va">False</span>:</span>
+<span id="cb48-71"><a href="#cb48-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span> <span class="co">## Failed earlier</span></span>
+<span id="cb48-72"><a href="#cb48-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">all</span>(<span class="bu">len</span>(values[s]) <span class="op">==</span> <span class="dv">1</span> <span class="cf">for</span> s <span class="kw">in</span> squares):</span>
+<span id="cb48-73"><a href="#cb48-73" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values <span class="co">## Solved!</span></span>
+<span id="cb48-74"><a href="#cb48-74" aria-hidden="true" tabindex="-1"></a>    <span class="co">## Chose the unfilled square s with the fewest possibilities</span></span>
+<span id="cb48-75"><a href="#cb48-75" aria-hidden="true" tabindex="-1"></a>    n,s <span class="op">=</span> <span class="bu">min</span>((<span class="bu">len</span>(values[s]), s) <span class="cf">for</span> s <span class="kw">in</span> squares <span class="cf">if</span> <span class="bu">len</span>(values[s]) <span class="op">&amp;</span>gt<span class="op">;</span> <span class="dv">1</span>)</span>
+<span id="cb48-76"><a href="#cb48-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> some(search(assign(values.copy(), s, d))</span>
+<span id="cb48-77"><a href="#cb48-77" aria-hidden="true" tabindex="-1"></a>           <span class="cf">for</span> d <span class="kw">in</span> values[s])</span>
+<span id="cb48-78"><a href="#cb48-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-79"><a href="#cb48-79" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> some(seq):</span>
+<span id="cb48-80"><a href="#cb48-80" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Return some element of seq that is true."</span></span>
+<span id="cb48-81"><a href="#cb48-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> e <span class="kw">in</span> seq:</span>
+<span id="cb48-82"><a href="#cb48-82" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> e: <span class="cf">return</span> e</span>
+<span id="cb48-83"><a href="#cb48-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">False</span><span class="op">&lt;/</span>code<span class="op">&gt;&lt;/</span>pre<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>There are results reported in the article which show how well it works.</p>
+</section>
+<section id="why" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="why"><span class="header-section-number">6</span> Why?</h2>
+<p>In the end, Peter explains why he did this project:</p>
+<blockquote class="blockquote">
+<p>As computer security expert Ben Laurie has stated, Sudoku is “a denial of service attack on human intellect”. Several people I know (including my wife) were infected by the virus, and I thought maybe this would demonstrate that they didn’t need to spend any more time on Sudoku.</p>
+</blockquote>
+</section>
+<section id="conclusion" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7</span> Conclusion</h2>
+<p>I hope this article finds some use for people having a hard time understanding Peter Norvig’s Sudoku solver article which is an excellent one but requires the reader to have a certain level of Python mastery.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/sudoku-worksheet.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Sudoku Worksheet Example</figcaption>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="references"><span class="header-section-number">8</span> References</h2>
+<ul>
+<li><a href="http://norvig.com/sudoku.html" target="_blank">Solving Every Sudoku Puzzle</a><br>
+Peter Norvig</li>
+<li><a href="https://github.com/norvig/pytudes/blob/main/ipynb/Sudoku.ipynb" target="_blank">Solving Any Sudoku Puzzle</a><br>
+Peter Norvig’s Python notebook</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
