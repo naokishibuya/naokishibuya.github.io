@@ -1,7 +1,11 @@
 comments:
   giscus:
     repo: naokishibuya/naokishibuya.github.io
-    category: "Comments"
-    mapping: "pathname"
+    repo-id: R_kgDOPTcwHA
+    category: Comments
+    category-id: DIC_kwDOPTcwHM4CtefM
+    mapping: pathname
     reactions-enabled: true
-    input-position: "bottom"
+    input-position: bottom
+    theme: preferred_color_scheme
+    loading: lazy
