@@ -1,0 +1,7 @@
+comments:
+  giscus:
+    repo: naokishibuya/naokishibuya.github.io
+    category: "Comments"
+    mapping: "pathname"
+    reactions-enabled: true
+    input-position: "bottom"
