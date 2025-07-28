@@ -370,7 +370,7 @@ window.Quarto = {
 <p>Longformer is an important work that influenced later works that must process long sequences like steams of video frames. This article explains the Longformer’s attention mechanism.</p>
 <section id="problem-with-long-sequence" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="problem-with-long-sequence"><span class="header-section-number">1</span> Problem with Long Sequence</h2>
-<p>The transformer is well-known for its <a href="../../blog/2021/2021-11-15-transformers-self-attention/" target="_blank">self-attention mechanism</a> in which each token in the input sequence refers to every token in the same sequence via dot-product operations. As such, the computation complexity in memory and space becomes <span class="math inline">\(O(n^2)\)</span>, where n is the number of tokens.</p>
+<p>The transformer is well-known for its <a href="../../blog/2021-11-15-transformers-self-attention/" target="_blank">self-attention mechanism</a> in which each token in the input sequence refers to every token in the same sequence via dot-product operations. As such, the computation complexity in memory and space becomes <span class="math inline">\(O(n^2)\)</span>, where n is the number of tokens.</p>
 <p>So, the computational complexity quadratically increases with the sequence length, which makes it very expensive to process long sequences. We could divide a long sequence into smaller chunks, but then we would lose the global context with the sequence, reducing the quality of the language task.</p>
 <p>On the contrary, Longformer scales linearly with sequence length and can process thousands of tokens, thanks to its attention patterns.</p>
 </section>
@@ -460,7 +460,7 @@ Q_g, K_g, V_g
 </section>
 <section id="performance-comparison" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="performance-comparison"><span class="header-section-number">3.2</span> Performance Comparison</h3>
-<p>Longformer outperforms <a href="../../blog/2022/2022-02-21-roberta-robustly-optimized-bert-apporach/" target="_blank">RoBERTa</a> on long document tasks using datasets like <a href="https://arxiv.org/abs/1905.07374" target="_blank">WikiHop</a>.</p>
+<p>Longformer outperforms <a href="../../blog/2022-02-21-roberta-robustly-optimized-bert-apporach/" target="_blank">RoBERTa</a> on long document tasks using datasets like <a href="https://arxiv.org/abs/1905.07374" target="_blank">WikiHop</a>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/tab-7.png" class="img-fluid figure-img"></p>
@@ -495,7 +495,7 @@ Q_g, K_g, V_g
 <section id="references" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="references"><span class="header-section-number">4</span> References</h2>
 <ul>
-<li><a href="../../blog/2022/2022-02-21-roberta-robustly-optimized-bert-apporach/" target="_blank">RoBERTa — Robustly optimized BERT approach</a></li>
+<li><a href="../../blog/2022-02-21-roberta-robustly-optimized-bert-apporach/" target="_blank">RoBERTa — Robustly optimized BERT approach</a></li>
 <li><a href="https://arxiv.org/abs/2004.05150" target="_blank">Longformer: The Long-Document Transformer</a><br>
 Iz Beltagy, Matthew E. Peters, Arman Cohan</li>
 </ul>
@@ -505,27 +505,31 @@ Iz Beltagy, Matthew E. Peters, Arman Cohan</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

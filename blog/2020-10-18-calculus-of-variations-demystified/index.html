@@ -641,7 +641,7 @@ S(\epsilon) = \int_{x_1}^{x_2} \sqrt{1+{y'}^2}dx \quad\text{ where }\quad y' = f
 <section id="references" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="references"><span class="header-section-number">8</span> References</h2>
 <ul>
-<li><a href="../../blog/2020/2020-10-04-constrained-optimization-demystified/" target="_blank">Constrained Optimization Demystified</a></li>
+<li><a href="../../blog/2020-10-04-constrained-optimization-demystified/" target="_blank">Constrained Optimization Demystified</a></li>
 <li><a href="https://youtu.be/6HeQc7CSkZs" target="_blank">Introduction to Calculus of Variations (Faculty of Khan)</a></li>
 </ul>
 
@@ -650,27 +650,31 @@ S(\epsilon) = \int_{x_1}^{x_2} \sqrt{1+{y'}^2}dx \quad\text{ where }\quad y' = f
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

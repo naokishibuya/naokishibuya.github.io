@@ -549,7 +549,7 @@ z_{i,m} \\
 \Biggl\| \text{diag} \Biggl( a'(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b}) \Biggr) \Biggr\| \le \gamma
 \]</span></p>
 <p>Note: for <span class="math inline">\(\tanh\)</span>, <span class="math inline">\(\gamma\)</span> is 1. For <span class="math inline">\(\text{sigmoid}\)</span>, <span class="math inline">\(\gamma\)</span> is <span class="math inline">\(\frac{1}{4}\)</span>. For ReLU, <span class="math inline">\(\gamma\)</span> is 1.</p>
-<p>Let’s also define the absolute value of the largest <a href="../../blog/2021/2021-08-31-matrix-decomposition-demystified/" target="_blank">eigenvalue</a> of the weight matrix <span class="math inline">\(W_h\)</span> as <span class="math inline">\(\lambda\)</span> to see the conditions for the vanishing and exploding gradients based on how <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\lambda\)</span> affect the following Jacobian matrix:</p>
+<p>Let’s also define the absolute value of the largest <a href="../../blog/2021-08-31-matrix-decomposition-demystified/" target="_blank">eigenvalue</a> of the weight matrix <span class="math inline">\(W_h\)</span> as <span class="math inline">\(\lambda\)</span> to see the conditions for the vanishing and exploding gradients based on how <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\lambda\)</span> affect the following Jacobian matrix:</p>
 <p><span class="math display">\[
 \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} = \text{diag}\Biggl( a'\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)\Biggr) W_h
 \]</span></p>
@@ -621,7 +621,7 @@ z_{i,m} \\
 \mathbf{h}_i &amp;= \mathbf{o}_i \odot \tanh(\mathbf{c}_i)
 \end{aligned}
 \]</span></p>
-<p>We call the whole thing an LSTM cell (or block). We can replace the basic RNN hidden state calculation with an LSTM cell to form a complete recurrent neural network. Some RNN patterns are explained in <a href="../../blog/2021/2021-09-20-recurrent-neural-networks/" target="_blank">the previous article</a>, where we can drop the LSTM cell in.</p>
+<p>We call the whole thing an LSTM cell (or block). We can replace the basic RNN hidden state calculation with an LSTM cell to form a complete recurrent neural network. Some RNN patterns are explained in <a href="../../blog/2021-09-20-recurrent-neural-networks/" target="_blank">the previous article</a>, where we can drop the LSTM cell in.</p>
 <p>Now that we understand how LSTM works, we want to examine BPTT to see how gradients flow through the cell states.</p>
 <p>Will the vanishing and exploding gradient problems go away?</p>
 </section>
@@ -664,7 +664,7 @@ z_{i,m} \\
 <section id="references" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="references"><span class="header-section-number">5</span> References</h2>
 <ul>
-<li><a href="../../blog/2021/2021-09-20-recurrent-neural-networks/" target="_blank">Recurrent Neural Networks</a></li>
+<li><a href="../../blog/2021-09-20-recurrent-neural-networks/" target="_blank">Recurrent Neural Networks</a></li>
 <li><a href="https://ieeexplore.ieee.org/document/279181" target="_blank">Learning Long-Term Dependencies with Gradient Descent is Difficult</a><br>
 Yoshua Bengio, Patrice Simard, Paolo Frasconi</li>
 <li><a href="https://arxiv.org/abs/1211.5063" target="_blank">On the difficulty of training recurrent neural networks</a><br>
@@ -680,27 +680,31 @@ Wikipedia</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

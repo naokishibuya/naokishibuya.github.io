@@ -1008,7 +1008,7 @@ Wikipedia</li>
 Wikipedia</li>
 <li><a href="https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse" target="_blank">Moore Penrose inverse</a><br>
 Wikipedia</li>
-<li><a href="../../blog/2017/2017-11-14-up-sampling-with-transposed-convolution/" target="_blank">Up-sampling with Transposed Convolution</a></li>
+<li><a href="../../blog/2017-11-14-up-sampling-with-transposed-convolution/" target="_blank">Up-sampling with Transposed Convolution</a></li>
 </ul>
 
 
@@ -1016,27 +1016,31 @@ Wikipedia</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

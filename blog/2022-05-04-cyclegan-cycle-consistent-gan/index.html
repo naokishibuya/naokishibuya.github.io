@@ -366,7 +366,7 @@ window.Quarto = {
 <p>This article explains how CycleGAN (aka Cycle-consistent GAN) works, which is well-known for the demo that translates horse into zebra and vice versa.</p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/9reHvktowLY?controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="">
 </iframe>
-<p>The previous article discussed <a href="../../blog/2022/2022-05-01-pix2pix-cgan/" target="_blank">pix2pix</a>, which does similar image translations. The same people that worked on pix2pix developed CycleGAN to overcome problems in pix2pix. So, let’s first see what kind of problems exist in pix2pix, which is valuable knowledge for us to understand CycleGAN better.</p>
+<p>The previous article discussed <a href="../../blog/2022-05-01-pix2pix-cgan/" target="_blank">pix2pix</a>, which does similar image translations. The same people that worked on pix2pix developed CycleGAN to overcome problems in pix2pix. So, let’s first see what kind of problems exist in pix2pix, which is valuable knowledge for us to understand CycleGAN better.</p>
 <section id="the-inconvenient-truth-about-pix2pix" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="the-inconvenient-truth-about-pix2pix"><span class="header-section-number">1</span> The Inconvenient Truth about Pix2Pix</h2>
 <section id="it-needs-pairs-of-images-for-training" class="level3" data-number="1.1">
@@ -411,7 +411,7 @@ window.Quarto = {
 </figure>
 </div>
 <p>Note: In the above diagram, the paper uses $Y# with a hat since generated images <span class="math inline">\(G(x)\)</span> are not from the dataset <span class="math inline">\(Y\)</span>.</p>
-<p>Here the discriminator network <span class="math inline">\(D_y\)</span> determines if the generated image <span class="math inline">\(G(x)\)</span> is real (as if the painter of <span class="math inline">\(Y\)</span> images drew it). The discriminator network <span class="math inline">\(D_y\)</span> determines if <span class="math inline">\(G(x)\)</span> is real or fake by the <strong>adversarial loss</strong>. It is the binary cross-entropy loss used in <a href="../../blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">regular GANs</a>.</p>
+<p>Here the discriminator network <span class="math inline">\(D_y\)</span> determines if the generated image <span class="math inline">\(G(x)\)</span> is real (as if the painter of <span class="math inline">\(Y\)</span> images drew it). The discriminator network <span class="math inline">\(D_y\)</span> determines if <span class="math inline">\(G(x)\)</span> is real or fake by the <strong>adversarial loss</strong>. It is the binary cross-entropy loss used in <a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">regular GANs</a>.</p>
 <p>Since there is no label image corresponding to <span class="math inline">\(G(x)\)</span>, there is nothing to guarantee that <span class="math inline">\(G\)</span> maintains the contents (shape, etc.) of the original image <span class="math inline">\(x\)</span> in the generated image <span class="math inline">\(G(x)\)</span>. It is where the cycle-consistency loss comes to the rescue. But before discussing the cycle-consistency loss, we need to discuss another generator network for the reverse direction (from <span class="math inline">\(Y\)</span> to <span class="math inline">\(X\)</span>).</p>
 <p>The generator network <span class="math inline">\(F\)</span> takes an image <span class="math inline">\(y\)</span> from <span class="math inline">\(Y\)</span> to produce an image <span class="math inline">\(x\)</span> with the style and texture of <span class="math inline">\(X\)</span>.</p>
 <div class="quarto-figure quarto-figure-center">
@@ -555,27 +555,31 @@ Jun-Yan Zhu, Taesung Park, Phillip Isola, Alexei A. Efros<br>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

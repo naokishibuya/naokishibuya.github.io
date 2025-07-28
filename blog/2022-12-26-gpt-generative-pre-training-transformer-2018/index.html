@@ -360,7 +360,7 @@ window.Quarto = {
 
 
 <p><img src="images/thumbnail.png" alt="GPT: Generative Pre-Trained Transformer (2018)"></p>
-<p>In 2018, OpenAI released the first version of GPT (Generative Pre-Trained Transformer) for generating texts as if humans wrote. The architecture of GPT is based on <a href="../../blog/2021/2021-12-13-transformers-encoder-decoder/" target="_blank">the original transformer’s decoder</a>.</p>
+<p>In 2018, OpenAI released the first version of GPT (Generative Pre-Trained Transformer) for generating texts as if humans wrote. The architecture of GPT is based on <a href="../../blog/2021-12-13-transformers-encoder-decoder/" target="_blank">the original transformer’s decoder</a>.</p>
 <p>They trained GPT in two stages:</p>
 <ol type="1">
 <li><strong>Unsupervised Pre-training</strong> pre-trains GPT on unlabeled text, which taps into abundant text corpora.</li>
@@ -515,13 +515,13 @@ L_1(\mathcal{U}) = \sum\limits_{i} \log P(u_i | u_{i-k}, \dots, u_{i-1}; \Theta)
 </figure>
 </div>
 <p>The right plot shows <strong>zero-shot behaviors</strong> where they designed a series of heuristic solutions to use the pre-trained model to perform tasks without supervised fine-tuning (therefore, it’s zero-shot). As we can see, the performance of GPT (solid lines) improves over the course of generative unsupervised pre-training. In comparison, LSTM does not perform as much in such zero-shot experiment.</p>
-<p>Their hypothesis is that GPT without fine-tuning can perform many of the tasks, thanks to its language modeling capability. GPT aquires such capability from the generative pre-training, using <a href="../../blog/2021/2021-11-15-transformers-self-attention/" target="_blank">the attention mechanism of the transformer</a>, causing it to outperform LSTM in zero-shot experiments.</p>
+<p>Their hypothesis is that GPT without fine-tuning can perform many of the tasks, thanks to its language modeling capability. GPT aquires such capability from the generative pre-training, using <a href="../../blog/2021-11-15-transformers-self-attention/" target="_blank">the attention mechanism of the transformer</a>, causing it to outperform LSTM in zero-shot experiments.</p>
 </section>
 <section id="references" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
 <ul>
-<li><a href="../../blog/2021/2021-12-13-transformers-encoder-decoder/" target="_blank">Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture</a></li>
-<li><a href="../../blog/2021/2021-11-15-transformers-self-attention/" target="_blank">Transformer’s Self-Attention: Why Is Attention All You Need?</a></li>
+<li><a href="../../blog/2021-12-13-transformers-encoder-decoder/" target="_blank">Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture</a></li>
+<li><a href="../../blog/2021-11-15-transformers-self-attention/" target="_blank">Transformer’s Self-Attention: Why Is Attention All You Need?</a></li>
 <li><a href="https://openai.com/blog/language-unsupervised/" target="_blank">Improving Language Understanding with Unsupervised Learning</a><br>
 <a href="https://github.com/openai/finetune-transformer-lm" target="_blank">Github</a><br>
 OpenAI</li>
@@ -533,27 +533,31 @@ OpenAI</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

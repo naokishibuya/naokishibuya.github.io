@@ -491,13 +491,13 @@ window.Quarto = {
 <p>Then, the decoder passes the output (the red curved line) and the hidden state (black dotted curved line) as inputs to the next step. It repeats the process until completion, for which the decoder outputs the <code>&lt;EOS&gt;</code> (the end of the sentence) marker.</p>
 <p>Note: we pass the label output (instead of the predicted output) to the next step during training. We call it <strong>teacher forcing</strong>. It stabilizes the learning process.</p>
 <p>One issue with seq2seq models is that the encoder must push all information into one hidden state vector for the decoder to start generating quality outputs. But the decoder may want to focus on different hidden states from the encoder to generate each output.</p>
-<p>The <a href="../../blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">attention mechanism</a> solves the problem by allowing the decoder to access any hidden states from the encoder based on what it needs to pay attention to.</p>
+<p>The <a href="../../blog/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">attention mechanism</a> solves the problem by allowing the decoder to access any hidden states from the encoder based on what it needs to pay attention to.</p>
 <p>To be continued.</p>
 </section>
 <section id="references" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
 <ul>
-<li><a href="../../blog/2021/2021-09-26-long-short-term-memory/" target="_blank">Long Short-Term Memory</a></li>
+<li><a href="../../blog/2021-09-26-long-short-term-memory/" target="_blank">Long Short-Term Memory</a></li>
 <li><a href="https://arxiv.org/abs/1409.3215" target="_blank">Sequence to Sequence Learning with Neural Networks</a><br>
 Ilya Sutskever, Oriol Vinyals, Quoc V. Le</li>
 <li><a href="https://en.wikipedia.org/wiki/Recurrent_neural_network" target="_blank">Recurrent neural network</a><br>
@@ -513,27 +513,31 @@ Wikipedia</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

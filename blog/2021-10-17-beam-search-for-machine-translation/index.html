@@ -353,7 +353,7 @@ window.Quarto = {
 
 
 <p><img src="images/thumbnail.png" alt="Beam Search for Machine Translation: How Greedy, Exhaustive, and Beam Search Algorithms Work"></p>
-<p>Beam search is a heuristic technique for choosing the most likely output used by probabilistic sequence models like <a href="../../blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">neural machine translation</a>.</p>
+<p>Beam search is a heuristic technique for choosing the most likely output used by probabilistic sequence models like <a href="../../blog/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">neural machine translation</a>.</p>
 <p>Machine translation is fundamentally multi-label learning where we have multiple plausible answers, yet the model must pick the best possible translation.</p>
 <p>We often use greedy search while explaining machine translation models, focusing on core concepts such as the RNN encoder-decoder structure and attention mechanisms. So, we do not talk much about actual output generation.</p>
 <p>However, it is a common assumption that we should already know what beam search is. As such, people new to the field might get stuck with the so-called minor detail before reaching the main subject in a paper.</p>
@@ -369,7 +369,7 @@ window.Quarto = {
 <p>For example, in an English-to-French machine translation, the encoder processes an input English sentence to produce encoded information (vector <span class="math inline">\(\boldsymbol{x}\)</span>). Then, the decoder processes vector <span class="math inline">\(\boldsymbol{x}\)</span> to produce a list of output probabilities for the first step.</p>
 <p><img src="images/encoder-decoder.png" class="img-fluid"></p>
 <p>Note: <code>&lt;SOS&gt;</code> is a special character indicating the start of a sentence. The decoder receives it as the first input along with the vector <span class="math inline">\(\boldsymbol{x}\)</span>.</p>
-<p>For simplicity, we are not showing any attention mechanism or other details like <a href="../../blog/2021/2021-10-12-word-embedding-lookup/" target="_blank">word embedding</a>. Such details won’t change anything about how beam search works. Our discussion focuses on the method of choosing an output given the list of output probabilities.</p>
+<p>For simplicity, we are not showing any attention mechanism or other details like <a href="../../blog/2021-10-12-word-embedding-lookup/" target="_blank">word embedding</a>. Such details won’t change anything about how beam search works. Our discussion focuses on the method of choosing an output given the list of output probabilities.</p>
 <p>In the above diagram, given the input English sentence “Hello, world!”, the output probabilities for the first French word are 60% for “Bonjour”, 30% for “Salut”, and so on. If the output vocabulary includes 100,000 items (words and special characters), there will be 100,000 output probabilities.</p>
 <p>In greedy search, we choose “Bonjour” as the model predicts it with the highest probability and use it as the second input to the decoder.</p>
 <p><img src="images/greedy-decoding.png" class="img-fluid"></p>
@@ -462,27 +462,31 @@ P(y^{(1)}, y^{(2)}, y^{(3)} | \mathbf{x}) = P(y^{(1)}| \mathbf{x}) P(y^{(2)} | \
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

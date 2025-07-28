@@ -393,7 +393,7 @@ window.Quarto = {
 
 
 <p><img src="images/thumbnail.png" alt="Transformer’s Positional Encoding: How Does It Know Word Positions Without Recurrence?"></p>
-<p>In 2017, Vaswani et al.&nbsp;published a paper titled <a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a> for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than <a href="../../blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">RNN encoder-decoder</a> models, which were mainstream at that time.</p>
+<p>In 2017, Vaswani et al.&nbsp;published a paper titled <a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a> for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than <a href="../../blog/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">RNN encoder-decoder</a> models, which were mainstream at that time.</p>
 <p>Then, the big transformer model achieved SOTA (state-of-the-art) performance on NLP tasks.</p>
 <ul>
 <li>On the WMT 2014 English-to-German translation task, it reached a BLEU score of 28.4.</li>
@@ -427,7 +427,7 @@ We propose a new simple network architecture, the Transformer, based solely on a
 <blockquote class="blockquote">
 Since our model contains no recurrence and no convolution, in order for the model to make use of the order of the sequence, we must inject some information about the relative or absolute position of the tokens in the sequence. <cite>Source: <a href="https://arxiv.org/abs/1706.03762" target="_blank">the paper</a></cite>
 </blockquote>
-<p>Historically, researchers used RNNs (Recurrent Neural Networks) to keep track of ordinal dependencies in sequential data. Later, researchers incorporated <a href="../../blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">attention mechanism</a> into RNN encoder-decoder architectures to better extract contextual information for each word.</p>
+<p>Historically, researchers used RNNs (Recurrent Neural Networks) to keep track of ordinal dependencies in sequential data. Later, researchers incorporated <a href="../../blog/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">attention mechanism</a> into RNN encoder-decoder architectures to better extract contextual information for each word.</p>
 <p>On the contrary, the transformer’s encoder-decoder architecture uses attention mechanisms without recurrence and convolution. That’s what the paper title “Attention Is All You Need” means.</p>
 <p>However, without positional information, an attention-only model might believe the following two sentences have the same semantics:</p>
 <blockquote class="blockquote">
@@ -673,27 +673,31 @@ PyTorch Tutorial</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

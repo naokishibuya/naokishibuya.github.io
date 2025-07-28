@@ -417,7 +417,7 @@ N = \frac{HW}{P^2}
 <p>According to the paper, ViT does the following:</p>
 <ul>
 <li>ViT uses a trainable linear project to map flattened patches from P^2 C to P^2 D, where D is an embedding vector size that the Transformer Encoder uses throughout its layers. They call them “<strong>patch embeddings</strong>”“.</li>
-<li>ViT prepends a learnable embedding (similar to <a href="../../blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT’s [CLS]</a>), and the final hidden state of that is the aggregate representation of image patches used for classification tasks.</li>
+<li>ViT prepends a learnable embedding (similar to <a href="../../blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT’s [CLS]</a>), and the final hidden state of that is the aggregate representation of image patches used for classification tasks.</li>
 <li>ViT adds 1D position embeddings (learned) to the patch embedding to retain positional information. They didn’t use more advanced 2D position embeddings as they did not observe better performance gains.</li>
 </ul>
 <p>In <a href="https://github.com/google-research/vision_transformer/blob/60104c1e50b9847c0b476ed783b4e84dbc64e77a/vit_jax/models_vit.py#L259" target="_blank">the official implementation</a> (below), they use a convolution layer with kernel size = patch size (say, 16 for 16 x 16), strides to the same size (= 16), and the output channels (features) to the hidden size (D). In other words, the convolution layer creates a grid of embeddings that is flattened later.</p>
@@ -485,8 +485,8 @@ They experimented with ViT on masked patch prediction, similar to how BERT used 
 <section id="references" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="references"><span class="header-section-number">3</span> References</h2>
 <ul>
-<li><a href="../../blog/2021/2021-12-13-transformers-encoder-decoder/" target="_blank">Transformer’s Encoder-Decoder</a></li>
-<li><a href="../../blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT — Bidirectional Encoder Representation from Transformers</a></li>
+<li><a href="../../blog/2021-12-13-transformers-encoder-decoder/" target="_blank">Transformer’s Encoder-Decoder</a></li>
+<li><a href="../../blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT — Bidirectional Encoder Representation from Transformers</a></li>
 <li><a href="https://arxiv.org/abs/2010.11929" target="_blank">An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale</a><br>
 Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, Neil Houlsby</li>
 <li><a href="https://arxiv.org/abs/1912.11370" target="_blank">Big Transfer (BiT): General Visual Representation Learning</a><br>
@@ -502,27 +502,31 @@ Xiaohua Zhai, Alexander Kolesnikov, Neil Houlsby, Lucas Beyer</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

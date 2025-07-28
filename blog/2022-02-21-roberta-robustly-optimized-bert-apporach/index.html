@@ -325,7 +325,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p><img src="images/thumbnail.png" alt="RoBERTa — Robustly optimized BERT approach: Better than XLNet without Architectural Changes to the Original BERT"></p>
-<p>RoBERTa’s base is <a href="../../blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT</a>. So, let’s quickly review the history before explaining what RoBERTa is all about.</p>
+<p>RoBERTa’s base is <a href="../../blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT</a>. So, let’s quickly review the history before explaining what RoBERTa is all about.</p>
 <p>In 2018, Jacob Devlin et al.&nbsp;(Google AI Language) released BERT, which achieved state-of-the-art results on nine NLP tasks, inspiring other researchers to develop further improvements. Soon, newer models superseded the original BERT models. At least, that was how it looked.</p>
 <p>One example was XLNet by Zhilin Yang et al.&nbsp;(Google AI Brain and Carnegie Mellon University). They incorporated architectural and training changes into BERT to produce XLNet outperforming BERT on 20 tasks, which was an outstanding achievement. However, it was unclear what changes made XLNet improve so much. Were the architectural changes the primary source for the performance jump, or did the updated training significantly contribute more?</p>
 <p>Moreover, there was a question of whether Jacob Devlin et al.&nbsp;optimally trained the original BERT. It could be that other researchers happened to train their model with better hyperparameters.</p>
@@ -419,27 +419,31 @@ Zhilin Yang, Zihang Dai, Yiming Yang, Jaime Carbonell, Ruslan Salakhutdinov, Quo
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

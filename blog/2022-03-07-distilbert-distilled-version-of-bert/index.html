@@ -353,7 +353,7 @@ window.Quarto = {
 
 
 <p><img src="images/thumbnail.png" alt="DistilBERT — distilled version of BERT: A Tiny BERT with Great Performance – 97% of the Original"></p>
-<p>In 2019, the team at Hugging Face released a model based on <a href="../../blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT</a> that was 40% smaller and 60% faster while retaining 97% of the language understanding capability. They called it DistilBERT.</p>
+<p>In 2019, the team at Hugging Face released a model based on <a href="../../blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/" target="_blank">BERT</a> that was 40% smaller and 60% faster while retaining 97% of the language understanding capability. They called it DistilBERT.</p>
 <section id="how-small-is-distilbert" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="how-small-is-distilbert"><span class="header-section-number">1</span> How Small Is DistilBERT?</h2>
 <p>So, exactly how small is DistilBERT? The below chart compares the size of DistilBERT with large-scale pre-trained language models from 2018 to 2019.</p>
@@ -435,27 +435,31 @@ C. Buciluǎ, R. Caruana, A. Niculescu-Mizil</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

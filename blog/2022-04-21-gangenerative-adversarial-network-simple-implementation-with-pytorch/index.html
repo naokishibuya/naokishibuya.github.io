@@ -645,7 +645,7 @@ tqdm==4.64.0</code></pre>
 </section>
 <section id="training-loop" class="level3" data-number="4.2">
 <h3 data-number="4.2" class="anchored" data-anchor-id="training-loop"><span class="header-section-number">4.2</span> Training Loop</h3>
-<p>We use <a href="../../blog/2021/2021-08-29-gradient-descent-optimizers/#adam" target="_blank">Adam</a> optimizer.</p>
+<p>We use <a href="../../blog/2021-08-29-gradient-descent-optimizers/#adam" target="_blank">Adam</a> optimizer.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.nn <span class="im">import</span> functional <span class="im">as</span> F</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>d_optimizer <span class="op">=</span> torch.optim.Adam(discriminator.parameters(), lr<span class="op">=</span><span class="fl">1.0e-4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -889,7 +889,7 @@ tqdm==4.64.0</code></pre>
 <h3 data-number="7.4" class="anchored" data-anchor-id="how-to-improve"><span class="header-section-number">7.4</span> How To Improve</h3>
 <p>We only used simple networks so we could add more layers to make the networks more complex, which may improve the quality of the generated images. Another idea is to introduce convolutional layers since we deal with images like DCGAN (Deep Convolutional GAN).</p>
 <p>We might (perhaps) be able to adjust learning rates to make the networks learn faster. Changing learning rates can significantly impact how the networks learn, for better or worse. We can also try other optimizers to see how they work. If so, we could draw loss curves and compare how different optimizer affects learning progresses.</p>
-<p>Or try the updated version in <a href="../../blog/2022/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/" target="_blank">this article</a>.</p>
+<p>Or try the updated version in <a href="../../blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/" target="_blank">this article</a>.</p>
 </section>
 </section>
 <section id="references" class="level2" data-number="8">
@@ -906,27 +906,31 @@ Facebook AI Research: Soumith Chintala, Emily Denton, Martin Arjovsky, Michael M
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

@@ -389,7 +389,7 @@ window.Quarto = {
 </section>
 <section id="conditional-adversarial-networks" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="conditional-adversarial-networks"><span class="header-section-number">2</span> Conditional Adversarial Networks</h2>
-<p>The latter half of the paper title is <strong>with Conditional Adversarial Networks</strong>, which indicates the use of a <a href="../../blog/2022/2022-04-28-conditional-gan-2/" target="_blank">CGAN (Conditional GAN)</a>. CGAN is an extension of <a href="../../blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">GAN</a> that generates images satisfying conditions given to the generator network.</p>
+<p>The latter half of the paper title is <strong>with Conditional Adversarial Networks</strong>, which indicates the use of a <a href="../../blog/2022-04-28-conditional-gan-2/" target="_blank">CGAN (Conditional GAN)</a>. CGAN is an extension of <a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">GAN</a> that generates images satisfying conditions given to the generator network.</p>
 <p>In pix2pix, an input image is also a condition.</p>
 <p>As shown below, the generator takes an input image (a sketch of a shoe) as a condition to produce a generated realistic shoe image, and the discriminator also takes the same input image as the condition.</p>
 <div class="quarto-figure quarto-figure-center">
@@ -503,7 +503,7 @@ To be real or not - that is not the only question. <cite>Source: me</cite>
 <p>This is all mathematically equivalent to if we had manually chopped up the image into 70×70 overlapping patches, run a regular discriminator over each patch, and averaged the results.</p>
 Maybe it would have been better if we called it a “Fully Convolutional GAN” like in FCNs… it’s the same idea :) <cite><a href="https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39" target="_blank">https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39</a></cite>
 </blockquote>
-<p>So, this is nothing new. We’ve discussed a discriminator with convolutional layers in the <a href="../../blog/2022/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/" target="_blank">DCGAN</a> and <a href="../../blog/2022/2022-04-28-conditional-gan-2/" target="_blank">CGAN</a> articles. Convolutional layers work a lot better than the <strong>fully-connected-layer-only</strong> version to extract features from images.</p>
+<p>So, this is nothing new. We’ve discussed a discriminator with convolutional layers in the <a href="../../blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/" target="_blank">DCGAN</a> and <a href="../../blog/2022-04-28-conditional-gan-2/" target="_blank">CGAN</a> articles. Convolutional layers work a lot better than the <strong>fully-connected-layer-only</strong> version to extract features from images.</p>
 <p>In the pix2pix paper, the author reasons that the discriminator only needs to penalize structure at the scale of patches (an area covered by a convolution kernel) by classifying each patch as real or fake and averaging all responses to provide the ultimate discriminator output since the L1 distance ensures the overall structural correctness. When the convolution kernel is 1x1, they call it the discriminator PixelGAN, and when the patch size is the same as the image size, they call it ImageGAN. In any case, they are convolutional neural networks and nothing more than that.</p>
 <p>The below shows example outputs.</p>
 <div class="quarto-figure quarto-figure-center">
@@ -585,8 +585,8 @@ Visually similar to the 70x70 PatchGAN, but somewhat lower quality in FCN score
 <section id="references" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
 <ul>
-<li><a href="../../blog/2022/2022-04-28-conditional-gan-2/" target="_blank">CGAN (Conditional GAN): Specify What Images To Generate With 1 Simple Yet Powerful Change</a></li>
-<li><a href="../../blog/2022/2022-05-04-cyclegan-cycle-consistent-gan/" target="_blank">CycleGAN: Turn a Horse into a Zebra and vice versa with the Magic of Self-Supervised Learning</a></li>
+<li><a href="../../blog/2022-04-28-conditional-gan-2/" target="_blank">CGAN (Conditional GAN): Specify What Images To Generate With 1 Simple Yet Powerful Change</a></li>
+<li><a href="../../blog/2022-05-04-cyclegan-cycle-consistent-gan/" target="_blank">CycleGAN: Turn a Horse into a Zebra and vice versa with the Magic of Self-Supervised Learning</a></li>
 <li><a href="https://arxiv.org/abs/1611.07004" target="_blank">Image-to-Image Translation with Conditional Adversarial Networks</a><br>
 Phillip Isola, Jun-Yan Zhu, Tinghui Zhou, Alexei A. Efros</li>
 <li><a href="https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix" target="_blank">CycleGAN and pix2pix in PyTorch</a><br>
@@ -601,27 +601,31 @@ Paper With Code</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

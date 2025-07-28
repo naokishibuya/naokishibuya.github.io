@@ -630,7 +630,7 @@ v_i \leftarrow \beta_1 v_i + (1 - \beta_1) \frac{\partial J(\boldsymbol{\theta})
 <section id="references" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="references"><span class="header-section-number">3</span> References</h2>
 <ul>
-<li><a href="../../blog/2021/2021-08-15-vanishing-gradient-problem/" target="_blank">Vanishing Gradient Problem</a></li>
+<li><a href="../../blog/2021-08-15-vanishing-gradient-problem/" target="_blank">Vanishing Gradient Problem</a></li>
 <li><a href="https://jmlr.org/papers/v12/duchi11a.html" target="_blank">Adaptive Subgradient Methods for Online Learning and Stochastic Optimization (2011)</a><br>
 John Duchi, Elad Hazan, Yoram Singer</li>
 <li><a href="http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf" target="_blank">Neural Networks for Machine Learning: Lecture 6a Overview of mini-batch gradient descent (2012)</a><br>
@@ -646,27 +646,31 @@ Diederik P. Kingma, Jimmy Ba</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

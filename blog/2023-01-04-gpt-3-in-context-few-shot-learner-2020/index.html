@@ -347,7 +347,7 @@ ul.task-list li input[type="checkbox"] {
 </figure>
 </div>
 <p>The outer loop refers to the unsupervised pre-training where the model acquires language skills. On the other hand, the inner loop occurs when we feed forward a sequence of examples to the model, which learns the context from the sequence to predict what comes next. It is like a human reading a sequence of examples and thinking about the next instance. As the model uses the language skills learned during the pre-training phase to learn the context given in the sequence, no neural network parameter updates are involved in this learning phase. They call it in-context learning.</p>
-<p>The diagram’s first (left-most) example provides a context for performing arithmetic addition. Then, the second (middle) demonstrates how to correct spelling mistakes. The last (right-most) provides examples of English-to-French word translations. Given the respective context, the model must learn how to perform the intended task. They tried this approach with <a href="../../blog/2022/2022-12-30-gpt-2-2019/" target="_blank">GPT-2</a>, but the result wasn’t good enough to be a practical method of solving language tasks.</p>
+<p>The diagram’s first (left-most) example provides a context for performing arithmetic addition. Then, the second (middle) demonstrates how to correct spelling mistakes. The last (right-most) provides examples of English-to-French word translations. Given the respective context, the model must learn how to perform the intended task. They tried this approach with <a href="../../blog/2022-12-30-gpt-2-2019/" target="_blank">GPT-2</a>, but the result wasn’t good enough to be a practical method of solving language tasks.</p>
 <p>Since then, however, they saw a growing trend in the capacity of transformer language models in terms of the number of parameters, bringing improvements to text generation and other downstream NLP tasks. They hypothesized that in-context learning would show similarly substantial gains with scale.</p>
 <p>Therefore, OpenAI researchers trained a 175 billion parameter language model (GPT-3) and measured its in-context learning abilities.</p>
 </section>
@@ -423,8 +423,8 @@ ul.task-list li input[type="checkbox"] {
 <section id="references" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
 <ul>
-<li><a href="../../blog/2022/2022-12-26-gpt-generative-pre-training-transformer-2018/" target="_blank">GPT: Generative Pre-Trained Transformer (2018)</a></li>
-<li><a href="../../blog/2022/2022-12-30-gpt-2-2019/" target="_blank">GPT-2: Too Dangerous To Release (2019)</a></li>
+<li><a href="../../blog/2022-12-26-gpt-generative-pre-training-transformer-2018/" target="_blank">GPT: Generative Pre-Trained Transformer (2018)</a></li>
+<li><a href="../../blog/2022-12-30-gpt-2-2019/" target="_blank">GPT-2: Too Dangerous To Release (2019)</a></li>
 <li><a href="https://arxiv.org/abs/2005.14165" target="_blank">Language Models are Few-Shot Learners</a> OpenAI</li>
 <li><a href="https://ai.stanford.edu/blog/understanding-incontext/" target="_blank">How does in-context learning work?</a><br>
 A framework for understanding the differences from traditional supervised learning<br>
@@ -439,27 +439,31 @@ Sang Michael Xie, Sewon Min</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

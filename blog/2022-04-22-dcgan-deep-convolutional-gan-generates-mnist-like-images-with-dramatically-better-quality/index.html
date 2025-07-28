@@ -370,7 +370,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p><img src="images/thumbnail.png" alt="DCGAN (Deep Convolutional GAN) Generates MNIST-like Images with Dramatically Better Quality"></p>
-<p>In this article, we incorporate the idea from DCGAN to improve the simple GAN model that we trained in <a href="../../blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">the previous article</a>. Just like before, we will implement DCGAN step by step.</p>
+<p>In this article, we incorporate the idea from DCGAN to improve the simple GAN model that we trained in <a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">the previous article</a>. Just like before, we will implement DCGAN step by step.</p>
 <section id="dcgan---our-reference-model" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="dcgan---our-reference-model"><span class="header-section-number">1</span> DCGAN - Our Reference Model</h2>
 <p>We refer to <a href="https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html" target="_blank">PyTorch’s DCGAN tutorial</a> for DCGAN model implementation. We are especially interested in the convolutional (Conv2d) layers as we believe they will improve how the discriminator extracts features. DCGAN also uses transposed convolution (TransposeConv2d) layers to improve how the generator generates images.</p>
@@ -449,7 +449,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.conv1(x)   <span class="co"># =&gt; 32 x 14 x 14</span></span>
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.conv2(x)   <span class="co"># =&gt; 1 x 28 x 28</span></span>
 <span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Like DCGAN, we are using <a href="../../blog/2017/2017-11-14-up-sampling-with-transposed-convolution/" target="_blank">ConvTranspose2d</a> to expand image size from 7x7 to 28x28. <code>ConvTranspose2d</code> layers have learnable parameters we train through GAN training. As such, the transposed convolution layers help expand image size and generate better-quality images. We have Batch Normalization to speed up the learning process. For reshaping, we prepare the following helper class.</p>
+<p>Like DCGAN, we are using <a href="../../blog/2017-11-14-up-sampling-with-transposed-convolution/" target="_blank">ConvTranspose2d</a> to expand image size from 7x7 to 28x28. <code>ConvTranspose2d</code> layers have learnable parameters we train through GAN training. As such, the transposed convolution layers help expand image size and generate better-quality images. We have Batch Normalization to speed up the learning process. For reshaping, we prepare the following helper class.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape helper</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Reshape(nn.Module):</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, <span class="op">*</span>shape):</span>
@@ -468,7 +468,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="discriminator-network-with-convolutions" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="discriminator-network-with-convolutions"><span class="header-section-number">3</span> Discriminator Network with Convolutions</h2>
-<p>The discriminator network from <a href="../../blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">the previous article</a> was very simple.</p>
+<p>The discriminator network from <a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">the previous article</a> was very simple.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Discriminator network</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Discriminator(nn.Sequential):</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
@@ -520,7 +520,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="the-entire-dcgan-code" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="the-entire-dcgan-code"><span class="header-section-number">4</span> The Entire DCGAN Code</h2>
-<p>The DCGAN implementation is mostly the same as <a href="../../blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">the previous article</a> except for <code>Generator</code> and <code>Discriminator</code> definitions. I also adjusted the learning rate for the generator slightly higher this time which seems to work better.</p>
+<p>The DCGAN implementation is mostly the same as <a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">the previous article</a> except for <code>Generator</code> and <code>Discriminator</code> definitions. I also adjusted the learning rate for the generator slightly higher this time which seems to work better.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -731,7 +731,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="5" class="anchored" data-anchor-id="before-and-after"><span class="header-section-number">5</span> Before and After</h2>
 <section id="epoch-1" class="level3" data-number="5.1">
 <h3 data-number="5.1" class="anchored" data-anchor-id="epoch-1"><span class="header-section-number">5.1</span> Epoch 1</h3>
-<p><a href="../../blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">The previous version</a> generated the below images after the first epoch.</p>
+<p><a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">The previous version</a> generated the below images after the first epoch.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/generated-old-1.jpg" class="img-fluid figure-img"></p>
@@ -799,7 +799,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="references" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
 <ul>
-<li><a href="../../blog/2022/2022-04-22-generating-fashion-images-with-dcgan/" target="_blank">Fashion GAN: Generating Colorful Fashion Images with DCGAN</a></li>
+<li><a href="../../blog/2022-04-22-generating-fashion-images-with-dcgan/" target="_blank">Fashion GAN: Generating Colorful Fashion Images with DCGAN</a></li>
 <li><a href="https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html" target="_blank">PyTorch - DCGAN TUTORIAL</a><br>
 Nathan Inkawhich</li>
 <li><a href="https://discuss.pytorch.org/t/why-dont-we-put-models-in-train-or-eval-modes-in-dcgan-example/7422" target="_blank">Why don’t we put models in .train() or .eval() modes in DCGAN example</a></li>
@@ -810,27 +810,31 @@ Nathan Inkawhich</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

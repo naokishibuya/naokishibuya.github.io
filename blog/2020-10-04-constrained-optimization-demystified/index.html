@@ -462,12 +462,12 @@ g(x, y) - C = 0
 <p><img src="images/not-a-solution.png" class="img-fluid" style="width:60.0%"></p>
 <p>So, finding such a position <span class="math inline">\((x, y)\)</span> where the road and contour lines are parallel is required.</p>
 <p>To solve this mathematically, we need the concept of the Lagrange multiplier.</p>
-<p>If interested, please read <a href="../../blog/2020/2020-10-04-lagrange-multiplier-demystified/" target="_blank">this article</a> on the Lagrange multiplier.</p>
+<p>If interested, please read <a href="../../blog/2020-10-04-lagrange-multiplier-demystified/" target="_blank">this article</a> on the Lagrange multiplier.</p>
 </section>
 <section id="references" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="references"><span class="header-section-number">8</span> References</h2>
 <ul>
-<li><a href="../../blog/2020/2020-10-04-lagrange-multiplier-demystified/" target="_blank">Lagrange Multiplier Demystified</a></li>
+<li><a href="../../blog/2020-10-04-lagrange-multiplier-demystified/" target="_blank">Lagrange Multiplier Demystified</a></li>
 <li><a href="https://www.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/lagrange-multipliers-and-constrained-optimization/v/constrained-optimization-introduction" target="_blank">Constrained optimization introduction</a><br>
 Khan Academy</li>
 </ul>
@@ -477,27 +477,31 @@ Khan Academy</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

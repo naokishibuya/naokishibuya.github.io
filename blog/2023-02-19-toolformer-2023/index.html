@@ -407,7 +407,7 @@ LLMs have no physical intuition as they are trained exclusively on text.<br>They
 </section>
 <section id="approach-by-toolformer" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="approach-by-toolformer"><span class="header-section-number">2</span> Approach by Toolformer</h2>
-<p>The idea is to use the <a href="../../blog/2023/2023-01-30-why-gpt-icl/" target="_blank">ICL</a> (in-context learning) capability of LLMs to learn how to use external APIs to overcome the limitations mentioned above.</p>
+<p>The idea is to use the <a href="../../blog/2023-01-30-why-gpt-icl/" target="_blank">ICL</a> (in-context learning) capability of LLMs to learn how to use external APIs to overcome the limitations mentioned above.</p>
 <p>They give a handful of human-written examples of using API calls and let an LM generate potential API calls. For example, a human-written prompt below demonstrates how to generate API calls for question-answering tools.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -671,7 +671,7 @@ L_i^- - L_i^+ \ge \tau_f
 <section id="references" class="level2" data-number="10">
 <h2 data-number="10" class="anchored" data-anchor-id="references"><span class="header-section-number">10</span> References</h2>
 <ul>
-<li><a href="../../blog/2023/2023-01-30-why-gpt-icl/" target="_blank">ICL: Why Can GPT Learn In-Context? (2022)</a></li>
+<li><a href="../../blog/2023-01-30-why-gpt-icl/" target="_blank">ICL: Why Can GPT Learn In-Context? (2022)</a></li>
 <li><a href="https://arxiv.org/pdf/2203.02155.pdf" target="_blank">Training language models to follow instructions with human feedback</a><br>
 Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli, Luke Zettlemoyer, Nicola Cancedda, Thomas Scialom</li>
 <li><a href="https://openai.com/blog/chatgpt/" target="_blank">ChatGPT: Optimizing Language Models for Dialogue</a></li>
@@ -690,27 +690,31 @@ Guillaume Wenzek, Marie-Anne Lachaux, Alexis Conneau, Vishrav Chaudhary, Francis
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

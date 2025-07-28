@@ -324,7 +324,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p><img src="images/thumbnail.png" alt="GPT-2: Too Dangerous To Release (2019)"></p>
-<p>GPT-2 is a direct scale-up of <a href="../../blog/2022/2022-12-26-gpt-generative-pre-training-transformer-2018/" target="_blank">GPT-1</a>, with more parameters and trained on more data. However, it was deemed too dangerous to release by OpenAI:</p>
+<p>GPT-2 is a direct scale-up of <a href="../../blog/2022-12-26-gpt-generative-pre-training-transformer-2018/" target="_blank">GPT-1</a>, with more parameters and trained on more data. However, it was deemed too dangerous to release by OpenAI:</p>
 <blockquote class="blockquote">
 <p>Due to our concerns about malicious applications of the technology, we are not releasing the trained model. As an experiment in responsible disclosure, we are instead releasing a much smaller model for researchers to experiment with, as well as a technical paper. <cite><a href="https://openai.com/blog/better-language-models/" target="_blank">OpenAI Blog – Better Language Models and Their Implications</a></cite></p>
 </blockquote>
@@ -372,7 +372,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="references" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="references"><span class="header-section-number">4</span> References</h2>
 <ul>
-<li><a href="../../blog/2022/2022-12-26-gpt-generative-pre-training-transformer-2018/" target="_blank">GPT-1: Generative Pre-Trained Transformer (2018)</a></li>
+<li><a href="../../blog/2022-12-26-gpt-generative-pre-training-transformer-2018/" target="_blank">GPT-1: Generative Pre-Trained Transformer (2018)</a></li>
 <li><a href="https://openai.com/blog/better-language-models/" target="_blank">GPT-2: Better Language Models and Their Implications</a><br>
 <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf" target="_blank">paper</a>, <a href="https://github.com/openai/gpt-2" target="_blank">code</a><br>
 OpenAI</li>
@@ -385,27 +385,31 @@ OpenAI</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

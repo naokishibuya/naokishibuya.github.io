@@ -357,7 +357,7 @@ window.Quarto = {
 
 
 <p><img src="images/thumbnail.png" alt="Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture"></p>
-<p>In 2017, Vaswani et al.&nbsp;published a paper titled <a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a> for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than <a href="../../blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">RNN encoder-decoder</a> models, which were mainstream.</p>
+<p>In 2017, Vaswani et al.&nbsp;published a paper titled <a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a> for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than <a href="../../blog/2021-09-29-neural-machine-translation-with-attention-mechanism/" target="_blank">RNN encoder-decoder</a> models, which were mainstream.</p>
 <p>The transformer architecture is the basis for recent well-known models like <a href="https://arxiv.org/abs/1810.04805" target="_blank">BERT</a> and <a href="https://openai.com/blog/gpt-3-apps/" target="_blank">GPT-3</a>. Researchers have already applied the transformer architecture in <a href="https://arxiv.org/abs/2010.11929" target="_blank">Computer Vision</a> and <a href="https://arxiv.org/abs/2106.01345" target="_blank">Reinforcement Learning</a>. So, understanding the transformer architecture is crucial if you want to know where machine learning is heading.</p>
 <p>However, the transformer architecture may look complicated to those without much background.</p>
 <div class="quarto-figure quarto-figure-center">
@@ -391,9 +391,9 @@ window.Quarto = {
 <p>These tokens are typically integer indices in a vocabulary dataset. So, it may be a sequence of numbers like the below:</p>
 <pre><code>(8667, 1362, 106, 0, 0, …, 0)</code></pre>
 <p>The number 8667 corresponds to the token <code>Hello</code> in this example. It may also contain special characters like <code>&lt;EOS&gt;</code> (end-of-sentence marker). It depends on your tokenizer and vocabulary dataset. If you use a model from <a href="https://huggingface.co" target="_blank">Hugging Face</a>, there is a specific tokenizer for the model handling such details. If you build a model from scratch, you’d need to decide how to tokenize a sentence, set up a vocabulary dataset, and assign an index to each token.</p>
-<p>To feed those tokens into the neural network, we convert each token into an embedding vector, a common practice in neural machine translation and other natural language models. In the paper, they use a 512-dimensional vector for such embedding. So, if the maximum length of a sentence is 200, the shape of every sentence will be (200, 512). The transformer learns those embeddings from scratch during training. If you are unfamiliar with word embeddings, please look at <a href="../../blog/2021/2021-10-12-word-embedding-lookup/" target="_blank">this article</a>.</p>
+<p>To feed those tokens into the neural network, we convert each token into an embedding vector, a common practice in neural machine translation and other natural language models. In the paper, they use a 512-dimensional vector for such embedding. So, if the maximum length of a sentence is 200, the shape of every sentence will be (200, 512). The transformer learns those embeddings from scratch during training. If you are unfamiliar with word embeddings, please look at <a href="../../blog/2021-10-12-word-embedding-lookup/" target="_blank">this article</a>.</p>
 <p><img src="images/input-embedding.png" class="img-fluid"></p>
-<p>Moreover, with the transformer, we inject <strong>positional encoding</strong> into each embedding so that the model can know word positions without recurrence. For the details of the positional encoding, please look at <a href="../../blog/2021/2021-10-31-transformers-positional-encoding/" target="_blank">this article</a>.</p>
+<p>Moreover, with the transformer, we inject <strong>positional encoding</strong> into each embedding so that the model can know word positions without recurrence. For the details of the positional encoding, please look at <a href="../../blog/2021-10-31-transformers-positional-encoding/" target="_blank">this article</a>.</p>
 <p>The point here is that an input to the transformer is not the characters of the input text but a sequence of embedding vectors. Each vector represents the semantics and position of a token. The encoder performs linear algebra operations on those vectors to extract the contexts for each token from the entire sentence and enrich the embedding vectors with helpful information for the target task through the multiple encoder blocks.</p>
 </section>
 <section id="softmax-and-output-probabilities" class="level2" data-number="3">
@@ -427,7 +427,7 @@ window.Quarto = {
 <section id="encoder-block-internals" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="encoder-block-internals"><span class="header-section-number">4</span> Encoder Block Internals</h2>
 <p>The encoder block uses the <strong>self-attention mechanism</strong> to enrich each token (embedding vector) with contextual information from the whole sentence.</p>
-<p>Depending on the surrounding tokens, each token may have more than one semantic and/or function. Hence, the self-attention mechanism employs multiple heads (eight parallel attention calculations) so that the model can tap into different embedding subspaces. For details on the self-attention mechanism, please refer to <a href="../../blog/2021/2021-11-15-transformers-self-attention/" target="_blank">this article</a>.</p>
+<p>Depending on the surrounding tokens, each token may have more than one semantic and/or function. Hence, the self-attention mechanism employs multiple heads (eight parallel attention calculations) so that the model can tap into different embedding subspaces. For details on the self-attention mechanism, please refer to <a href="../../blog/2021-11-15-transformers-self-attention/" target="_blank">this article</a>.</p>
 <p><img src="images/encoder-multi-head-attention.png" class="img-fluid"></p>
 <p>The <strong>position-wise feed-forward network</strong> (FFN) has a linear layer, ReLU, and another linear layer, which processes each embedding vector independently with identical weights. So, each embedding vector (with contextual information from the multi-head attention) goes through the position-wise feed-forward layer for further transformation.</p>
 <p><img src="images/encoder-position-wise-feed-forward.png" class="img-fluid"></p>
@@ -497,27 +497,31 @@ Jay Alammar</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

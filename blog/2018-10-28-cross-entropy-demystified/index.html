@@ -362,7 +362,7 @@ window.Quarto = {
 <p>So, let’s review the entropy formula.</p>
 <section id="review-of-entropy-formula" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="review-of-entropy-formula"><span class="header-section-number">1</span> Review of Entropy&nbsp;Formula</h2>
-<p><a href="../../blog/2018/2018-07-24-entropy-demystified/" target="_blank">The previous article</a> should help you understand the entropy concept in case you are not already familiar with it.</p>
+<p><a href="../../blog/2018-07-24-entropy-demystified/" target="_blank">The previous article</a> should help you understand the entropy concept in case you are not already familiar with it.</p>
 <p><a href="https://en.wikipedia.org/wiki/Claude_Shannon" target="_blank">Claude Shannon</a> defined the entropy to calculate the minimum encoding size as he was looking for a way to efficiently send messages without losing any information.</p>
 <p><img src="images/information.png" class="img-fluid"></p>
 <p>As we will see below, there are various ways of expressing entropy.</p>
@@ -591,27 +591,31 @@ Aurélien Géron</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

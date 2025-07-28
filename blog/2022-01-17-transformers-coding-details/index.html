@@ -436,7 +436,7 @@ window.Quarto = {
 <p>The paper mentions that they multiply embedding values by the square root of the embedding dimension <code>dim_embed</code>.</p>
 <p>The embedding layer will transform the shape of an input batch from <code>(batch_size, max_sequence_length)</code> to <code>(batch_size, max_sequence_length, dim_embed)</code>.</p>
 <p>Note: we calculate <code>max_sequence_length</code> per batch. Then, we add padding to shorter sentences. The attention mechanism will ignore padded positions using a mask on this later.</p>
-<p>I’ve written <a href="../../blog/2021/2021-10-12-word-embedding-lookup/" target="_blank">an article on word embedding</a>, which you can read here to learn more about.</p>
+<p>I’ve written <a href="../../blog/2021-10-12-word-embedding-lookup/" target="_blank">an article on word embedding</a>, which you can read here to learn more about.</p>
 </section>
 <section id="positional-encoding" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="positional-encoding"><span class="header-section-number">2</span> Positional Encoding</h2>
@@ -514,7 +514,7 @@ window.Quarto = {
 <blockquote class="blockquote">
 we apply dropout to the sums of the embeddings and the positional encodings in both the encoder and decoder stacks. <cite>Section 5.4 Regularization from <a href="https://arxiv.org/abs/1706.03762" target="_blank">the paper</a></cite>
 </blockquote>
-<p>I’ve written an article on positional encoding, which you can read <a href="../../blog/2021/2021-10-31-transformers-positional-encoding/" target="_blank">here</a> for more details.</p>
+<p>I’ve written an article on positional encoding, which you can read <a href="../../blog/2021-10-31-transformers-positional-encoding/" target="_blank">here</a> for more details.</p>
 </section>
 <section id="scaled-dot-product-attention" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="scaled-dot-product-attention"><span class="header-section-number">3</span> Scaled Dot-Product Attention</h2>
@@ -603,7 +603,7 @@ we apply dropout to the sums of the embeddings and the positional encodings in b
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    subsequent_mask <span class="op">=</span> subsequent_mask.unsqueeze(<span class="dv">0</span>)</span>
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> src_pad_mask, tgt_pad_mask <span class="op">&amp;</span> subsequent_mask</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>I have written an article on the self-attention mechanism, which you can read <a href="../../blog/2021/2021-11-15-transformers-self-attention/" target="_blank">this article</a> for more details.</p>
+<p>I have written an article on the self-attention mechanism, which you can read <a href="../../blog/2021-11-15-transformers-self-attention/" target="_blank">this article</a> for more details.</p>
 </section>
 <section id="multi-head-attention" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="multi-head-attention"><span class="header-section-number">7</span> Multi-Head Attention</h2>
@@ -942,7 +942,7 @@ We apply dropout [33] to the output of each sub-layer, before it is added to the
 <span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> <span class="va">self</span>.decoder(x, x_mask, y, y_mask)</span>
 <span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.projection(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The last linear layer projects the embedding dimensions to the number of vocabulary. We can apply softmax on the projected values to assign a probability to each token index.</p>
-<p>Please look at <a href="../../blog/2021/2021-12-13-transformers-encoder-decoder/" target="_blank">this article</a> for more details of the encoder-decoder architecture.</p>
+<p>Please look at <a href="../../blog/2021-12-13-transformers-encoder-decoder/" target="_blank">this article</a> for more details of the encoder-decoder architecture.</p>
 </section>
 <section id="greedy-translator" class="level2" data-number="14">
 <h2 data-number="14" class="anchored" data-anchor-id="greedy-translator"><span class="header-section-number">14</span> Greedy Translator</h2>
@@ -1024,27 +1024,31 @@ Toan Q. Nguyen, Julian Salazar<br>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

@@ -416,7 +416,7 @@ y_i &amp;= f(\bar{a}_i + b_i)
 </section>
 <section id="swiglu-activation-function-palm" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="swiglu-activation-function-palm"><span class="header-section-number">1.2</span> SwiGLU Activation Function [PaLM]</h3>
-<p>The original Transformer architecture uses ReLU as the activation function in the feed-forward layer. In contrast, LLaMA uses <a href="../../blog/2023/2023-04-30-swiglu-2020" target="_blank">SwiGLU</a>, a variation of <a href="../../blog/2023/2023-04-23-glu-gated-linear-unit-2016-lm-with-gcns/" target="_blank">GLU</a> (Gated Linear Unit), to improve the performance of the feed-forward layer.</p>
+<p>The original Transformer architecture uses ReLU as the activation function in the feed-forward layer. In contrast, LLaMA uses <a href="../../blog/2023-04-30-swiglu-2020" target="_blank">SwiGLU</a>, a variation of <a href="../../blog/2023-04-23-glu-gated-linear-unit-2016-lm-with-gcns/" target="_blank">GLU</a> (Gated Linear Unit), to improve the performance of the feed-forward layer.</p>
 <p>SwiGLU is a variant of GLU, replacing the sigmoid activation function with Swish.</p>
 <p><span class="math display">\[
 \text{SwiGLU}(x) = \text{Swish}(xW) \otimes xV
@@ -577,7 +577,7 @@ Noam Shazeer</li>
 Jianlin Su, Yu Lu, Shengfeng Pan, Ahmed Murtadha, Bo Wen, and Yunfeng Liu</li>
 <li><a href="https://analyticsindiamag.com/metas-llama-leaked-to-the-public-thanks-to-4chan/" target="_blank">Meta’s LLaMA Leaked to the Public, Thanks To 4chan</a><br>
 Analytics India Magazine</li>
-<li><a href="../../blog/2023/2023-04-30-swiglu-2020/" target="_blank">SwiGLU: GLU Variants Improve Transformer (2020)</a></li>
+<li><a href="../../blog/2023-04-30-swiglu-2020/" target="_blank">SwiGLU: GLU Variants Improve Transformer (2020)</a></li>
 </ul>
 
 
@@ -585,27 +585,31 @@ Analytics India Magazine</li>
 
 </main> <!-- /main -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const linkSelectors = [
-        'a.nav-link',
-        'a.quarto-grid-link',
-        '.quarto-category a',
-        // Add more selectors here as needed
-    ];
-
-    function openLinksInNewTab() {
-        linkSelectors.forEach(selector => {
-            const links = document.querySelectorAll(selector);
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
     }
-    openLinksInNewTab();
 
-    // Start observing the entire document body and its descendants
-    const observer = new MutationObserver(openLinksInNewTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">
