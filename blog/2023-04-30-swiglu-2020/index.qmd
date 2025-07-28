@@ -1,0 +1,271 @@
+---
+title: "SwiGLU: GLU Variants Improve Transformer (2020)"
+subtitle: ReGLU, GEGLU, SwiGLU
+date: "2023-04-30"
+image: images/thumbnail.png
+categories:
+- Large Language Models
+---
+
+<img src="images/thumbnail.png" alt="GLU Variants Improve Transformer"/>
+
+Google's PaLM and Meta's LLaMA use **SwiGLU** to improve the performance of the **FFN** (position-wise feed-forward network) layers in the Transformer architecture.
+
+SwiGLU is one of the variants of Gated Linear Units (GLU) activation functions explored in the paper **GLU Variants Improve Transformer** by Noam Shazeer. He was with Google Brain at the time of the paper. He is one of the co-authors of the original Transformer paper. 
+
+He is also a significant contributor to Google's **LaMDA**, a project led by Daniel De Freitas. In November 2021, Noam Shazeer and Daniel De Freitas co-founded [Character.AI](https://character.ai), according to [his LinkedIn profile](https://www.linkedin.com/in/noam-shazeer-3b27288/). Moreover, LaMDA is the base dialog system of Google's **Bard**, rivaling OpenAI's **ChatGPT**.
+
+Note: they now (2023) use PaLM 2 (Pathways Language Model 2) as the base for Bard.
+
+He experimented with GLU variants as activation in FFN. He showed some variants produce better perplexities for the language tasks than the previous SOTA (state-of-the-art), like ReLU and GELU activation functions. 
+
+This article will explain the GLU variants experimented on in the paper, such as ReGLU, GEGLU, and SwiGLU.
+
+## FFN with ReLU Activation
+
+Transformer models alternate multi-head attention and FFN (position-wise feed-forward networks) layers. The FFN layers are in the encoder and decoder blocks of the Transformer architecture. For example, the encoder block below consists of a multi-head attention layer and an FFN layer.
+
+![Source: [Attention Is All You Need](https://arxiv.org/abs/1706.03762)](images/encoder.png){width="40%"}
+
+FFN layers are composed of two linear transformations with a non-linear activation function in between. 
+
+The original Transformer architecture uses the ReLU activation function.
+
+$$
+\text{FFN}(x, W_1, W_2, b_1, b_2) = \text{ReLU}(xW_1 + b_1) W_2 + b_2
+$$
+
+where $\text{ReLU}(x) = \max(0, x)$.
+
+In their experiments, they use no bias and call it FFN$_{\text{ReLU}}$. This simplification follows the approach by [the T5 paper](https://arxiv.org/pdf/1910.10683.pdf), in which Noam Shazeer is one of the co-authors.
+
+So the equations become:
+
+$$
+\text{FFN}_{\text{ReLU}}(x, W_1, W_2) = \text{ReLU}(xW_1) W_2
+$$
+
+Since the original Transformer paper, there have been proposals to replace ReLU with other activation functions. 
+
+## FFN with GELU Activation
+
+The paper [Gaussian Error Linear Units (GELUs)](https://arxiv.org/abs/1606.08415) proposes **GELU**, a smooth approximation of ReLU. 
+
+By looking at the chart below, we can see that GELU is a smooth approximation of ReLU.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+def gelu(x):
+   return x * norm.cdf(x)
+
+def relu(x):
+   return np.maximum(0, x)
+
+x_values = np.linspace(-5, 5, 500)
+y_values = gelu(x_values)
+
+gelu_values = gelu(x_values)
+relu_values = relu(x_values)
+
+plt.plot(x_values, gelu_values, label='GELU')
+plt.plot(x_values, relu_values, label='ReLU')
+plt.title("GELU and ReLU Activation Functions")
+plt.xlabel("x")
+plt.ylabel("Activation")
+plt.grid()
+plt.legend()
+plt.show()
+
+```
+
+It is a non-linear function that is differentiable everywhere.
+
+The FFN with GELU activation becomes:
+$$
+\text{FFN}_{\text{GELU}}(x, W_1, W_2) = \text{GELU}(xW_1) W_2
+$$
+
+where $\text{GELU}(x) = x \Phi(x)$ and $\Phi(x)$ is the cumulative distribution function of the standard normal distribution.
+
+Note: in the GELU paper, they use approximations of the cumulative distribution function (cdf) of the standard normal distribution for faster computation.
+
+## FFN with Swish Activation
+
+The paper [Swish: a Self-Gated Activation Function](https://arxiv.org/abs/1710.05941v1) proposes **Swish**, also a smooth version of ReLU with a non-zero gradient for negative values.
+
+The below chart shows that Swish is also a smooth approximation of ReLU.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+def gelu(x):
+   return x * norm.cdf(x)
+
+def relu(x):
+   return np.maximum(0, x)
+
+def swish(x, beta=1):
+   return x * (1 / (1 + np.exp(-beta * x)))
+
+x_values = np.linspace(-5, 5, 500)
+gelu_values = gelu(x_values)
+relu_values = relu(x_values)
+swish_values = swish(x_values)
+swish_values2 = swish(x_values, beta=0.5)
+
+plt.plot(x_values, gelu_values, label='GELU')
+plt.plot(x_values, relu_values, label='ReLU')
+plt.plot(x_values, swish_values, label='Swish')
+plt.plot(x_values, swish_values2, label='Swish (beta=0.5)')
+plt.title("GELU, ReLU, and Swish Activation Functions")
+plt.xlabel("x")
+plt.ylabel("Activation")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+As with GELU, it is a non-linear function that is differentiable everywhere. Swish has the beta parameter, which controls the shape of the function.
+
+So, the FFN with Swish activation becomes:
+
+$$
+\text{FFN}_{\text{Swish}}(x, W_1, W_2) = \text{Swish}_1(xW_1) W_2
+$$
+
+where $\text{Swish}_\beta(x) = x \sigma(\beta x)$.
+
+Note: they use $\beta = 1$ in their experiments.
+
+## GLU and Variants
+
+**GLU** (Gated Linear Units) is a neural network layer, not an activation function in the strict sense. It is a linear transformation followed by a gating mechanism. The gating mechanism is a sigmoid function that controls the flow of information from the linear transformation.
+
+$$
+\text{GLU}(x, W, V, b, c) = \sigma(xW + b) \otimes (xV + c)
+$$
+
+where $\sigma$ is the sigmoid function and $\otimes$ is the element-wise product. The sigmoid function is the gating mechanism, similar to the gates in LSTM.
+
+We can deﬁne GLU variants using other activation functions than the sigmoid function.
+
+### Bilinear activation
+
+The bilinear layer is a GLU variant that omits the sigmoid function. It is a bilinear transformation followed by an element-wise product.
+
+$$
+\text{Bilinear}(x, W, V, b, c) = (xW + b) \otimes (xV + c)
+$$
+
+### ReGLU activation
+
+ReGLU is a GLU variant that uses ReLU as the activation function.
+
+$$
+\text{ReGLU}(x, W, V, b, c) = \text{ReLU}(xW + b) \otimes (xV + c)
+$$
+
+### GEGLU activation
+
+GEGLU is a GLU variant that uses GELU as the activation function.
+
+$$
+\text{GEGLU}(x, W, V, b, c) = \text{GELU}(xW + b) \otimes (xV + c)
+$$
+
+### SwiGLU activation
+
+SwiGLU is a GLU variant that uses Swish as the activation function.
+
+$$
+\text{SwiGLU}(x,W, V, b, c) = \text{Swish}_1(xW + b) \otimes (xV + c)
+$$
+
+## FFN and GLU variants
+
+In the paper, they use the GLU variants without bias.
+
+$$
+\begin{aligned}
+\text{GLU}(x, W, V) &= \sigma(xW) \otimes xV \\\\
+\text{Bilinear}(x, W, V) &= xW \otimes xV \\\\
+\text{ReGLU}(x, W, V) &= \text{ReLU}(xW) \otimes xV \\\\
+\text{GEGLU}(x, W, V) &= \text{GELU}(xW) \otimes xV \\\\
+\text{SwiGLU}(x, W, V) &= \text{Swish}_1(xW) \otimes xV
+\end{aligned}
+$$
+
+And they use the GLU variants in the FFN layers.
+
+$$
+\begin{aligned}
+\text{FFN}_{\text{Bilinear}}(x, W, V, W_2) &= \text{Bilinear}(x, W, V) W_2 \\\\
+\text{FFN}_{\text{ReGLU}}(x, W, V, W_2) &= \text{ReGLU}(x, W, V) W_2 \\\\
+\text{FFN}_{\text{GEGLU}}(x, W, V, W_2) &= \text{GEGLU}(x, W, V) W_2 \\\\
+\text{FFN}_{\text{SwiGLU}}(x, W, V, W_2) &= \text{SwiGLU}(x, W, V) W_2
+\end{aligned}
+$$
+
+All these FFN layers have three weight matrices, $W$, $V$, and $W_2$, whereas the original FFN layer has two weight matrices, $W_1$ and $W_2$.
+
+To keep the number of parameters and the amount of the computation the same, they reduce the size of hidden units $d_{ff}$ (the second dimension of $W$ and $V$ and the ﬁrst dimension of $W_2$) by a factor of $\frac{2}{3}$. So, it makes the number of parameters in the three weight matrices comparable to the two-weight matrix version.
+
+## Experiments
+
+They use T5 (Text-to-Text Transfer Transformer) with the various FFN layers and compare the results with the original FFN layer.
+
+- The encoder and decoder each consist of 12 layers.
+- The embedding size is $d_{model} = 768$.
+- 12 attention heads with the key and query size of $d_k = d_v = 64$ (so, $d_{model} = 768 = 12 \times 64$).
+- $d_{ff} = 3072$ for the original FFN layer
+- $d_{ff} = 2048$ for the GLU variants
+
+### Pre-training Results
+
+Table 1 shows the results of pre-training. The GEGLU and SwiGLU variants produce the best perplexities and outperform the original FFN layer.
+
+![Table 1 of [the paper](https://arxiv.org/abs/2002.05202v1)](images/tab1.png)
+
+Note: the pre-training is identical to the one in the T5 paper, except that there is **no dropout** during pre-training as it produces better results.
+
+### Fine-tuning Results
+
+Table 2 shows the results of fine-tuning, benchmarked on GLUE. GLU variants outperform the original FFN layer on most tasks. As per the T5 paper, they use the dropout during fine-tuning.
+
+![Table 2 of [the paper](https://arxiv.org/abs/2002.05202v1)](images/tab2.png)
+
+The bottom two rows of the table show the results from the T5 paper in that the model is identical to $\text{FFN}_{\text{ReLU}}$ except for the use of **dropout** during pre-training. It shows that the use of dropout during pre-training is detrimental to performance. The last row is the inter-run standard deviations of the results.
+
+Table 3 shows the results of fine-tuning, benchmarked on SuperGLUE. The GLU variants outperform the original FFN layer on most tasks.
+
+![Table 3 of [the paper](https://arxiv.org/abs/2002.05202v1)](images/tab3.png)
+
+Table 4 shows the results of fine-tuning, benchmarked on SQuAD. Again, the GLU variants outperform the original FFN layer.
+
+![Table 4 of [the paper](https://arxiv.org/abs/2002.05202v1)](images/tab4.png)
+
+## Conclusion
+
+GLU variants outperform the original FFN layer on most tasks without any apparent computational drawbacks.
+
+It is probably due to the additional gating mechanism of GLU variants that allows the model to learn more complex functions and achieve better performance. However, the paper's author does not explain the reason for the better performance.
+
+<blockquote>
+We offer no explanation as to why these architectures seem to work; we attribute their success, as all else, to divine benevolence.
+<cite>Source: <a href="https://arxiv.org/abs/2002.05202v1">GLU Variants Improve Transformer</a></cite>
+</blockquote>
+
+The empirical results show that the FFNs with the GLU variants are better than the original FFN layer. As such, Google's PaLM and Meta's LLaMA use the SwiGLU variant instead of ReLU, GELU, and Swish activations.
+
+## References
+
+- [GLU Variants Improve Transformer](https://arxiv.org/abs/2002.05202v1) \
+   Noam Shazeer
+
+- [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/pdf/1910.10683.pdf) \
+   Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, Peter J. Liu
