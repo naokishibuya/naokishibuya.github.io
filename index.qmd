@@ -14,5 +14,6 @@ listing:
 page-layout: full
 format:
   html:
+    include-after-body: include-after-body.html
     katex: true
 ---

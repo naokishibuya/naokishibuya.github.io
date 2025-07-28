@@ -1,0 +1,24 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        'a.nav-link' // Added a.nav-link
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>

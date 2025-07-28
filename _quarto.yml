@@ -2,12 +2,16 @@ project:
   type: website
 
 website:
-  title: "Naoki Shibuya's Articles"
+  title: "Naoki Shibuya"
+  favicon: "favicon.png"
   navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
+    collapse: true
+    collapse-below: sm
+    right:
+      - icon: github
+        href: https://github.com/naokishibuya
+      - icon: linkedin
+        href: https://linkedin.com/in/naokishibuya
   page-footer:
     center: "© 2025, Naoki Shibuya"
 
