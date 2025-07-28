@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="BERT — Bidirectional Encoder Representation from Transformers: Pioneering Wonderful Large-Scale Pre-Trained Language Model Boom"/>
 
-BERT stands for **B**idirectional **E**ncoder **R**epresentations from **T**ransformers. As the name suggests, it generates representations using an encoder from Vaswani et al.’s [Transformer Architecture](/blog/2021/2021-12-13-transformers-encoder-decoder/). However, there are notable differences between BERT and the original Transformer, especially in how they train those models.
+BERT stands for **B**idirectional **E**ncoder **R**epresentations from **T**ransformers. As the name suggests, it generates representations using an encoder from Vaswani et al.’s [Transformer Architecture](/blog/2021-12-13-transformers-encoder-decoder/). However, there are notable differences between BERT and the original Transformer, especially in how they train those models.
 
 This article discusses the following:
 

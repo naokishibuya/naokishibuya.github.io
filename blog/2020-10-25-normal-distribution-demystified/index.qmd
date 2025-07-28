@@ -74,7 +74,7 @@ By using the uniform distribution, we tell the world that we are maximally ignor
 
 The question is how to express what we’ve said in mathematics.
 
-That is where the concept of [information entropy](/blog/2018/2018-07-24-entropy-demystified/) comes in.
+That is where the concept of [information entropy](/blog/2018-07-24-entropy-demystified/) comes in.
 
 ## Maximum Entropy Distribution with no Information
 

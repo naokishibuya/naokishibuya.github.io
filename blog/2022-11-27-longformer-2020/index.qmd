@@ -17,7 +17,7 @@ Longformer is an important work that influenced later works that must process lo
 
 ## Problem with Long Sequence
 
-The transformer is well-known for its [self-attention mechanism](/blog/2021/2021-11-15-transformers-self-attention/) in which each token in the input sequence refers to every token in the same sequence via dot-product operations. As such, the computation complexity in memory and space becomes $O(n^2)$, where n is the number of tokens.
+The transformer is well-known for its [self-attention mechanism](/blog/2021-11-15-transformers-self-attention/) in which each token in the input sequence refers to every token in the same sequence via dot-product operations. As such, the computation complexity in memory and space becomes $O(n^2)$, where n is the number of tokens.
 
 So, the computational complexity quadratically increases with the sequence length, which makes it very expensive to process long sequences. We could divide a long sequence into smaller chunks, but then we would lose the global context with the sequence, reducing the quality of the language task.
 
@@ -124,7 +124,7 @@ The memory usage of Longformer scales linearly with the sequence length, while t
 
 ### Performance Comparison
 
-Longformer outperforms [RoBERTa](/blog/2022/2022-02-21-roberta-robustly-optimized-bert-apporach/) on long document tasks using datasets like [WikiHop](https://arxiv.org/abs/1905.07374).
+Longformer outperforms [RoBERTa](/blog/2022-02-21-roberta-robustly-optimized-bert-apporach/) on long document tasks using datasets like [WikiHop](https://arxiv.org/abs/1905.07374).
 
 ![Table 7 of [the paper](https://arxiv.org/abs/2004.05150)](images/tab-7.png)
 
@@ -146,6 +146,6 @@ The below shows its effectiveness on the arXiv summarization dataset.
 
 ## References
 
-- [RoBERTa — Robustly optimized BERT approach](/blog/2022/2022-02-21-roberta-robustly-optimized-bert-apporach/)
+- [RoBERTa — Robustly optimized BERT approach](/blog/2022-02-21-roberta-robustly-optimized-bert-apporach/)
 - [Longformer: The Long-Document Transformer](https://arxiv.org/abs/2004.05150) \
 Iz Beltagy, Matthew E. Peters, Arman Cohan

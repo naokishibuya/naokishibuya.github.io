@@ -25,7 +25,7 @@ I’ll demystify it for you.
 
 ## An example constrained optimization problem
 
-If you are unfamiliar with constrained optimizations, I have written [an article](/blog/2020/2020-10-04-constrained-optimization-demystified/) that explains them. Otherwise, please read on.
+If you are unfamiliar with constrained optimizations, I have written [an article](/blog/2020-10-04-constrained-optimization-demystified/) that explains them. Otherwise, please read on.
 
 Suppose we have a mountain that looks like the one below:
 

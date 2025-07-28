@@ -177,10 +177,10 @@ So, finding such a position $(x, y)$ where the road and contour lines are parall
 
 To solve this mathematically, we need the concept of the Lagrange multiplier.
 
-If interested, please read [this article](/blog/2020/2020-10-04-lagrange-multiplier-demystified/) on the Lagrange multiplier.
+If interested, please read [this article](/blog/2020-10-04-lagrange-multiplier-demystified/) on the Lagrange multiplier.
 
 ## References
 
-- [Lagrange Multiplier Demystified](/blog/2020/2020-10-04-lagrange-multiplier-demystified/)
+- [Lagrange Multiplier Demystified](/blog/2020-10-04-lagrange-multiplier-demystified/)
 - [Constrained optimization introduction](https://www.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/lagrange-multipliers-and-constrained-optimization/v/constrained-optimization-introduction) \
   Khan Academy

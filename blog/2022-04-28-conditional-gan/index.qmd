@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="CGAN (Conditional GAN): Specify What Images To Generate With 1 Simple Yet Powerful Change"/>
 
-[GAN](/blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) and [DCGAN](/blog/2022/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/) generate random images. As such, we have almost no control over what images to generate. However, CGAN can let us specify a condition so that we can tell it what images to generate. The trick is to convert label values into feature vectors using a learnable layer so the generator can learn what image to generate. The discriminator also takes advantage of label conditions. It may not be clear to you at this stage but don't worry. This article will teach how the whole thing works in a simple code.
+[GAN](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) and [DCGAN](/blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/) generate random images. As such, we have almost no control over what images to generate. However, CGAN can let us specify a condition so that we can tell it what images to generate. The trick is to convert label values into feature vectors using a learnable layer so the generator can learn what image to generate. The discriminator also takes advantage of label conditions. It may not be clear to you at this stage but don't worry. This article will teach how the whole thing works in a simple code.
 
 ## Python Environment Setup
 
@@ -117,7 +117,7 @@ class Reshape(nn.Module):
 
 ## Generator Network Definition
 
-The generator is similar to the DCGAN generator we used in [this article](/blog/2022/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/). As before, we generate random value vectors and use a fully-connected layer to increase the dimensions to 784. We also use the Conditional layer to convert input labels into feature vectors of 784 dimensions. Then, we sum random vectors and label features. It is an element-wise addition operation. We can do that because the random value and label feature vectors have the same number of elements.
+The generator is similar to the DCGAN generator we used in [this article](/blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/). As before, we generate random value vectors and use a fully-connected layer to increase the dimensions to 784. We also use the Conditional layer to convert input labels into feature vectors of 784 dimensions. Then, we sum random vectors and label features. It is an element-wise addition operation. We can do that because the random value and label feature vectors have the same number of elements.
 
 The generator network processes the sum of random value vectors and label feature vectors to generate random images for specified label classes. Let's see how we integrate the `Condition` class into the DCGAN generator class.
 

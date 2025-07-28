@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="DistilBERT — distilled version of BERT: A Tiny BERT with Great Performance – 97% of the Original"/>
 
-In 2019, the team at Hugging Face released a model based on [BERT](/blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/) that was 40% smaller and 60% faster while retaining 97% of the language understanding capability. They called it DistilBERT.
+In 2019, the team at Hugging Face released a model based on [BERT](/blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/) that was 40% smaller and 60% faster while retaining 97% of the language understanding capability. They called it DistilBERT.
 
 ## How Small Is DistilBERT?
 

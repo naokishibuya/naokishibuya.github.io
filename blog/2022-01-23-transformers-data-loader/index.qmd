@@ -10,7 +10,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="Transformer Data Loader: To Make Writing A Training Loop Simple"/>
 
-[The previous article](/blog/2022/2022-01-17-transformers-coding-details/) discussed my simple implementation of the transformer architecture from [Attention Is All You Need](https://arxiv.org/abs/1706.03762) by Ashish Vaswani et al.
+[The previous article](/blog/2022-01-17-transformers-coding-details/) discussed my simple implementation of the transformer architecture from [Attention Is All You Need](https://arxiv.org/abs/1706.03762) by Ashish Vaswani et al.
 
 This article discusses the implementation of a data loader in detail:
 
@@ -181,7 +181,7 @@ We want to convert each token text into a unique integer (token ID). We use toke
 
 ![Words to token IDs](images/word-to-id.png){width="75%"}
 
-You can read more about word-embedding look-up in [this article](/blog/2021/2021-10-12-word-embedding-lookup/).
+You can read more about word-embedding look-up in [this article](/blog/2021-10-12-word-embedding-lookup/).
 
 So, we need to build a map between token texts and token IDs.
 
@@ -277,7 +277,7 @@ EOS = '<eos>' # End of sentence
 SPECIAL_TOKENS = [UNK, PAD, SOS, EOS]
 ```
 
-You can read more details about the special characters in [this article](/blog/2021/2021-12-13-transformers-encoder-decoder/).
+You can read more details about the special characters in [this article](/blog/2021-12-13-transformers-encoder-decoder/).
 
 So, we combine the special tokens with the list of unique token texts and build a map of token texts and token IDs:
 
@@ -418,7 +418,7 @@ Then, we create a source mask and target mask:
 source_mask, target_mask = create_masks(source_batch, target_batch)
 ```
 
-For the details of `create_masks`, please look at [this article](/blog/2022/2022-01-17-transformers-coding-details/).
+For the details of `create_masks`, please look at [this article](/blog/2022-01-17-transformers-coding-details/).
 
 At the end of `collate_fn`, we move all batches and masks to the target device:
 

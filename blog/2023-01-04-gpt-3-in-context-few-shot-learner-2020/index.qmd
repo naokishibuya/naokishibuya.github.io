@@ -35,7 +35,7 @@ In the paper, they use __in-context learning__ to make their model learn by exam
 
 The outer loop refers to the unsupervised pre-training where the model acquires language skills. On the other hand, the inner loop occurs when we feed forward a sequence of examples to the model, which learns the context from the sequence to predict what comes next. It is like a human reading a sequence of examples and thinking about the next instance. As the model uses the language skills learned during the pre-training phase to learn the context given in the sequence, no neural network parameter updates are involved in this learning phase. They call it in-context learning.
 
-The diagram's first (left-most) example provides a context for performing arithmetic addition. Then, the second (middle) demonstrates how to correct spelling mistakes. The last (right-most) provides examples of English-to-French word translations. Given the respective context, the model must learn how to perform the intended task. They tried this approach with [GPT-2](/blog/2022/2022-12-30-gpt-2-2019/), but the result wasn't good enough to be a practical method of solving language tasks. 
+The diagram's first (left-most) example provides a context for performing arithmetic addition. Then, the second (middle) demonstrates how to correct spelling mistakes. The last (right-most) provides examples of English-to-French word translations. Given the respective context, the model must learn how to perform the intended task. They tried this approach with [GPT-2](/blog/2022-12-30-gpt-2-2019/), but the result wasn't good enough to be a practical method of solving language tasks. 
 
 Since then, however, they saw a growing trend in the capacity of transformer language models in terms of the number of parameters, bringing improvements to text generation and other downstream NLP tasks. They hypothesized that in-context learning would show similarly substantial gains with scale.
 
@@ -93,8 +93,8 @@ OpenAI uses GPT-3's text generation capability for OpenAI Codex, which translate
 
 ## References
 
-- [GPT: Generative Pre-Trained Transformer (2018)](/blog/2022/2022-12-26-gpt-generative-pre-training-transformer-2018/)
-- [GPT-2: Too Dangerous To Release (2019)](/blog/2022/2022-12-30-gpt-2-2019/)
+- [GPT: Generative Pre-Trained Transformer (2018)](/blog/2022-12-26-gpt-generative-pre-training-transformer-2018/)
+- [GPT-2: Too Dangerous To Release (2019)](/blog/2022-12-30-gpt-2-2019/)
 - [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) OpenAI
 - [How does in-context learning work?](https://ai.stanford.edu/blog/understanding-incontext/) \
   A framework for understanding the differences from traditional supervised learning \

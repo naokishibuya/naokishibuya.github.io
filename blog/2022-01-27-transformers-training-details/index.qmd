@@ -10,7 +10,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="Transformer Training Details: Optimizer, Scheduler, Loss Function"/>
 
-[The previous article](/blog/2022/2022-01-23-transformers-data-loader/) discussed the implementation of a data loader for training a model based on the transformer architecture from [Attention Is All You Need](https://arxiv.org/abs/1706.03762) by Ashish Vaswani et al.
+[The previous article](/blog/2022-01-23-transformers-data-loader/) discussed the implementation of a data loader for training a model based on the transformer architecture from [Attention Is All You Need](https://arxiv.org/abs/1706.03762) by Ashish Vaswani et al.
 
 This article discusses Transformer training details with the following details:
 
@@ -170,7 +170,7 @@ During training, we employed label smoothing of value ls = 0.1 [36]. This hurts 
 <cite>[Attention is All You Need]()
 </blockquote>
 
-For details of the BLEU score, please look at [this article](/blog/2021/2021-10-20-bleu-bi-lingual-evaluation-understudy/).
+For details of the BLEU score, please look at [this article](/blog/2021-10-20-bleu-bi-lingual-evaluation-understudy/).
 
 ## Transformer Training Loop
 
@@ -210,7 +210,7 @@ def train(model: nn.Module,
     return avg_loss
 ```
 
-We load the training dataset with `split = 'train'` and pass it to the train function. Please look at [this article](/blog/2022/2022-01-23-transformers-data-loader/) for the details of the data loader.
+We load the training dataset with `split = 'train'` and pass it to the train function. Please look at [this article](/blog/2022-01-23-transformers-data-loader/) for the details of the data loader.
 
 For evaluation, we set the model to the eval mode by `model.eval()`, and also, we don’t need gradients as we have no optimization step.
 
@@ -336,7 +336,7 @@ English    : A Boston Terrier is running on lush green grass in front of a white
 Translation: A rodeo athlete runs across the grass.
 </pre>
 
-I’ll write about the translator in [the next article](/blog/2022/2022-01-31-transformers-evaluation-details/)
+I’ll write about the translator in [the next article](/blog/2022-01-31-transformers-evaluation-details/)
 
 ## References
 

@@ -826,4 +826,4 @@ Congratulations! You've made it this far. I hope you've enjoyed it!
   Wikipedia
 - [Moore Penrose inverse](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) \
   Wikipedia
-- [Up-sampling with Transposed Convolution](/blog/2017/2017-11-14-up-sampling-with-transposed-convolution/)
+- [Up-sampling with Transposed Convolution](/blog/2017-11-14-up-sampling-with-transposed-convolution/)

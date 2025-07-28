@@ -48,7 +48,7 @@ The embedding layer will transform the shape of an input batch from `(batch_size
 
 Note: we calculate `max_sequence_length` per batch. Then, we add padding to shorter sentences. The attention mechanism will ignore padded positions using a mask on this later.
 
-I’ve written [an article on word embedding](/blog/2021/2021-10-12-word-embedding-lookup/), which you can read here to learn more about.
+I’ve written [an article on word embedding](/blog/2021-10-12-word-embedding-lookup/), which you can read here to learn more about.
 
 ## Positional Encoding
 
@@ -138,7 +138,7 @@ we apply dropout to the sums of the embeddings and the positional encodings in b
 <cite>Section 5.4 Regularization from [the paper](https://arxiv.org/abs/1706.03762)</cite>
 </blockquote>
 
-I’ve written an article on positional encoding, which you can read [here](/blog/2021/2021-10-31-transformers-positional-encoding/) for more details.
+I’ve written an article on positional encoding, which you can read [here](/blog/2021-10-31-transformers-positional-encoding/) for more details.
 
 ## Scaled Dot-Product Attention
 
@@ -255,7 +255,7 @@ def create_masks(src_batch: Tensor, tgt_batch: Tensor) -> Tuple[Tensor, Tensor]:
     return src_pad_mask, tgt_pad_mask & subsequent_mask
 ```
 
-I have written an article on the self-attention mechanism, which you can read [this article](/blog/2021/2021-11-15-transformers-self-attention/) for more details.
+I have written an article on the self-attention mechanism, which you can read [this article](/blog/2021-11-15-transformers-self-attention/) for more details.
 
 ## Multi-Head Attention
 
@@ -638,7 +638,7 @@ class Transformer(nn.Module):
 
 The last linear layer projects the embedding dimensions to the number of vocabulary. We can apply softmax on the projected values to assign a probability to each token index.
 
-Please look at [this article](/blog/2021/2021-12-13-transformers-encoder-decoder/) for more details of the encoder-decoder architecture.
+Please look at [this article](/blog/2021-12-13-transformers-encoder-decoder/) for more details of the encoder-decoder architecture.
 
 ## Greedy Translator
 

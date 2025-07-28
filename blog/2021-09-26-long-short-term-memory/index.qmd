@@ -282,7 +282,7 @@ $$
 
 Note: for $\tanh$, $\gamma$ is 1. For $\text{sigmoid}$, $\gamma$ is $\frac{1}{4}$. For ReLU, $\gamma$ is 1.
 
-Let’s also define the absolute value of the largest [eigenvalue](/blog/2021/2021-08-31-matrix-decomposition-demystified/) of the weight matrix $W_h$ as $\lambda$ to see the conditions for the vanishing and exploding gradients based on how $\gamma$ and $\lambda$ affect the following Jacobian matrix:
+Let’s also define the absolute value of the largest [eigenvalue](/blog/2021-08-31-matrix-decomposition-demystified/) of the weight matrix $W_h$ as $\lambda$ to see the conditions for the vanishing and exploding gradients based on how $\gamma$ and $\lambda$ affect the following Jacobian matrix:
 
 $$
 \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} = \text{diag}\Biggl( a'\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)\Biggr) W_h
@@ -387,7 +387,7 @@ $$
 \end{aligned}
 $$
 
-We call the whole thing an LSTM cell (or block). We can replace the basic RNN hidden state calculation with an LSTM cell to form a complete recurrent neural network. Some RNN patterns are explained in [the previous article](/blog/2021/2021-09-20-recurrent-neural-networks/), where we can drop the LSTM cell in.
+We call the whole thing an LSTM cell (or block). We can replace the basic RNN hidden state calculation with an LSTM cell to form a complete recurrent neural network. Some RNN patterns are explained in [the previous article](/blog/2021-09-20-recurrent-neural-networks/), where we can drop the LSTM cell in.
 
 Now that we understand how LSTM works, we want to examine BPTT to see how gradients flow through the cell states.
 
@@ -443,7 +443,7 @@ For example, PyTorch has [torch.nn.utils.clip\_grad\_norm\_](https://pytorch.org
 
 ## References
 
-- [Recurrent Neural Networks](/blog/2021/2021-09-20-recurrent-neural-networks/)
+- [Recurrent Neural Networks](/blog/2021-09-20-recurrent-neural-networks/)
 - [Learning Long-Term Dependencies with Gradient Descent is Difficult](https://ieeexplore.ieee.org/document/279181) \
   Yoshua Bengio, Patrice Simard, Paolo Frasconi
 - [On the difficulty of training recurrent neural networks](https://arxiv.org/abs/1211.5063) \

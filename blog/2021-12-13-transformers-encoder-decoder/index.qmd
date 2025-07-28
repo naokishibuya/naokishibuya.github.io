@@ -10,7 +10,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture"/>
 
-In 2017, Vaswani et al. published a paper titled [Attention Is All You Need](https://arxiv.org/abs/1706.03762) for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than [RNN encoder-decoder](/blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/) models, which were mainstream.
+In 2017, Vaswani et al. published a paper titled [Attention Is All You Need](https://arxiv.org/abs/1706.03762) for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than [RNN encoder-decoder](/blog/2021-09-29-neural-machine-translation-with-attention-mechanism/) models, which were mainstream.
 
 The transformer architecture is the basis for recent well-known models like [BERT](https://arxiv.org/abs/1810.04805) and [GPT-3](https://openai.com/blog/gpt-3-apps/). Researchers have already applied the transformer architecture in [Computer Vision](https://arxiv.org/abs/2010.11929) and [Reinforcement Learning](https://arxiv.org/abs/2106.01345). So, understanding the transformer architecture is crucial if you want to know where machine learning is heading.
 
@@ -66,11 +66,11 @@ These tokens are typically integer indices in a vocabulary dataset. So, it may b
 
 The number 8667 corresponds to the token `Hello` in this example. It may also contain special characters like `<EOS>` (end-of-sentence marker). It depends on your tokenizer and vocabulary dataset. If you use a model from [Hugging Face](https://huggingface.co), there is a specific tokenizer for the model handling such details. If you build a model from scratch, you’d need to decide how to tokenize a sentence, set up a vocabulary dataset, and assign an index to each token.
 
-To feed those tokens into the neural network, we convert each token into an embedding vector, a common practice in neural machine translation and other natural language models. In the paper, they use a 512-dimensional vector for such embedding. So, if the maximum length of a sentence is 200, the shape of every sentence will be (200, 512). The transformer learns those embeddings from scratch during training. If you are unfamiliar with word embeddings, please look at [this article](/blog/2021/2021-10-12-word-embedding-lookup/).
+To feed those tokens into the neural network, we convert each token into an embedding vector, a common practice in neural machine translation and other natural language models. In the paper, they use a 512-dimensional vector for such embedding. So, if the maximum length of a sentence is 200, the shape of every sentence will be (200, 512). The transformer learns those embeddings from scratch during training. If you are unfamiliar with word embeddings, please look at [this article](/blog/2021-10-12-word-embedding-lookup/).
 
 ![](images/input-embedding.png)
 
-Moreover, with the transformer, we inject __positional encoding__ into each embedding so that the model can know word positions without recurrence. For the details of the positional encoding, please look at [this article](/blog/2021/2021-10-31-transformers-positional-encoding/).
+Moreover, with the transformer, we inject __positional encoding__ into each embedding so that the model can know word positions without recurrence. For the details of the positional encoding, please look at [this article](/blog/2021-10-31-transformers-positional-encoding/).
 
 The point here is that an input to the transformer is not the characters of the input text but a sequence of embedding vectors. Each vector represents the semantics and position of a token. The encoder performs linear algebra operations on those vectors to extract the contexts for each token from the entire sentence and enrich the embedding vectors with helpful information for the target task through the multiple encoder blocks.
 
@@ -130,7 +130,7 @@ So, we only need to discuss the internals of the encoder and the decoder to unde
 
 The encoder block uses the __self-attention mechanism__ to enrich each token (embedding vector) with contextual information from the whole sentence.
 
-Depending on the surrounding tokens, each token may have more than one semantic and/or function. Hence, the self-attention mechanism employs multiple heads (eight parallel attention calculations) so that the model can tap into different embedding subspaces. For details on the self-attention mechanism, please refer to [this article](/blog/2021/2021-11-15-transformers-self-attention/).
+Depending on the surrounding tokens, each token may have more than one semantic and/or function. Hence, the self-attention mechanism employs multiple heads (eight parallel attention calculations) so that the model can tap into different embedding subspaces. For details on the self-attention mechanism, please refer to [this article](/blog/2021-11-15-transformers-self-attention/).
 
 ![](images/encoder-multi-head-attention.png)
 

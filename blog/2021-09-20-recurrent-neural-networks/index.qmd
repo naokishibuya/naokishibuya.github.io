@@ -242,13 +242,13 @@ Note: we pass the label output (instead of the predicted output) to the next ste
 
 One issue with seq2seq models is that the encoder must push all information into one hidden state vector for the decoder to start generating quality outputs. But the decoder may want to focus on different hidden states from the encoder to generate each output.
 
-The [attention mechanism](/blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/) solves the problem by allowing the decoder to access any hidden states from the encoder based on what it needs to pay attention to.
+The [attention mechanism](/blog/2021-09-29-neural-machine-translation-with-attention-mechanism/) solves the problem by allowing the decoder to access any hidden states from the encoder based on what it needs to pay attention to.
 
 To be continued.
 
 ## References
 
-- [Long Short-Term Memory](/blog/2021/2021-09-26-long-short-term-memory/)
+- [Long Short-Term Memory](/blog/2021-09-26-long-short-term-memory/)
 - [Sequence to Sequence Learning with Neural Networks](https://arxiv.org/abs/1409.3215) \
   Ilya Sutskever, Oriol Vinyals, Quoc V. Le
 - [Recurrent neural network](https://en.wikipedia.org/wiki/Recurrent_neural_network) \

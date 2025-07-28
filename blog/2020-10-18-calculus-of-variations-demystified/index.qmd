@@ -415,5 +415,5 @@ I hope you have a clearer idea about the calculus of variations now.
 
 ## References
 
-- [Constrained Optimization Demystified](/blog/2020/2020-10-04-constrained-optimization-demystified/)
+- [Constrained Optimization Demystified](/blog/2020-10-04-constrained-optimization-demystified/)
 - [Introduction to Calculus of Variations (Faculty of Khan)](https://youtu.be/6HeQc7CSkZs)

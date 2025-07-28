@@ -329,7 +329,7 @@ However, many of them are variations of the core activation functions.
 
 ## References
 
-- [Gradient Descent Optimizers](/blog/2021/2021-08-29-gradient-descent-optimizers/)
+- [Gradient Descent Optimizers](/blog/2021-08-29-gradient-descent-optimizers/)
 - [Eigenvalues of covariance matrices: Application to neural-network learning](http://yann.lecun.com/exdb/publis/pdf/lecun-kanter-solla-91.pdf) \
   Yann Le Cunn, Ido Kanter, Sara A. Solla
 - [Rectified Linear Units Improve Restricted Boltzmann Machines](https://www.cs.toronto.edu/~fritz/absps/reluICML.pdf) \

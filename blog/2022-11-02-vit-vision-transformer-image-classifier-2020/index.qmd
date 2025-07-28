@@ -30,7 +30,7 @@ $$
 According to the paper, ViT does the following:
 
 - ViT uses a trainable linear project to map flattened patches from P^2 C to P^2 D, where D is an embedding vector size that the Transformer Encoder uses throughout its layers. They call them "**patch embeddings**"".
-- ViT prepends a learnable embedding (similar to [BERT’s [CLS]](/blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/)), and the final hidden state of that is the aggregate representation of image patches used for classification tasks.
+- ViT prepends a learnable embedding (similar to [BERT’s [CLS]](/blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/)), and the final hidden state of that is the aggregate representation of image patches used for classification tasks.
 - ViT adds 1D position embeddings (learned) to the patch embedding to retain positional information. They didn’t use more advanced 2D position embeddings as they did not observe better performance gains.
 
 In [the official implementation](https://github.com/google-research/vision_transformer/blob/60104c1e50b9847c0b476ed783b4e84dbc64e77a/vit_jax/models_vit.py#L259) (below), they use a convolution layer with kernel size = patch size (say, 16 for 16 x 16), strides to the same size (= 16), and the output channels (features) to the hidden size (D). In other words, the convolution layer creates a grid of embeddings that is flattened later.
@@ -85,8 +85,8 @@ Finally, the author mentions that further scaling (to billions of parameters) of
 
 ## References
 
-- [Transformer's Encoder-Decoder](/blog/2021/2021-12-13-transformers-encoder-decoder/)
-- [BERT — Bidirectional Encoder Representation from Transformers](/blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/)
+- [Transformer's Encoder-Decoder](/blog/2021-12-13-transformers-encoder-decoder/)
+- [BERT — Bidirectional Encoder Representation from Transformers](/blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/)
 - [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929) \
    Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, Neil Houlsby
 - [Big Transfer (BiT): General Visual Representation Learning](https://arxiv.org/abs/1912.11370) \

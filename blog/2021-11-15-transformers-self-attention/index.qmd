@@ -10,7 +10,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="Transformer’s Self-Attention: Why Is Attention All You Need?"/>
 
-In 2017, Vaswani et al. published a paper titled [Attention Is All You Need](https://arxiv.org/abs/1706.03762) for the NeurIPS conference. [The transformer architecture](/blog/2021/2021-12-13-transformers-encoder-decoder/) does not use recurrence or convolution. It solely relies on attention mechanisms.
+In 2017, Vaswani et al. published a paper titled [Attention Is All You Need](https://arxiv.org/abs/1706.03762) for the NeurIPS conference. [The transformer architecture](/blog/2021-12-13-transformers-encoder-decoder/) does not use recurrence or convolution. It solely relies on attention mechanisms.
 
 In this article, we discuss the attention mechanisms in the transformer:
 

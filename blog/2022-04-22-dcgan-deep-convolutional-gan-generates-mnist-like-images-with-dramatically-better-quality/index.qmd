@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="DCGAN (Deep Convolutional GAN) Generates MNIST-like Images with Dramatically Better Quality"/>
 
-In this article, we incorporate the idea from DCGAN to improve the simple GAN model that we trained in [the previous article](/blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/). Just like before, we will implement DCGAN step by step.
+In this article, we incorporate the idea from DCGAN to improve the simple GAN model that we trained in [the previous article](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/). Just like before, we will implement DCGAN step by step.
 
 ## DCGAN - Our Reference Model
 
@@ -94,7 +94,7 @@ class Generator(nn.Module):
         return x
 ```
 
-Like DCGAN, we are using [ConvTranspose2d](/blog/2017/2017-11-14-up-sampling-with-transposed-convolution/) to expand image size from 7x7 to 28x28. `ConvTranspose2d` layers have learnable parameters we train through GAN training. As such, the transposed convolution layers help expand image size and generate better-quality images. We have Batch Normalization to speed up the learning process. For reshaping, we prepare the following helper class.
+Like DCGAN, we are using [ConvTranspose2d](/blog/2017-11-14-up-sampling-with-transposed-convolution/) to expand image size from 7x7 to 28x28. `ConvTranspose2d` layers have learnable parameters we train through GAN training. As such, the transposed convolution layers help expand image size and generate better-quality images. We have Batch Normalization to speed up the learning process. For reshaping, we prepare the following helper class.
 
 ```python
 # Reshape helper
@@ -121,7 +121,7 @@ With these arrangements, the updated generator generates greyscale images of 28x
 
 ## Discriminator Network with Convolutions
 
-The discriminator network from [the previous article](/blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) was very simple.
+The discriminator network from [the previous article](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) was very simple.
 
 ```python
 # Discriminator network
@@ -182,7 +182,7 @@ We use `Conv2d` to shrink image size from 1x28x28 to 16x7x7, extracting features
 
 ## The Entire DCGAN Code
 
-The DCGAN implementation is mostly the same as [the previous article](/blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) except for `Generator` and `Discriminator` definitions. I also adjusted the learning rate for the generator slightly higher this time which seems to work better. 
+The DCGAN implementation is mostly the same as [the previous article](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) except for `Generator` and `Discriminator` definitions. I also adjusted the learning rate for the generator slightly higher this time which seems to work better. 
 
 ```python
 import numpy as np
@@ -397,7 +397,7 @@ In the above source code, I commented out the line that enables the discriminato
 
 ### Epoch 1
 
-[The previous version](/blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) generated the below images after the first epoch.
+[The previous version](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) generated the below images after the first epoch.
 
 ![Epoch 1 (the previous version)](images/generated-old-1.jpg)
 
@@ -441,7 +441,7 @@ The quality of images dramatically improved. I can not tell if the above images 
 
 ## References
 
-- [Fashion GAN: Generating Colorful Fashion Images with DCGAN](/blog/2022/2022-04-22-generating-fashion-images-with-dcgan/)
+- [Fashion GAN: Generating Colorful Fashion Images with DCGAN](/blog/2022-04-22-generating-fashion-images-with-dcgan/)
 - [PyTorch - DCGAN TUTORIAL](https://pytorch.org/tutorials/beginner/dcgan\_faces\_tutorial.html) \
   Nathan Inkawhich
 - [Why don’t we put models in .train() or .eval() modes in DCGAN example](https://discuss.pytorch.org/t/why-dont-we-put-models-in-train-or-eval-modes-in-dcgan-example/7422)

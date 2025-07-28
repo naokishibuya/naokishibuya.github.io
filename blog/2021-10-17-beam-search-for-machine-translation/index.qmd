@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="Beam Search for Machine Translation: How Greedy, Exhaustive, and Beam Search Algorithms Work"/>
 
-Beam search is a heuristic technique for choosing the most likely output used by probabilistic sequence models like [neural machine translation](/blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/).
+Beam search is a heuristic technique for choosing the most likely output used by probabilistic sequence models like [neural machine translation](/blog/2021-09-29-neural-machine-translation-with-attention-mechanism/).
 
 Machine translation is fundamentally multi-label learning where we have multiple plausible answers, yet the model must pick the best possible translation.
 
@@ -33,7 +33,7 @@ For example, in an English-to-French machine translation, the encoder processes 
 
 Note: `<SOS>` is a special character indicating the start of a sentence. The decoder receives it as the first input along with the vector $\boldsymbol{x}$.
 
-For simplicity, we are not showing any attention mechanism or other details like [word embedding](/blog/2021/2021-10-12-word-embedding-lookup/). Such details won’t change anything about how beam search works. Our discussion focuses on the method of choosing an output given the list of output probabilities.
+For simplicity, we are not showing any attention mechanism or other details like [word embedding](/blog/2021-10-12-word-embedding-lookup/). Such details won’t change anything about how beam search works. Our discussion focuses on the method of choosing an output given the list of output probabilities.
 
 In the above diagram, given the input English sentence “Hello, world!”, the output probabilities for the first French word are 60% for “Bonjour”, 30% for “Salut”, and so on. If the output vocabulary includes 100,000 items (words and special characters), there will be 100,000 output probabilities.
 

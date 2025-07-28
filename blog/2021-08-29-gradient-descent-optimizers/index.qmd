@@ -393,7 +393,7 @@ $$
 
 ## References
 
-- [Vanishing Gradient Problem](/blog/2021/2021-08-15-vanishing-gradient-problem/)
+- [Vanishing Gradient Problem](/blog/2021-08-15-vanishing-gradient-problem/)
 - [Adaptive Subgradient Methods for Online Learning and Stochastic Optimization (2011)](https://jmlr.org/papers/v12/duchi11a.html) \
   John Duchi, Elad Hazan, Yoram Singer
 - [Neural Networks for Machine Learning: Lecture 6a Overview of mini-batch gradient descent (2012)](http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf) \

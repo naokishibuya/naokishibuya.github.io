@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="RoBERTa — Robustly optimized BERT approach: Better than XLNet without Architectural Changes to the Original BERT"/>
 
-RoBERTa's base is [BERT](/blog/2022/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/). So, let's quickly review the history before explaining what RoBERTa is all about.
+RoBERTa's base is [BERT](/blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/). So, let's quickly review the history before explaining what RoBERTa is all about.
 
 In 2018, Jacob Devlin et al. (Google AI Language) released BERT, which achieved state-of-the-art results on nine NLP tasks, inspiring other researchers to develop further improvements. Soon, newer models superseded the original BERT models. At least, that was how it looked.
 

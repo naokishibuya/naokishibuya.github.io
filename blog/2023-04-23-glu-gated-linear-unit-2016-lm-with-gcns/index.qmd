@@ -160,10 +160,10 @@ However, softmax is often computationally inefficient for large vocabulary sizes
 
 ![Softmax is inefficient for large vocabulary size](images/softmax.png)
 
-As such, the model applies an [adaptive softmax](/blog/2023/2023-04-12-adaptive-softmax-2016/) layer to the output of the last residual block.
+As such, the model applies an [adaptive softmax](/blog/2023-04-12-adaptive-softmax-2016/) layer to the output of the last residual block.
 
 ## References
 - [Language Modeling with Gated Convolutional Networks](https://arxiv.org/abs/1612.08083) \
   Yann N. Dauphin, Angela Fan, Michael Auli, David Grangier \
   [video](https://vimeo.com/238222385)
-- [Adaptive Softmax](/blog/2023/2023-04-12-adaptive-softmax-2016/)
+- [Adaptive Softmax](/blog/2023-04-12-adaptive-softmax-2016/)

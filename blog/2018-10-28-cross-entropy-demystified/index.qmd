@@ -19,7 +19,7 @@ So, let’s review the entropy formula.
 
 ## Review of Entropy&nbsp;Formula
 
-[The previous article](/blog/2018/2018-07-24-entropy-demystified/) should help you understand the entropy concept in case you are not already familiar with it.
+[The previous article](/blog/2018-07-24-entropy-demystified/) should help you understand the entropy concept in case you are not already familiar with it.
 
 [Claude Shannon](https://en.wikipedia.org/wiki/Claude_Shannon) defined the entropy to calculate the minimum encoding size as he was looking for a way to efficiently send messages without losing any information.
 

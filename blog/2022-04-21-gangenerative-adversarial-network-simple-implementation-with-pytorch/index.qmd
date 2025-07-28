@@ -312,7 +312,7 @@ def calculate_loss(images: torch.Tensor, targets: torch.Tensor):
 
 ### Training Loop
 
-We use [Adam](/blog/2021/2021-08-29-gradient-descent-optimizers/#adam) optimizer.
+We use [Adam](/blog/2021-08-29-gradient-descent-optimizers/#adam) optimizer.
 
 ```python
 from torch.nn import functional as F
@@ -566,7 +566,7 @@ We only used simple networks so we could add more layers to make the networks mo
 
 We might (perhaps) be able to adjust learning rates to make the networks learn faster. Changing learning rates can significantly impact how the networks learn, for better or worse. We can also try other optimizers to see how they work. If so, we could draw loss curves and compare how different optimizer affects learning progresses.
 
-Or try the updated version in [this article](/blog/2022/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/).
+Or try the updated version in [this article](/blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/).
 
 ## References
 

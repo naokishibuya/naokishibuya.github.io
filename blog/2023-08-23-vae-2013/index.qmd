@@ -168,7 +168,7 @@ Neural networks can handle high-dimensional spaces and large datasets using tech
 
 But how can we define a loss function to achieve efficient learning?
 
-That is where the [Kullback-Leibler (KL) divergence](/blog/2018/2018-11-06-kl-divergence-demystified/) comes into play, which measures how one probability distribution differs from another. As we want to make our Q<sub>ϕ</sub>(z∣x) closer to the true posterior P(z∣x), we should aim to minimize the KL divergence between the two distributions, which we can include in our loss function as a regularization term.
+That is where the [Kullback-Leibler (KL) divergence](/blog/2018-11-06-kl-divergence-demystified/) comes into play, which measures how one probability distribution differs from another. As we want to make our Q<sub>ϕ</sub>(z∣x) closer to the true posterior P(z∣x), we should aim to minimize the KL divergence between the two distributions, which we can include in our loss function as a regularization term.
 
 The immediate question is: if P(z∣x) is intractable, how can we compute the KL divergence between P(z|x) and Q<sub>ϕ</sub>(z∣x)? The answer is that we don’t compute the KL divergence directly. Instead, we maximize the **Evidence Lower Bound** (ELBO) derived from the KL divergence. By maximizing the ELBO, we implicitly minimize the KL divergence between the approximating distribution Q<sub>ϕ</sub>(z∣x) and the true posterior P(z|x), even though we don't compute this divergence directly. We'll discuss the details of the mathematics later on. 
 
@@ -374,7 +374,7 @@ The decoder in a VAE is responsible for translating the latent variables back in
 
 At its core, the decoder is a neural network designed to do the opposite of what the encoder does. In more straightforward terms, it transforms the condensed latent vector into a complete image.
 
-The process typically begins with a fully connected layer that takes the latent vector z as input and produces a tensor of suitable shape. This tensor then goes through a set of upsampling layers. For example, these upsampling layers may consist of [transposed convolution](/blog/2017/2017-11-14-up-sampling-with-transposed-convolution/) layers that progressively enlarge the tensor's spatial dimensions until they match the desired image size.
+The process typically begins with a fully connected layer that takes the latent vector z as input and produces a tensor of suitable shape. This tensor then goes through a set of upsampling layers. For example, these upsampling layers may consist of [transposed convolution](/blog/2017-11-14-up-sampling-with-transposed-convolution/) layers that progressively enlarge the tensor's spatial dimensions until they match the desired image size.
 
 In essence, the decoder's main aim is to create an image x′ that closely resembles the original image x. To achieve this, it focuses on maximizing the likelihood P<sub>θ</sub>(x|z) of the observed data x given the latent variables z. The greater this likelihood, the more proficient the decoder becomes at reconstructing the original data from the latent space.
 
@@ -805,6 +805,6 @@ Enjoy the exploration!
 
 ## References
 
-- [KL Divergence Demystified](/blog/2018/2018-11-06-kl-divergence-demystified/)
+- [KL Divergence Demystified](/blog/2018-11-06-kl-divergence-demystified/)
 - [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114) \
   Diederik P Kingma, Max Welling

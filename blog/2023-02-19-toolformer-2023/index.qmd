@@ -53,7 +53,7 @@ As for the unawareness of the progression of time, one should use a calendar to 
 
 ## Approach by Toolformer
 
-The idea is to use the [ICL](/blog/2023/2023-01-30-why-gpt-icl/) (in-context learning) capability of LLMs to learn how to use external APIs to overcome the limitations mentioned above.
+The idea is to use the [ICL](/blog/2023-01-30-why-gpt-icl/) (in-context learning) capability of LLMs to learn how to use external APIs to overcome the limitations mentioned above.
 
 They give a handful of human-written examples of using API calls and let an LM generate potential API calls. For example, a human-written prompt below demonstrates how to generate API calls for question-answering tools.
 
@@ -315,7 +315,7 @@ Given the above limitations, Toolformer is not a perfect tool. However, it is a 
 
 ## References
 
-- [ICL: Why Can GPT Learn In-Context? (2022)](/blog/2023/2023-01-30-why-gpt-icl/)
+- [ICL: Why Can GPT Learn In-Context? (2022)](/blog/2023-01-30-why-gpt-icl/)
 - [Training language models to follow instructions with human feedback](https://arxiv.org/pdf/2203.02155.pdf) \
 Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli, Luke Zettlemoyer, Nicola Cancedda, Thomas Scialom
 - [ChatGPT: Optimizing Language Models for Dialogue](https://openai.com/blog/chatgpt/)

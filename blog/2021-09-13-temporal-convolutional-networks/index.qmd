@@ -183,7 +183,7 @@ They provided the source code in their <a href="https://github.com/locuslab/TCN"
 
 ## References
 
-- [Long Short Term Memory](/blog/2021/2021-09-26-long-short-term-memory/)
+- [Long Short Term Memory](/blog/2021-09-26-long-short-term-memory/)
 - [An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling](https://arxiv.org/abs/1803.01271) \
   Shaojie Bai, J. Zico Kolter, Vladlen Koltun \
   [GitHub](https://github.com/locuslab/TCN)

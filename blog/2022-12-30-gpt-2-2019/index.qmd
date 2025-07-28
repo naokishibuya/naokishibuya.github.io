@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="GPT-2: Too Dangerous To Release (2019)"/>
 
-GPT-2 is a direct scale-up of [GPT-1](/blog/2022/2022-12-26-gpt-generative-pre-training-transformer-2018/), with more parameters and trained on more data. However, it was deemed too dangerous to release by OpenAI:
+GPT-2 is a direct scale-up of [GPT-1](/blog/2022-12-26-gpt-generative-pre-training-transformer-2018/), with more parameters and trained on more data. However, it was deemed too dangerous to release by OpenAI:
 
 > Due to our concerns about malicious applications of the technology, we are not releasing the trained model. As an experiment in responsible disclosure, we are instead releasing a much smaller model for researchers to experiment with, as well as a technical paper.
 <cite>[OpenAI Blog – Better Language Models and Their Implications](https://openai.com/blog/better-language-models/)</cite>
@@ -66,7 +66,7 @@ However, many other misuses, like students making ChatGPT do their home, are har
 
 ## References
 
-- [GPT-1: Generative Pre-Trained Transformer (2018)](/blog/2022/2022-12-26-gpt-generative-pre-training-transformer-2018/)
+- [GPT-1: Generative Pre-Trained Transformer (2018)](/blog/2022-12-26-gpt-generative-pre-training-transformer-2018/)
 - [GPT-2: Better Language Models and Their Implications](https://openai.com/blog/better-language-models/) \
   [paper](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), [code](https://github.com/openai/gpt-2) \
   OpenAI

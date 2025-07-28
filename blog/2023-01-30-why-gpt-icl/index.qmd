@@ -480,4 +480,4 @@ In conclusion, the momentum-based Transformer outperforms the vanilla Transforme
 
 - [Why Can GPT Learn In-Context? Language Models Secretly Perform Gradient Descent as Meta-Optimizers](https://arxiv.org/abs/2212.10559) \
 Damai Dai, Yutao Sun, Li Dong, Yaru Hao, Zhifang Sui, Furu Wei
-- [GPT-3: In-Context Few-Shot Learner (2020)](/blog/2023/2023-01-04-gpt-3-in-context-few-shot-learner-2020/)
+- [GPT-3: In-Context Few-Shot Learner (2020)](/blog/2023-01-04-gpt-3-in-context-few-shot-learner-2020/)

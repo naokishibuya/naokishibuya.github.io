@@ -87,7 +87,7 @@ The authors of RMSNorm show that RMSNorm achieves similar performance to layer n
 
 ### SwiGLU Activation Function [PaLM]
 
-The original Transformer architecture uses ReLU as the activation function in the feed-forward layer. In contrast, LLaMA uses [SwiGLU](/blog/2023/2023-04-30-swiglu-2020), a variation of [GLU](/blog/2023/2023-04-23-glu-gated-linear-unit-2016-lm-with-gcns/) (Gated Linear Unit), to improve the performance of the feed-forward layer.
+The original Transformer architecture uses ReLU as the activation function in the feed-forward layer. In contrast, LLaMA uses [SwiGLU](/blog/2023-04-30-swiglu-2020), a variation of [GLU](/blog/2023-04-23-glu-gated-linear-unit-2016-lm-with-gcns/) (Gated Linear Unit), to improve the performance of the feed-forward layer.
 
 SwiGLU is a variant of GLU, replacing the sigmoid activation function with Swish.
 
@@ -248,4 +248,4 @@ I look forward to seeing even more efficient LLMs being available to the public 
   Jianlin Su, Yu Lu, Shengfeng Pan, Ahmed Murtadha, Bo Wen, and Yunfeng Liu
 - [Meta’s LLaMA Leaked to the Public, Thanks To 4chan](https://analyticsindiamag.com/metas-llama-leaked-to-the-public-thanks-to-4chan/) \
   Analytics India Magazine
-- [SwiGLU: GLU Variants Improve Transformer (2020)](/blog/2023/2023-04-30-swiglu-2020/)
+- [SwiGLU: GLU Variants Improve Transformer (2020)](/blog/2023-04-30-swiglu-2020/)

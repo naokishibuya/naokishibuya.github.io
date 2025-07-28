@@ -9,7 +9,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="GPT: Generative Pre-Trained Transformer (2018)"/>
 
-In 2018, OpenAI released the first version of GPT (Generative Pre-Trained Transformer) for generating texts as if humans wrote. The architecture of GPT is based on [the original transformer's decoder](/blog/2021/2021-12-13-transformers-encoder-decoder/).
+In 2018, OpenAI released the first version of GPT (Generative Pre-Trained Transformer) for generating texts as if humans wrote. The architecture of GPT is based on [the original transformer's decoder](/blog/2021-12-13-transformers-encoder-decoder/).
 
 They trained GPT in two stages:
 
@@ -152,12 +152,12 @@ The below left chart shows the performence improvement over the number of layers
 
 The right plot shows __zero-shot behaviors__ where they designed a series of heuristic solutions to use the pre-trained model to perform tasks without supervised fine-tuning (therefore, it's zero-shot). As we can see, the performance of GPT (solid lines) improves over the course of generative unsupervised pre-training. In comparison, LSTM does not perform as much in such zero-shot experiment.
 
-Their hypothesis is that GPT without fine-tuning can perform many of the tasks, thanks to its language modeling capability. GPT aquires such capability from the generative pre-training, using [the attention mechanism of the transformer](/blog/2021/2021-11-15-transformers-self-attention/), causing it to outperform LSTM in zero-shot experiments.
+Their hypothesis is that GPT without fine-tuning can perform many of the tasks, thanks to its language modeling capability. GPT aquires such capability from the generative pre-training, using [the attention mechanism of the transformer](/blog/2021-11-15-transformers-self-attention/), causing it to outperform LSTM in zero-shot experiments.
 
 ## References
 
-- [Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture](/blog/2021/2021-12-13-transformers-encoder-decoder/)
-- [Transformer’s Self-Attention: Why Is Attention All You Need?](/blog/2021/2021-11-15-transformers-self-attention/)
+- [Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture](/blog/2021-12-13-transformers-encoder-decoder/)
+- [Transformer’s Self-Attention: Why Is Attention All You Need?](/blog/2021-11-15-transformers-self-attention/)
 - [Improving Language Understanding with Unsupervised Learning](https://openai.com/blog/language-unsupervised/) \
   [Github](https://github.com/openai/finetune-transformer-lm) \
   OpenAI

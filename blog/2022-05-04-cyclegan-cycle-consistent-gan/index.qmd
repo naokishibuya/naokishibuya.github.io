@@ -13,7 +13,7 @@ This article explains how CycleGAN (aka Cycle-consistent GAN) works, which is we
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/9reHvktowLY?controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-The previous article discussed [pix2pix](/blog/2022/2022-05-01-pix2pix-cgan/), which does similar image translations. The same people that worked on pix2pix developed CycleGAN to overcome problems in pix2pix. So, let's first see what kind of problems exist in pix2pix, which is valuable knowledge for us to understand CycleGAN better.
+The previous article discussed [pix2pix](/blog/2022-05-01-pix2pix-cgan/), which does similar image translations. The same people that worked on pix2pix developed CycleGAN to overcome problems in pix2pix. So, let's first see what kind of problems exist in pix2pix, which is valuable knowledge for us to understand CycleGAN better.
 
 ## The Inconvenient Truth about Pix2Pix
 
@@ -53,7 +53,7 @@ Let $G$ be a generator network that takes an image from $X$ and produces an imag
 
 Note: In the above diagram, the paper uses $Y# with a hat since generated images $G(x)$ are not from the dataset $Y$.
 
-Here the discriminator network $D_y$ determines if the generated image $G(x)$ is real (as if the painter of $Y$ images drew it). The discriminator network $D_y$ determines if $G(x)$ is real or fake by the __adversarial loss__. It is the binary cross-entropy loss used in [regular GANs](/blog/2022/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/).
+Here the discriminator network $D_y$ determines if the generated image $G(x)$ is real (as if the painter of $Y$ images drew it). The discriminator network $D_y$ determines if $G(x)$ is real or fake by the __adversarial loss__. It is the binary cross-entropy loss used in [regular GANs](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/).
 
 Since there is no label image corresponding to $G(x)$, there is nothing to guarantee that $G$ maintains the contents (shape, etc.) of the original image $x$ in the generated image $G(x)$. It is where the cycle-consistency loss comes to the rescue. But before discussing the cycle-consistency loss, we need to discuss another generator network for the reverse direction (from $Y$ to $X$).
 

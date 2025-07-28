@@ -17,7 +17,7 @@ The word Swin stands for **S**hifted **win**dows that provide the Transformer wi
 
 ### ViT is NOT Suitable for Dense Prediction
 
-[ViT](/blog/2022/2022-11-02-vit-vision-transformer-image-classifier-2020/) (the original Vision Transformer from Google) uses fixed-scale image patches (i.e., 16 x 16) as inputs to the encoder to extract features. Although ViT works well for image classification, it is unsuitable for more dense vision tasks, such as object detection and semantic segmentation, which require finer visual details than 16 x 16 patches. Moreover, images in those tasks are typically larger than those in image classification datasets. Using smaller image patches on larger images will increase the number of patches that self-attention layers must process.
+[ViT](/blog/2022-11-02-vit-vision-transformer-image-classifier-2020/) (the original Vision Transformer from Google) uses fixed-scale image patches (i.e., 16 x 16) as inputs to the encoder to extract features. Although ViT works well for image classification, it is unsuitable for more dense vision tasks, such as object detection and semantic segmentation, which require finer visual details than 16 x 16 patches. Moreover, images in those tasks are typically larger than those in image classification datasets. Using smaller image patches on larger images will increase the number of patches that self-attention layers must process.
 
 For example, if we use 32 x 32 images, a 16 x 16 patch will produce four patches per image. For 64 x 64 images, a 16 x 16 patch means 16 patches per image. Therefore the attention mechanism must deal with four times more patches. For 128 x 128 images, the number of patches becomes 64.
 
@@ -44,7 +44,7 @@ So, the computation complexity is linear to the input image size. The below figu
 
 ![Swin Transformer builds a hierarchy of feature maps by merging neighboring patches.](images/Swin-Transformer-hierarchical.png)
 
-The idea of hierarchical feature maps is similar to [FPN (Feature Pyramid Network)](/blog/2022/2022-08-21-fpn-2016/), which provides fine and coarse features useful for all image-related tasks.
+The idea of hierarchical feature maps is similar to [FPN (Feature Pyramid Network)](/blog/2022-08-21-fpn-2016/), which provides fine and coarse features useful for all image-related tasks.
 
 ### Patch Merging Layers
 
@@ -145,9 +145,9 @@ There you have it. We have just witnessed that Transformer can handle typical vi
 
 ## References
 
-- [ViT: Vision Transformer](/blog/2022/2022-11-02-vit-vision-transformer-image-classifier-2020/)
-- [Transformer's Encoder-Decoder](/blog/2021/2021-12-13-transformers-encoder-decoder/)
-- [FPN: Feature Pyramid Network](/blog/2022/2022-08-21-fpn-2016/)
+- [ViT: Vision Transformer](/blog/2022-11-02-vit-vision-transformer-image-classifier-2020/)
+- [Transformer's Encoder-Decoder](/blog/2021-12-13-transformers-encoder-decoder/)
+- [FPN: Feature Pyramid Network](/blog/2022-08-21-fpn-2016/)
 - [Swin Transformer: Hierarchical Vision Transformer using Shifted Windows](https://arxiv.org/abs/2103.14030) \
   Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, Baining Guo \
   [GitHub](https://github.com/microsoft/Swin-Transformer)

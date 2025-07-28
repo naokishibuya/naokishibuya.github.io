@@ -10,7 +10,7 @@ categories:
 
 <img src="images/thumbnail.png" alt="Transformer’s Positional Encoding: How Does It Know Word Positions Without Recurrence?"/>
 
-In 2017, Vaswani et al. published a paper titled [Attention Is All You Need](https://arxiv.org/abs/1706.03762) for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than [RNN encoder-decoder](/blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/) models, which were mainstream at that time.
+In 2017, Vaswani et al. published a paper titled [Attention Is All You Need](https://arxiv.org/abs/1706.03762) for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than [RNN encoder-decoder](/blog/2021-09-29-neural-machine-translation-with-attention-mechanism/) models, which were mainstream at that time.
 
 Then, the big transformer model achieved SOTA (state-of-the-art) performance on NLP tasks. 
 
@@ -50,7 +50,7 @@ Since our model contains no recurrence and no convolution, in order for the mode
 <cite>Source: [the paper](https://arxiv.org/abs/1706.03762)</cite>
 </blockquote>
 
-Historically, researchers used RNNs (Recurrent Neural Networks) to keep track of ordinal dependencies in sequential data. Later, researchers incorporated [attention mechanism](/blog/2021/2021-09-29-neural-machine-translation-with-attention-mechanism/) into RNN encoder-decoder architectures to better extract contextual information for each word.
+Historically, researchers used RNNs (Recurrent Neural Networks) to keep track of ordinal dependencies in sequential data. Later, researchers incorporated [attention mechanism](/blog/2021-09-29-neural-machine-translation-with-attention-mechanism/) into RNN encoder-decoder architectures to better extract contextual information for each word.
 
 On the contrary, the transformer’s encoder-decoder architecture uses attention mechanisms without recurrence and convolution. That’s what the paper title “Attention Is All You Need” means.
 
