@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2018-10-28">
 
-<title>Naoki Shibuya</title>
+<title>Cross-Entropy Demystified – Naoki Shibuya</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,28 +24,26 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<link href="./favicon.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,35 +71,6 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
-
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-image','listing-title','listing-subtitle','listing-date',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -132,7 +102,7 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
@@ -302,7 +272,7 @@ window.Quarto = {
     <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Naoki Shibuya</span>
     </a>
   </div>
@@ -331,153 +301,295 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#review-of-entropy-formula" id="toc-review-of-entropy-formula" class="nav-link active" data-scroll-target="#review-of-entropy-formula"><span class="header-section-number">1</span> Review of Entropy&nbsp;Formula</a></li>
+  <li><a href="#estimating-entropy" id="toc-estimating-entropy" class="nav-link" data-scroll-target="#estimating-entropy"><span class="header-section-number">2</span> Estimating Entropy</a></li>
+  <li><a href="#cross-entropy-entropy" id="toc-cross-entropy-entropy" class="nav-link" data-scroll-target="#cross-entropy-entropy"><span class="header-section-number">3</span> Cross-entropy ≥ Entropy</a></li>
+  <li><a href="#cross-entropy-as-a-loss-function" id="toc-cross-entropy-as-a-loss-function" class="nav-link" data-scroll-target="#cross-entropy-as-a-loss-function"><span class="header-section-number">4</span> Cross-Entropy as a Loss&nbsp;Function</a></li>
+  <li><a href="#notes-on-nats-vs.-bits" id="toc-notes-on-nats-vs.-bits" class="nav-link" data-scroll-target="#notes-on-nats-vs.-bits"><span class="header-section-number">5</span> Notes on Nats vs.&nbsp;Bits</a></li>
+  <li><a href="#binary-cross-entropy" id="toc-binary-cross-entropy" class="nav-link" data-scroll-target="#binary-cross-entropy"><span class="header-section-number">6</span> Binary Cross-Entropy</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">7</span> References</a></li>
+  </ul>
+</nav>
+</nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(5)</span></div><div class="category" data-category="QWxnb3JpdGhtcw==">Algorithms <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Q29udm9sdXRpb25hbCUyME5ldXJhbCUyME5ldHdvcmtz">Convolutional Neural Networks <span class="quarto-category-count">(1)</span></div><div class="category" data-category="SW5mb3JtYXRpb24lMjBUaGVvcnk=">Information Theory <span class="quarto-category-count">(3)</span></div></div></div>
-<!-- main -->
-<main class="content column-page-left" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
-
-
-
-
-
-
-
-
-
-<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
-<div class="listing-actions-group">
-   <div class="input-group input-group-sm quarto-listing-sort">
-    <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
-    <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
-      <option value="" disabled="" selected="" hidden="">Order By</option>
-      <option value="index" data-direction="asc">Default</option>
-      <option value="listing-title" data-direction="asc">
-        Title
-      </option>
-      <option value="listing-date-sort" data-direction="asc">
-        Date - Oldest
-      </option>
-      <option value="listing-date-sort" data-direction="desc">
-        Date - Newest
-      </option>
-    </select>
-  </div>
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Cross-Entropy Demystified</h1>
+<p class="subtitle lead">What is it? Is there any relation to the entropy concept?</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Information Theory</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 28, 2018</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Cross-Entropy Demystified: What is it? Is there any relation to the entropy concept? "></p>
+<p><em>What is it? Is there any relation to the entropy concept? Why is it used for classification loss? What about the binary cross-entropy?</em></p>
+<p>Some of us might have used cross-entropy for calculating classification losses and wondered why we use the natural logarithm. Some might have seen the binary cross-entropy and wondered whether it fundamentally differs from the cross-entropy. If so, reading this article should help to demystify those questions.</p>
+<p>The word “cross-entropy” has “cross” and “entropy” in it, and it helps to understand the “entropy” part to understand the “cross” part.</p>
+<p>So, let’s review the entropy formula.</p>
+<section id="review-of-entropy-formula" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="review-of-entropy-formula"><span class="header-section-number">1</span> Review of Entropy&nbsp;Formula</h2>
+<p><a href="../../blog/2018/2018-07-24-entropy-demystified/" target="_blank">The previous article</a> should help you understand the entropy concept in case you are not already familiar with it.</p>
+<p><a href="https://en.wikipedia.org/wiki/Claude_Shannon" target="_blank">Claude Shannon</a> defined the entropy to calculate the minimum encoding size as he was looking for a way to efficiently send messages without losing any information.</p>
+<p><img src="images/information.png" class="img-fluid"></p>
+<p>As we will see below, there are various ways of expressing entropy.</p>
+<p>The entropy of a probability distribution is as follows:</p>
+<p><span class="math display">\[
+\text{Entropy} = - \sum\limits_i P(i) \log P(i)
+\]</span></p>
+<p>We assume that we know the probability <span class="math inline">\(P\)</span> for each <span class="math inline">\(i\)</span>. The term <span class="math inline">\(i\)</span> indicates a discrete event that could mean different things depending on the scenario you are dealing with.</p>
+<p>For continuous variables, we can be write it using the integral form:</p>
+<p><span class="math display">\[
+\text{Entropy} = - \int P(x) \log P(x) dx
+\]</span></p>
+<p>Here, <span class="math inline">\(x\)</span> is a continuous variable, and <span class="math inline">\(P(x)\)</span> is the probability density function.</p>
+<p>In both discrete and continuous variable cases, we are calculating the expectation (average) of the negative log probability, which is the theoretical minimum encoding size of the information from the event <span class="math inline">\(x\)</span>.</p>
+<p>So, the above formula can be re-written in the expectation form as follows:</p>
+<p><span class="math display">\[
+\text{Entropy} = \mathbb{E}_{x \sim P} \left[ - \log P(x) \right]
+\]</span></p>
+<p><span class="math inline">\(x \sim P\)</span> means we calculate the expectation with the probability distribution <span class="math inline">\(P\)</span>.</p>
+<p>We can write the entropy using <span class="math inline">\(H\)</span> as follows:</p>
+<p><span class="math display">\[
+H(P) = \mathbb{E}_{x \sim P} \left[ -\log P(x) \right]
+\]</span></p>
+<p>People use all these notations interchangeably, and we see them used in different places when we read articles and papers that use entropy concepts.</p>
+<p>In short, the entropy tells us the theoretical minimum average encoding size for events that follow a particular probability distribution.</p>
+<p>As long as we know the probability distribution of anything, we can calculate its entropy.</p>
+<p>We cannot calculate the entropy if we do not know the probability distribution. So, we would need to estimate the probability distribution.</p>
+<p>However, what does it mean to estimate the entropy?</p>
+<p>Also, how accurate would that be?</p>
+<p>Answering these questions gets us to the cross-entropy concept.</p>
+</section>
+<section id="estimating-entropy" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="estimating-entropy"><span class="header-section-number">2</span> Estimating Entropy</h2>
+<p>Let’s assume we are reporting Tokyo’s weather to New York and want to encode the message into the smallest possible size. We do not know the distribution of the weather before it happens. For the sake of discussion, let’s assume we can find it out after observing the weather in Tokyo for some time.</p>
+<p>We do not initially know the probability distribution of Tokyo’s weather, so we estimate it as <span class="math inline">\(Q\)</span> to calculate the encoding size for transmitting our weather report from Tokyo to New York.</p>
+<p>Using the estimated probability distribution <span class="math inline">\(Q\)</span>, the estimated entropy would be:</p>
+<p><span class="math display">\[
+\text{EstimatedEntropy} = \mathbb{E}_{x \sim Q}\left[ -\log Q(x) \right]
+\]</span></p>
+<p>If <span class="math inline">\(Q\)</span> is close to the real probability distribution, the above estimation tells us the smallest average encoding size.</p>
+<p>However, there are two kinds of uncertainty involved in the estimation formula.</p>
+<p>As indicated by <span class="math inline">\(x \sim Q\)</span>, we are using the estimated probability distribution <span class="math inline">\(Q\)</span> to calculate the expectation, which would differ from the actual probability distribution <span class="math inline">\(P\)</span>.</p>
+<p>Moreover, we estimate the minimum encoding size as <span class="math inline">\(-\log Q\)</span>, which we calculate based on the estimated probability distribution <span class="math inline">\(Q\)</span>. Hence, it will not be 100% accurate.</p>
+<p>The estimated probability distribution <span class="math inline">\(Q\)</span> affects the expectation and encoding size estimation. Therefore, the estimated entropy can be very wrong.</p>
+<p>Alternatively, it can be close to the real entropy by coincidence because <span class="math inline">\(Q\)</span> affects both the expectation calculation and the encoding size estimation.</p>
+<p>So, comparing the estimated entropy with the real entropy may not mean anything.</p>
+<p>Like Claude Shannon, our main concern is making the encoding size as small as possible. So, we want to compare our encoding size with the theoretical minimum encoding size based on entropy.</p>
+<p>Suppose we have the real distribution <span class="math inline">\(P\)</span> after observing the weather in Tokyo for some period. We can calculate the realized average encoding size using the probability distribution <span class="math inline">\(P\)</span> and the actual encoding size (based on <span class="math inline">\(Q\)</span>) used during the weather reporting.</p>
+<p>It is called the cross-entropy between <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>, which we can compare with the entropy.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{CrossEntropy} &amp;= \mathbb{E}_{x \sim P} \left[ -\log Q(x) \right] \\\\
+     \text{Entropy} &amp;= \mathbb{E}_{x \sim P} \left[ -\log P(x) \right]
+\end{aligned}
+\]</span></p>
+<p>We are comparing apple to apple as we use the same true distribution for both expectation calculations. We are comparing the theoretical minimum and actual encoding used in weather reporting.</p>
+<p>In short, we are cross-checking the encoding size, which is what “cross” means in cross-entropy.</p>
+</section>
+<section id="cross-entropy-entropy" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="cross-entropy-entropy"><span class="header-section-number">3</span> Cross-entropy ≥ Entropy</h2>
+<p>Commonly, we express the cross-entropy H as follows:</p>
+<p><span class="math display">\[
+H(P, Q) = \mathbb{E}_{x \sim P} \left[ -\log Q(x) \right]
+\]</span></p>
+<p><span class="math inline">\(H(P, Q)\)</span> means that we calculate the expectation using <span class="math inline">\(P\)</span> and the encoding size using <span class="math inline">\(Q\)</span>. As such, <span class="math inline">\(H(P, Q)\)</span> and <span class="math inline">\(H(Q, P)\)</span> is not necessarily the same except when <span class="math inline">\(Q=P\)</span>, in which case <span class="math inline">\(H(P, Q) = H(P, P) = H(P)\)</span> and it becomes the entropy itself.</p>
+<p>This point is subtle but essential. For the expectation, we should use the true probability <span class="math inline">\(P\)</span> as that tells the distribution of events. For the encoding size, we should use <span class="math inline">\(Q\)</span> as that is used to encode messages.</p>
+<p>Since the entropy is the theoretical minimum average size, the cross-entropy is higher than or equal to the entropy but not less than that.</p>
+<p>In other words, if our estimate is perfect, <span class="math inline">\(Q = P\)</span> and, hence, <span class="math inline">\(H(P, Q)=H(P)\)</span>. Otherwise, <span class="math inline">\(H(P, Q) &gt; H(P)\)</span>.</p>
+<p>I hope the connection between hentropy and cross-entropy should be clear. Let’s talk about why we use cross-entropy for the classification loss function.</p>
+</section>
+<section id="cross-entropy-as-a-loss-function" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="cross-entropy-as-a-loss-function"><span class="header-section-number">4</span> Cross-Entropy as a Loss&nbsp;Function</h2>
+<p>Let’s say we have a dataset of animal images with five different animals. Each image has only one animal in it.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/animals.png" class="img-fluid figure-img"></p>
+<figcaption>Source: <a href="https://www.freeimages.com/" target="_blank">https://www.freeimages.com/</a></figcaption>
+</figure>
 </div>
-<div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1541462199000" data-listing-file-modified-sort="1753703064421" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="989">
-<a href="./blog/2018-11-06-kl-divergence-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-11-06-kl-divergence-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-KL Divergence Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-What does measuring the similarity of two probability distributions mean?
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Nov 6, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="1" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1540720282000" data-listing-file-modified-sort="1753703064404" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1885">
-<a href="./blog/2018-10-28-cross-entropy-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-10-28-cross-entropy-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Cross-Entropy Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-What is it? Is there any relation to the entropy concept?
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Oct 28, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="2" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1532411020000" data-listing-file-modified-sort="1753703064392" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1828">
-<a href="./blog/2018-07-24-entropy-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-07-24-entropy-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Entropy Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-Is it a disorder, uncertainty, or surprise?
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Jul 24, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="3" data-categories="Q29udm9sdXRpb25hbCUyME5ldXJhbCUyME5ldHdvcmtz" data-listing-date-sort="1510597022000" data-listing-file-modified-sort="1753701181760" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1069">
-<a href="./blog/2017-11-14-up-sampling-with-transposed-convolution/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2017-11-14-up-sampling-with-transposed-convolution/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Up-sampling with Transposed Convolution
-</h5>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Nov 14, 2017
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="4" data-categories="QWxnb3JpdGhtcw==" data-listing-date-sort="1485564523000" data-listing-file-modified-sort="1753624571000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="32" data-listing-word-count-sort="6274">
-<a href="./blog/2017-01-28-sudoku-solver-by-peter-norvig/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2017-01-28-sudoku-solver-by-peter-norvig/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Beautiful Sudoku Solver by Peter Norvig
-</h5>
-<div class="card-subtitle listing-subtitle">
-Python code that solves any Sudoku puzzles systematically
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Jan 28, 2017
-</div>
-</div>
-</div>
-</div></a>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+<p>Each image is labeled with the corresponding animal using the one-hot encoding.</p>
+<p><img src="images/one-hot-encoding.png" class="img-fluid"></p>
+<p>We can treat one-hot encoding as a probability distribution for each image. Let’s see a few examples.</p>
+<p>The probability distribution of the first image being a dog is 1.0 (=100%).</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;P_1(\text{dog})      &amp;= 1 \\
+&amp;P_1(\text{fox})      &amp;= 0 \\
+&amp;P_1(\text{horse})    &amp;= 0 \\
+&amp;P_1(\text{eagle})    &amp;= 0 \\
+&amp;P_1(\text{squirrel}) &amp;= 0
+\end{aligned}
+\]</span></p>
+<p>For the second image, the label tells us that it is a fox with 100% certainty.</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;P_1(\text{dog})      &amp;= 0 \\
+&amp;P_1(\text{fox})      &amp;= 1 \\
+&amp;P_1(\text{horse})    &amp;= 0 \\
+&amp;P_1(\text{eagle})    &amp;= 0 \\
+&amp;P_1(\text{squirrel}) &amp;= 0
+\end{aligned}
+\]</span></p>
+<p>and so on.</p>
+<p>As such, the entropy of each image is zero.</p>
+<p><span class="math display">\[
+\begin{aligned}
+H(P_1) &amp;= 0 \\
+H(P_2) &amp;= 0 \\
+H(P_3) &amp;= 0 \\
+H(P_4) &amp;= 0 \\
+H(P_5) &amp;= 0
+\end{aligned}
+\]</span></p>
+<p>In other words, one-hot encoded labels tell us what animal each image has with 100% certainty. It is not like the first image can be a dog for 90% and a cat for 10%. It is always a dog, and there will be no surprise.</p>
+<p>Let’s say we have a machine-learning model that classifies those images. When we have not adequately trained the model, it may classify the first image (dog) as follows:</p>
+<p><span class="math display">\[
+Q_1 = \begin{bmatrix}
+0.4 &amp; 0.3 &amp; 0.05 &amp; 0.05 &amp; 0.2
+\end{bmatrix}
+\]</span></p>
+<p>The model says the first image is 40% for a dog, 30% for a fox, 5% for a horse, 5% for an eagle, and 20% for a squirrel. This estimation is not very precise or confident about what animal the first image has.</p>
+<p>In contrast, the below label gives us the exact distribution of the first image’s animal class. It tells us it is a dog with 100% certainty.</p>
+<p><span class="math display">\[
+P_1 = \begin{bmatrix}
+1 &amp; 0 &amp; 0 &amp; 0 &amp; 0
+\end{bmatrix}
+\]</span></p>
+<p>So, how well was the model’s prediction? We can calculate the cross-entropy as follows:</p>
+<p><span class="math display">\[
+\begin{aligned}
+H(P_1, Q_1) &amp;= -\sum\limits_i P_1(i) \log Q_1(i) \\
+&amp; = -(1 \, \log\, 0.4 \quad + \\
+&amp;\qquad\ \ 0\, \log\, 0.3  \quad + \\
+&amp;\qquad\ \ 0\, \log\, 0.05 \ \ + \\
+&amp;\qquad\ \ 0\, \log\, 0.05 \ \ + \\
+&amp;\qquad\ \ 0\, \log\, 0.2) \\
+&amp;= - \log\, 0.4 \\
+&amp;\approx 0.916
+\end{aligned}
+\]</span></p>
+<p>The value is higher than the zero entropy of the label, but we do not have an intuitive sense of what this value means. So, let’s see another cross-entropy value for comparison.</p>
+<p>After the model is well-trained, it may produce the following prediction for the first image.</p>
+<p><span class="math display">\[
+Q_1 = \begin{bmatrix}
+0.98 &amp; 0.01 &amp; 0 &amp; 0 &amp; 0.01
+\end{bmatrix}
+\]</span></p>
+<p>As seen below, the cross-entropy is much lower than before.</p>
+<p><span class="math display">\[
+\begin{aligned}
+H(P_1, Q_1) &amp;= -\sum\limits_i P_1(i) \log Q_1(i) \\
+&amp; = -(1 \, \log\, 0.98 \ + \\
+&amp;\qquad\ \ 0\, \log\, 0.01 \ + \\
+&amp;\qquad\ \ 0\, \log\, 0 \quad\ \  + \\
+&amp;\qquad\ \ 0\, \log\, 0 \quad\ \ + \\
+&amp;\qquad\ \ 0\, \log\, 0.01) \\
+&amp;= - \log\, 0.98 \\
+&amp;\approx 0.02
+\end{aligned}
+\]</span></p>
+<p>The cross-entropy compares the model’s prediction with the label, which is the true probability distribution. The cross-entropy goes down as the prediction gets more and more accurate. It becomes zero if the prediction is perfect. As such, cross-entropy can be a loss function to train a classification model.</p>
+</section>
+<section id="notes-on-nats-vs.-bits" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="notes-on-nats-vs.-bits"><span class="header-section-number">5</span> Notes on Nats vs.&nbsp;Bits</h2>
+<p>In machine learning, we use <strong>base e</strong> instead of <strong>base 2</strong> for multiple reasons (one of them being the ease of calculating the derivative).</p>
+<p>The change of the logarithm base does not cause any problem since it changes the magnitude only.</p>
+<p><span class="math display">\[
+\log_2 x = \frac{\log_e x}{\log_e 2}
+\]</span></p>
+<p>For example, using the cross-entropy as a classification cost function still makes sense as we only care about reducing it by training the model better and better.</p>
+<p>As a side note, the information unit with the <strong>base e</strong> logarithm is <strong>nats</strong>, whereas the information unit with the <strong>base 2</strong> logarithm is called <strong>bits</strong>. <strong>1 nat</strong> information comes from an event with 1/e probability.</p>
+<p><span class="math display">\[
+\begin{aligned}
+1 &amp;= -\log P \\
+\therefore P &amp;= \frac{1}{e}
+\end{aligned}
+\]</span></p>
+<p>The <strong>base e</strong> logarithms are less intuitive than the <strong>base 2</strong> logarithms. The amount of information in 1 bit comes from an event with 1/2 probability. If we can encode a piece of information in 1 bit, one such message can reduce 50% uncertainty. The same analogy is not easy to make with <strong>base e</strong>, which is why the <strong>base 2</strong> logarithm is often used to explain the information entropy concept. However, the machine learning application uses the <strong>base e</strong> logarithm for implementation convenience.</p>
+</section>
+<section id="binary-cross-entropy" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="binary-cross-entropy"><span class="header-section-number">6</span> Binary Cross-Entropy</h2>
+<p>We can use binary cross-entropy for binary classification where we have yes/no answers. For example, there are only dogs or cats in the images.</p>
+<p>For the binary classifications, the cross-entropy formula contains only two probabilities:</p>
+<p><span class="math display">\[
+\begin{aligned}
+H(P, Q) &amp;= -\sum\limits_{i=(\text{cat,dog})} P(i) \log Q(i) \\\\
+&amp;= -P(\text{cat}) \log Q(\text{cat}) - P(\text{cat}) \log Q(\text{dog})
+\end{aligned}
+\]</span></p>
+<p>Using the following relationship:</p>
+<p><span class="math display">\[
+P(\text{dog}) = 1 - P(\text{cat})
+\]</span></p>
+<p>, we can write the cross-entropy as follows:</p>
+<p><span class="math display">\[
+H(P, Q) = -P(\text{cat}) \log Q(\text{cat}) - (1 - P(\text{cat})) \log(1 - Q(\text{cat}))
+\]</span></p>
+<p>We can further simplify it by changing the symbols slightly:</p>
+<p><span class="math display">\[
+\begin{aligned}
+P &amp;= P(\text{cat}) \\
+\hat{P} &amp;= Q(\text{cat})
+\end{aligned}
+\]</span></p>
+<p>Then, the binary cross-entropy formula becomes:</p>
+<p><span class="math display">\[
+\text{BinaryCrossEntropy} = -P \log \hat{P} - (1 - P) \log(1 - \hat{P})
+\]</span></p>
+<p>, which may look more familiar to some of us.</p>
+<p>In short, the binary cross-entropy is a cross-entropy with two classes. Other than that, they are the same concept.</p>
+<p>Now that we know the concepts well, the entropy of the cross-entropy concept should be zero for all of us.</p>
+</section>
+<section id="references" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="references"><span class="header-section-number">7</span> References</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)" target="_blank">Information Entropy</a><br>
+Wikipedia</li>
+<li><a href="https://en.wikipedia.org/wiki/Cross_entropy" target="_blank">Cross-entropy</a><br>
+Wikipedia</li>
+<li><a href="https://www.youtube.com/watch?v=ErfnhcEV1O8" target="_blank">A Short Introduction to Entropy, Cross-Entropy, and KL-Divergence</a><br>
+Aurélien Géron</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const linkSelectors = [
@@ -921,6 +1033,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">

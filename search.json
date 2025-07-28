@@ -1,17 +1,199 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html",
+    "href": "blog/2018-07-24-entropy-demystified/index.html",
+    "title": "Entropy Demystified",
     "section": "",
-    "text": "About this site"
+    "text": "Is it a disorder, uncertainty, or surprise?\nThe idea of entropy is confusing at first because people use so many different words to describe it: disorder, uncertainty, surprise, unpredictability, amount of information, and so on. If you’ve got confused with the word “entropy”, you are in the right place. I am going to demystify it for you."
+  },
+  {
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html#who-invented-entropy-and-why",
+    "href": "blog/2018-07-24-entropy-demystified/index.html#who-invented-entropy-and-why",
+    "title": "Entropy Demystified",
+    "section": "1 Who Invented Entropy and Why?",
+    "text": "1 Who Invented Entropy and Why?\nIn 1948, Claude Shannon introduced the concept of information entropy in his paper “A Mathematical Theory of Communication”.\n\n\n\nClaude Shannon (Source: Wikipedia)\n\n\nShannon sought a way to efficiently send messages without losing any information.\n\nShannon measured the efficiency in terms of average message length. Therefore, he was thinking about how to encode the original message into the smallest possible data structure. At the same time, he required that there should be no information loss. As such, the decoder at the destination must be able to restore the original message losslessly.\n\nShannon defined entropy as the smallest possible average size of lossless encoding of the messages sent from the source to the destination. He showed how to calculate entropy, which is valuable for using the communication channel efficiently.\nThe above definition of entropy might not be evident to you now. We shall see many examples to learn what it means to efficiently and losslessly send messages."
+  },
+  {
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html#how-to-make-efficient-and-lossless-encoding",
+    "href": "blog/2018-07-24-entropy-demystified/index.html#how-to-make-efficient-and-lossless-encoding",
+    "title": "Entropy Demystified",
+    "section": "2 How to Make Efficient and Lossless Encoding?",
+    "text": "2 How to Make Efficient and Lossless Encoding?\nSuppose you want to send a message from Tokyo to New York regarding Tokyo’s weather today.\n\nIs this efficient?\nIn this scenario, the sender in Tokyo and the receiver in New York both know that they only communicate about today’s weather in Tokyo. So, we don’t need to send the words like Today, Tokyo’s, and weather. We need to say Fine or Not fine, and that’s it.\n\n\nIt is much shorter. Can we do better?\nYou bet. Because we only need to say yes or no, which is binary. We need precisely 1 bit to encode the above messages. 0 for Fine and 1 for Not fine.\n\n\nIs this lossless?\nYes, we can encode and decode the message without losing any information since we only have two possible message types: Fine and Not fine.\nBut if we also want to talk about Cloudy or Rainy, the 1-bit encoding won’t cover all cases.\n\nHow about using 2 bits instead?\n\nNow we can express all cases. It requires only 2 bits to send the messages.\nBut there is something wrong with this approach. Semantically, Cloudy and Rainy are Not fine. It seems Not fine is redundant. Let’s remove it.\n\nIn the above encoding, Fine is 00, but we don’t need the second zero. When the first bit is zero, we already know it is Fine because both Cloudy and Rainy start with 1.\n\nThe first bit indicates Fine or not in the above encoding. The second bit indicates Cloudy or Rainy.\nBut there is a problem. It can snow in Tokyo, and we cannot communicate with such weather. What do we do?\nWe could add a third bit for Rainy and Snow cases.\n\nWe changed Rainy from 11 to 110 and added Snow as 111 because 110 distinctly differs from 111, but 11 is ambiguous when multiple encodings are transmitting one after another.\nFor example, if we use 11 for Rainy and 111 for Snow, a 5-bit value of 11111 could mean either Rainy, Snow or Snow, Rainy. Because of this, we use 110 for Rainy so that we can use 110111 for Rainy, Snow and 111110 for Snow, Rainy. There is no ambiguity.\nSo, the encoding now uses the first bit for Fine or not, the second for Cloudy or others, and the third for Rain or snow.\nFor example, 010110111 means Fine, Cloudy, Rainy, Snow. 110010111 means Rainy, Fine, Cloudy, Snow. Once again, there is no ambiguity. It is lossless, and it looks pretty efficient.\nTokyo has more weather conditions than just those four cases, but let’s keep the problem simple for now.\nSo, are we done?\nNot quite — we want to know whether we’ve achieved the smallest possible average encoding size using the above lossless encoding. How do we calculate the average encoding size anyway?"
+  },
+  {
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html#how-to-calculate-average-encoding-size",
+    "href": "blog/2018-07-24-entropy-demystified/index.html#how-to-calculate-average-encoding-size",
+    "title": "Entropy Demystified",
+    "section": "3 How to Calculate Average Encoding Size",
+    "text": "3 How to Calculate Average Encoding Size\nLet’s suppose Tokyo sends weather messages to New York often (say, every hour) using the lossless encoding we’ve discussed.\nWe can accumulate weather report data to know the probability distribution of message types sent from Tokyo to New York.\n\nThen, we can calculate the average number of bits used to send messages from Tokyo to New York.\n\\[\n(0.6 \\times 1 \\text{bit})+(0.38 \\times 2 \\text{bits})+(0.01 \\times 3 \\text{bits})+(0.01 \\times 3 \\text{bits}) = 1.42 \\text{bits}\n\\]\nSo, with the above encoding, we use 1.42 bits on average per message. As you can see, the average number of bits depends on the probability distribution and the message encoding (how many bits we use for each message type).\nFor example, the average encoding size will be very different if we have more rain and snow in Tokyo.\n\n\\[\n(0.1 \\times 1 \\text{bit})+(0.1 \\times 2 \\text{bits})+(0.4 \\times 3 \\text{bits})+(0.4 \\times 3 \\text{bits}) = 2.7 \\text{bits}\n\\]\nWe would use 2.7 bits to encode messages on average. We could reduce the average encoding size by changing the encoding to use fewer bits for Rainy and Snow.\n\nThe above encoding requires 1.8 bits on average, much smaller than the previous encoding yields.\nAlthough this encoding yields a smaller average encoding size, we lose the nice semantic meaning we had in the previous encoding scheme (i.e., the first bit for Fine or not, the second for, etc.). It’s ok since we are only concerned with the average encoding size and worry about neither the semantics nor the ease of decoding.\nWe now know how to calculate an average encoding size. But how do we know if our encoding is the best one that achieves the smallest average encoding size?"
+  },
+  {
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html#finding-the-smallest-average-encoding-size",
+    "href": "blog/2018-07-24-entropy-demystified/index.html#finding-the-smallest-average-encoding-size",
+    "title": "Entropy Demystified",
+    "section": "4 Finding the Smallest Average Encoding Size",
+    "text": "4 Finding the Smallest Average Encoding Size\nLet’s suppose we have the following probability distribution. How do we calculate the minimum lossless encoding size for each message type?\n\nWhat is the minimum required encoding size for Rainy? How many bits should we use?\nSuppose we use 1 bit to encode Rainy so 0 means Rainy. In this case, we would have to use at least 2 bits for other message types to make the whole encoding unambiguous. It is not optimal as message types like Fine and Cloudy happen more frequently. We should reserve 1-bit encoding for them to make the average encoding size smaller. Hence, we should use more than 1 bit for Rainy as it occurs much less frequently.\nAs an example shown below, the encoding is unambiguous. Still, the average size is not a theoretical minimum because we use more bits for frequent message types like Fine and Cloudy.\n\nHow about using 2 bits for Rainy? Let’s swap the encoding between Rainy and Fine.\n\nThis encoding has the same problem as the previous one because we use more bits for more frequent message types (Cloudy).\nIf you use 3 bits for Rainy, we can achieve the minimum encoding size on average.\n\nIf we use 4 bits for Rainy, our encoding becomes redundant. So, using 3 bits is the correct encoding for Rainy. It’s all good. However, finding the correct encoding size involves too many trials and errors.\nGiven a probability distribution, is there any easy way to calculate the smallest possible average size of lossless encoding of the messages sent from the source to the destination? In other words, how do we calculate entropy?"
+  },
+  {
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html#how-to-calculate-entropy",
+    "href": "blog/2018-07-24-entropy-demystified/index.html#how-to-calculate-entropy",
+    "title": "Entropy Demystified",
+    "section": "5 How to Calculate Entropy",
+    "text": "5 How to Calculate Entropy\nSuppose we have eight message types, each happening with equal probability (\\(\\frac{1}{8} = 12.5%\\)). What is the minimum number of bits we need to encode them without any ambiguity?\n\nHow many bits do we need to encode eight different values?\n1 bit can encode 0 or 1 (2 values). Adding another bit doubles the capacity since \\(2 \\text{ bits} = 2 \\times 2 = 4\\) values (00, 01, 10, and 11). So, eight different values require \\(3 \\text{ bits} = 2 \\times 2 \\times 2 = 8\\) (000, 001, 010, 011, 100, 101, 110 and 111).\n\nWe can not reduce any bit from any of the message types. If we do, it will cause ambiguity. Also, we don’t need more than 3 bits to encode eight different values.\nIn general, when we need N different values expressed in bits, we need\n\\[\n\\log_2 N\n\\]\nbits, and we don’t need more than this.\nFor example,\n\\[\n\\log_2 8 = \\log_2 2^3 = 3 \\text{ bits}\n\\]\nIn other words, if a message type happens 1 out of N times, the above formula gives the minimum size required. As \\(P=\\frac{1}{N}\\) is the probability of the message, the same thing can be expressed as:\n\\[\n\\log_2 N = -\\log_2 \\frac{1}{N} = -\\log_2 P\n\\]\nLet’s combine this knowledge with how we calculate the minimum average encoding size (in bits), which is entropy:\n\\[\n\\text{Entropy} = -\\sum\\limits_i P(i) \\log_2 P(i)\n\\]\nP(i) is the probability of i-th message type. You may need to sit back and reflect on the simplicity and beauty of this formula. There is no magic. We are merely calculating the average encoding size for each message type using the minimum encoding size.\nLet’s analyze an example using the weather reporting scenario to solidify our understanding.\n\n\\[\n\\begin{aligned}\nP(\\text{Fine}) &= 0.5 \\\\\n-\\log_2 P(\\text{Fine}) &= -\\log_2 0.5 = -\\log_2 1/2 = \\log_2 2 = 1 \\text{ bit} \\\\\n\\\\\nP(\\text{Cloudy}) &= 0.25 \\\\\n-\\log_2 P(\\text{Cloudy}) &= -\\log_2 0.25 = -\\log_2 1/4 = \\log_2 4 = 2 \\text{ bits} \\\\\n\\\\\nP(\\text{Rainy}) &= 0.125 \\\\\n-\\log_2 P(\\text{Rainy}) &= -\\log_2 0.125 = -\\log_2 1/8 = \\log_2 8 = 3 \\text{ bits} \\\\\n\\\\\nP(\\text{Snow}) &= 0.125 \\\\\n-\\log_2 P(\\text{Snow}) &= -\\log_2 0.125 = -\\log_2 1/8 = \\log_2 8 = 3 \\text{ bits}\n\\end{aligned}\n\\]\nSo, the entropy is:\n\\[\n(0.5 \\times 1 \\text{bit})+(0.25 \\times 2 \\text{bits})+(0.125 \\times 3 \\text{bits})+(0.125 \\times 3 \\text{bits}) = 1.75 \\text{bits}\n\\]"
+  },
+  {
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html#what-about-those-analogies",
+    "href": "blog/2018-07-24-entropy-demystified/index.html#what-about-those-analogies",
+    "title": "Entropy Demystified",
+    "section": "6 What About Those Analogies?",
+    "text": "6 What About Those Analogies?\nThere are a lot of analogies used for entropy: disorder, uncertainty, surprise, unpredictability, amount of information, and so on.\nIf entropy is high (encoding size is big on average), we have many message types with small probabilities. Hence, whenever a new message arrives, you’d expect a different type than previous messages. You may see it as a disorder or uncertainty, or unpredictability.\nWhen a message type with a much smaller probability than other message types happens, it appears as a surprise because, on average, you’d expect other, more frequently sent message types.\nAlso, a rare message type has more information than more frequent message types because it eliminates a lot of other probabilities and tells us more specific information.\nIn the weather scenario, by sending Rainy, which happens 12.5% of the time, we reduce the uncertainty by 87.5% of the probability distribution (Fine, Cloudy, Snow) provided we had no information before. If we sent Fine (50%) instead, we would reduce the uncertainty by 50%.\nIf the entropy is high, the average encoding size is significant, which means each message tends to have more (specific) information. Again, this is why high entropy is associated with disorder, uncertainty, surprise, unpredictability, and amount of information.\nLow entropy means that we often receive more predictable information, which means less disorder, uncertainty, surprise, predictability, and less (specific) information.\nI hope these analogies are no longer confusing for you."
+  },
+  {
+    "objectID": "blog/2018-07-24-entropy-demystified/index.html#references",
+    "href": "blog/2018-07-24-entropy-demystified/index.html#references",
+    "title": "Entropy Demystified",
+    "section": "7 References",
+    "text": "7 References\n\nThe Mathematical Theory of Communication. 1963.\nShannon, C. E.\nEntropy (Information theory)\nWikipedia\nA Short Introduction to Entropy, Cross-Entropy and KL-Divergence\nAurélien Géron"
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html",
+    "title": "KL Divergence Demystified",
+    "section": "",
+    "text": "What does KL stand for? Is it a distance measure? What does it mean to measure the similarity of two probability distributions?\nIf you want to intuitively understand the KL divergence, you are in the right place. I’ll demystify it for you.\nAs I will explain from the information theory point of view, knowing the entropy and the cross-entropy concepts is required to apprehend this article thoroughly. If you are not familiar with them, you may want to read the following two articles: one for the entropy and the other for the cross-entropy.\nIf you are ready, read on."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#what-does-kl-stand-for",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#what-does-kl-stand-for",
+    "title": "KL Divergence Demystified",
+    "section": "1 What does KL stand for?",
+    "text": "1 What does KL stand for?\nKL in the KL divergence stands for Kullback-Leibler, which represents the following two people:\n\n\n\nSolomon Kullback (Source: Wikipedia)\n\n\n\n\n\nRichard A. Leibler (Source: Wikipedia)\n\n\nThey introduced the concept of the KL divergence in 1951 (Wikipedia)."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#what-is-the-kl-divergence",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#what-is-the-kl-divergence",
+    "title": "KL Divergence Demystified",
+    "section": "2 What is the KL divergence?",
+    "text": "2 What is the KL divergence?\nThe KL divergence tells us how well the probability distribution \\(Q\\) approximates the probability distribution \\(P\\) by calculating the cross-entropy minus the entropy.\n\\[\nD_{KL}(P \\| Q) = H(P, Q) - H(P)\n\\]\nAs a reminder, I put the cross-entropy and the entropy formula below:\n\\[\n\\begin{aligned}\nH(P, Q) &= \\mathbb{E}_{x \\sim P}[ -\\log Q(x)] \\\\\n   H(P) &= \\mathbb{E}_{x \\sim P}[ -\\log P(x)] \\\\\n\\end{aligned}\n\\]\nThe KL divergence can also be expressed in the expectation form as follows:\n\\[\n\\begin{aligned}\nD_{KL}(P \\| Q) &= \\mathbb{E}_{x \\sim P}[ -\\log Q(x)] - \\mathbb{E}_{x \\sim P}[ -\\log P(x)] \\\\\\\\\n&= \\mathbb{E}_{x \\sim P}[ -\\log Q(x) - (-\\log P(x)) ] \\\\\\\\\n&= \\mathbb{E}_{x \\sim P}[ -\\log Q(x) + \\log P(x) ] \\\\\\\\\n&= \\mathbb{E}_{x \\sim P}[ \\log P(x) -\\log Q(x) ] \\\\\\\\\n&= \\mathbb{E}_{x \\sim P}\\left[ \\log \\frac{P(x)}{Q(x)} \\right]\n\\end{aligned}\n\\]\nThe expectation formula can be expressed in the discrete summation form or the continuous integration form:\n\\[\n\\begin{aligned}\nD_{KL}(P \\| Q) &= \\sum\\limits_i P(i) \\log \\frac{P(i)}{Q(i)} \\\\\\\\\nD_{KL}(P \\| Q) &= \\int P(x) \\log \\frac{P(x)}{Q(x)} dx\n\\end{aligned}\n\\]\nSo, what does it measure? It measures the similarity (or dissimilarity) between two probability distributions.\nIf so, is it a distance measure?\nTo answer this question, let’s see a few more characteristics of the KL divergence."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#the-kl-divergence-is-non-negative",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#the-kl-divergence-is-non-negative",
+    "title": "KL Divergence Demystified",
+    "section": "3 The KL divergence is non-negative",
+    "text": "3 The KL divergence is non-negative\nThe KL divergence is non-negative. An intuitive proof is that:\n\nIf \\(P = Q\\), the KL divergence is zero as: \\(\\log \\frac{P}{Q} = \\log 1 = 0\\)\nIf \\(P \\ne Q\\), the KL divergence is positive because the entropy is the minimum average lossless encoding size.\n\nSo, the KL divergence is a non-negative value that indicates how close two probability distributions are.\nIt does sound like a distance measure, doesn’t it? But it is not."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#the-kl-divergence-is-asymmetric",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#the-kl-divergence-is-asymmetric",
+    "title": "KL Divergence Demystified",
+    "section": "4 The KL divergence is asymmetric",
+    "text": "4 The KL divergence is asymmetric\nThe KL divergence is not symmetric:\n\\[\nD_{KL}(P \\| Q) \\ne D_{KL}(Q \\| P)\n\\]\nWe can deduce the above from the fact that the cross-entropy is asymmetric. The cross-entropy \\(H(P, Q)\\) uses the probability distribution \\(P\\) to calculate the expectation. The cross-entropy \\(H(Q, P)\\) uses the probability distribution \\(Q\\) to calculate the expectation.\nSo, it cannot be a distance measure, as any distance measure should be symmetric.\nThis asymmetric nature of the KL divergence is a crucial aspect. Let’s look at two examples to understand it intuitively.\nSuppose we have a probability distribution \\(P\\) which looks like the below:\n\nNow, we want to approximate it with a normal distribution \\(Q\\) as below:\n\nThe KL divergence measures inefficiency in using the probability distribution \\(Q\\) to approximate the true probability distribution \\(P\\).\n\\[\nD_{KL}(P \\| Q) = \\mathbb{E}_{x \\sim P} \\left[ \\log \\frac{P(x)}{Q(x)} \\right]\n\\]\nIf we swap P and Q, it means that we use the probability distribution P to approximate the normal distribution Q, and it’d look like the below:\n\n\\[\nD_{KL}(Q \\| P) = \\mathbb{E}_{x \\sim Q} \\left[ \\log \\frac{Q(x)}{P(x)} \\right]\n\\]\nBoth cases measure the similarity between \\(P\\) and \\(Q\\), but the result could be entirely different, and both are valid."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#modeling-a-true-distribution",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#modeling-a-true-distribution",
+    "title": "KL Divergence Demystified",
+    "section": "5 Modeling a true distribution",
+    "text": "5 Modeling a true distribution\nBy approximating a probability distribution with a well-known distribution like the normal distribution, binomial distribution, etc., we are modeling the true distribution with a known one.\nThis is when we are using the below formula:\n\\[\nD_{KL}(P \\| Q) = \\mathbb{E}_{x \\sim P} \\left[ \\log \\frac{P(x)}{Q(x)} \\right]\n\\]\nCalculating the KL divergence, we can find the model (the distribution and the parameters) that fits the true distribution well."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#variational-auto-encoder",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#variational-auto-encoder",
+    "title": "KL Divergence Demystified",
+    "section": "6 Variational Auto-encoder",
+    "text": "6 Variational Auto-encoder\nAn example of using the below formula is the variational auto-encoder.\n\\[\nD_{KL}(Q \\| P) = \\mathbb{E}_{x \\sim Q} \\left[ \\log \\frac{Q(x)}{P(x)} \\right]\n\\]\nI will lightly touch on this topic here as it requires much more explanation for people unfamiliar with the variational auto-encoder.\nThe KL divergence is used to force the distribution of latent variables to be normal so that we can sample latent variables from the normal distribution. As such, it is included in the loss function to improve the similarity between the distribution of latent variables and the normal distribution.\nI’ve written an article on VAE in details here."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#a-few-mathy-points",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#a-few-mathy-points",
+    "title": "KL Divergence Demystified",
+    "section": "7 A Few Mathy Points",
+    "text": "7 A Few Mathy Points\nThe term \\(p \\log p\\) becomes zero when \\(p\\) goes to zero.\n\\[\n\\lim\\limits_{p \\rightarrow 0} p \\log p = 0\n\\]\nIt is defined as infinity where \\(P &gt; 0\\) but \\(Q=0\\).\n\\[\nD_{KL}(P \\| Q) = \\infty \\quad (\\text{where } P &gt; 0 \\text{ but } Q = 0)\n\\]\nA more rigor proof of the KL divergence being non-negative is as follows:\n\\[\n\\begin{aligned}\nD_{KL}(P \\| Q) &= \\mathbb{E}_{x \\sim P}\\left[ \\log \\frac{P(x)}{Q(x)} \\right] \\\\\n&= \\mathbb{E}_{x \\sim P}\\left[ -\\log \\frac{Q(x)}{P(x)} \\right]\n\\end{aligned}\n\\]\nSince \\(-\\log\\) is a convex function, we can apply Jensen’s inequality:\n\\[\n\\begin{aligned}\nD_{KL}(P \\| Q) &\\ge -\\log \\left(\\mathbb{E}_{x \\sim P}\\left[ \\frac{Q(x)}{P(x)} \\right] \\right) \\\\\n&= -\\log \\left( \\int P(x) \\frac{Q(x)}{P(x)} dx \\right) \\\\\n&= -\\log \\left( \\int Q(x) dx \\right) \\\\\n&= -\\log(1) \\\\\n&= 0\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#likelihood-ratio",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#likelihood-ratio",
+    "title": "KL Divergence Demystified",
+    "section": "8 Likelihood Ratio",
+    "text": "8 Likelihood Ratio\nAnother way to describe the KL divergence from a probabilistic perspective is to use the following likelihood ratio.\n\\[\n\\frac{P(x)}{Q(x)}\n\\]\nIf you are interested in this approach, I recommend the article by Marko Cotra (the link in the references section below).\n\nThat is all for now. I hope this article is helpful to you."
+  },
+  {
+    "objectID": "blog/2018-11-06-kl-divergence-demystified/index.html#references",
+    "href": "blog/2018-11-06-kl-divergence-demystified/index.html#references",
+    "title": "KL Divergence Demystified",
+    "section": "9 References",
+    "text": "9 References\n\nVAE: Variational Auto-Encoder (2013)\nCross-Entropy Demystified\nEntropy Demystified\nKullback Leibler divergence\nWikipedia\nCS412 Fall 2008. Introduction to Data Warehousing and Data Mining\nJiawei Han\nECE 830 Fall 2011 Statistical Signal Processing\nRobert Nowak\nMaking sense of the Kullback–Leibler (KL) Divergence\nMarko Cotra\nA Short Introduction to Entropy, Cross-Entropy, and KL-Divergence\nAurélien Géron"
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "",
+    "text": "If you’ve heard about the transposed convolution and got confused about its meaning, this article is for you.\nThe content of this article is as follows:\nThe notebook is available on my GitHub."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#the-need-for-up-sampling",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#the-need-for-up-sampling",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "1 The Need for Up-sampling",
+    "text": "1 The Need for Up-sampling\nUsing neural networks to generate images usually involves up-sampling from low resolution to high resolution.\n\nThere are various methods to conduct up-sampling operations:\n\nNearest neighbor interpolation\nBi-linear interpolation\nBi-cubic interpolation\n\nAll these methods involve some interpolation method we must choose when deciding on network architecture. It is like manual feature engineering, and there is nothing that the network can learn."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#why-transposed-convolution",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#why-transposed-convolution",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "2 Why Transposed Convolution?",
+    "text": "2 Why Transposed Convolution?\nWe can use the transposed convolution if we want our network to learn how to up-sample optimally. It does not use a predefined interpolation method. It has learnable parameters.\nIt is helpful to understand the transposed convolution concept as essential papers and projects use it, such as:\n\nthe generator in DCGAN takes randomly sampled values to produce a full-size image.\nsemantic segmentation uses convolutional layers to extract features in the encoder. Then it restores the original image size in the decoder to classify every pixel in the original image.\n\nFYI — the transposed convolution is also known as:\n\nFractionally-strided convolution\nDeconvolution\n\nWe will only use the word transposed convolution in this article, but you may notice alternative names in other articles."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#convolution-operation",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#convolution-operation",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "3 Convolution Operation",
+    "text": "3 Convolution Operation\nLet’s use a simple example to explain how convolution operation works. Suppose we have a 4x4 matrix and apply a convolution operation with a 3 x 3 kernel, with no padding and a stride of 1. As shown further below, the output is a 2x2 matrix.\n\n\n\nConvolution Operation\n\n\nThe convolution operation calculates the sum of the element-wise multiplication between the input and kernel matrices. We can do this only four times since we have no padding and a stride of 1. Hence, the output matrix is 2x2.\n\n\n\nSum of Element-wise Multiplication\n\n\nA critical point of such convolution operation is that positional connectivity exists between input and output values.\nFor example, the input matrix’s top left values affect the output matrix’s top left value.\nWe use the 3 x 3 kernel to connect the nine input matrix values to one output matrix value. A convolution operation forms a many-to-one relationship. Let’s keep this in mind as we need it later on."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#going-backward",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#going-backward",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "4 Going Backward",
+    "text": "4 Going Backward\nNow, suppose we want to go in the other direction. We want to associate one value in a matrix with nine values in another. It’s a one-to-many relationship. It is like going backward in convolution operation, which is the core idea of transposed convolution.\nFor example, we up-sample a 2x2 matrix to a 4x4 matrix. The operation maintains the 1-to-9 relationship.\n\n\n\nGoing Backward of Convolution\n\n\nBut how do we perform such an operation?\nTo talk about how we need to define the convolution matrix and the transposed convolution matrix."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#convolution-matrix",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#convolution-matrix",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "5 Convolution Matrix",
+    "text": "5 Convolution Matrix\nWe can express a convolution operation using a matrix. It is a kernel matrix rearranged so that we can use matrix multiplication to conduct convolution operations.\n\nWe rearrange the 3x3 kernel into a 4x16 matrix as below:\n\nIt is a convolution matrix. Each row defines one convolution operation. If you do not see it, the below diagram may help. Each row of the convolution matrix is just a rearranged kernel matrix with zero padding in different places.\n\nTo use it, we flatten the input matrix (4x4) into a column vector (16x1).\n\n\n\nFlattened Input Matrix\n\n\nWe can matrix-multiply the 4x16 convolution matrix with the 16x1 input matrix (16-dimensional column vector).\n\nThe output 4x1 matrix can be reshaped into a 2x2 matrix, giving us the same result.\n\nIn short, a convolution matrix is nothing but rearranged kernel weights, and we can express a convolution operation using the convolution matrix.\nSo what?\nThe point is that with the convolution matrix, you can go from 16 (4x4) to 4 (2x2) because the convolution matrix is 4x16. Then, if you have a 16x4 matrix, you can go from 4 (2x2) to 16 (4x4).\nConfused?\nPlease read on."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#transposed-convolution-matrix",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#transposed-convolution-matrix",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "6 Transposed Convolution Matrix",
+    "text": "6 Transposed Convolution Matrix\nWe want to go from 4 (2x2) to 16 (4x4). So, we use a 16x4 matrix. But there is one more thing here. We want to maintain the 1-to-9 relationship.\nSuppose we transpose the convolution matrix C (4x16) to C.T (16x4). We can matrix-multiply C.T (16x4) with a column vector (4x1) to generate an output matrix (16x1). The transposed matrix connects one value to 9 values in the output.\n\n\n\nConvolution By Matrix Multiplication\n\n\nWe can reshape the output into 4x4.\n\nWe have up-sampled a smaller matrix (2x2) into a larger one (4x4). The transposed convolution maintains the 1 to 9 relationship because of the way it lays out the weights.\nNB: the actual weight values in the matrix do not come from the original convolution matrix. What’s important is that the weight layout is the same as the transpose of the convolution matrix shape."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#summary",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#summary",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "7 Summary",
+    "text": "7 Summary\nThe transposed convolution operation forms the same connectivity as the regular convolution but in the backward direction.\nWe can use it to conduct up-sampling. Moreover, the weights in the transposed convolution are learnable. So we do not need a predefined interpolation method.\nEven though it is called the transposed convolution, it does not mean we take some existing convolution matrix and use the transposed version. The main point is that the association between the input and the output is handled backward compared with a standard convolution matrix (one-to-many rather than many-to-one association).\nAs such, the transposed convolution is not a convolution. But we can emulate the transposed convolution using a convolution. We up-sample the input by adding zeros between the values in the input matrix so that the direct convolution produces the same effect as the transposed convolution. You may find some article that explains the transposed convolution in this way. However, it is less efficient due to the need to add zeros to up-sample the input before the convolution.\nOne caution: the transposed convolution is the cause of the checkerboard artifacts in generated images. This article recommends an up-sampling operation (i.e., an interpolation method) followed by a convolution operation to reduce such issues. If your main objective is generating images without such artifacts, it is worth reading the paper to learn more."
+  },
+  {
+    "objectID": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#references",
+    "href": "blog/2017-11-14-up-sampling-with-transposed-convolution/index.html#references",
+    "title": "Up-sampling with Transposed Convolution",
+    "section": "8 References",
+    "text": "8 References\n\nA guide to convolution arithmetic for deep learning\nVincent Dumoulin, Francesco Visin\nUnsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks\nAlec Radford, Luke Metz, Soumith Chintala\nFully Convolutional Networks for Semantic Segmentation\nJonathan Long, Evan Shelhamer, Trevor Darrell\nDeconvolution and Checkerboard Artifacts\nAugustus Odena, Vincent Dumoulin, Chris Olah"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Naoki Shibuya's Articles",
+    "title": "Naoki Shibuya",
     "section": "",
-    "text": "Order By\n      Default\n      \n        Title\n      \n      \n        Date - Oldest\n      \n      \n        Date - Newest\n      \n    \n  \n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\nBeautiful Sudoku Solver by Peter Norvig\n\n\nPython code that solves any Sudoku puzzles systematically\n\n\n\nJan 28, 2017\n\n\n\n\n\n\nNo matching items"
+    "text": "Order By\n      Default\n      \n        Title\n      \n      \n        Date - Oldest\n      \n      \n        Date - Newest\n      \n    \n  \n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\nKL Divergence Demystified\n\n\nWhat does measuring the similarity of two probability distributions mean?\n\n\n\nNov 6, 2018\n\n\n\n\n\n\n\n\n\n\n\n\n\nCross-Entropy Demystified\n\n\nWhat is it? Is there any relation to the entropy concept?\n\n\n\nOct 28, 2018\n\n\n\n\n\n\n\n\n\n\n\n\n\nEntropy Demystified\n\n\nIs it a disorder, uncertainty, or surprise?\n\n\n\nJul 24, 2018\n\n\n\n\n\n\n\n\n\n\n\n\n\nUp-sampling with Transposed Convolution\n\n\n\nNov 14, 2017\n\n\n\n\n\n\n\n\n\n\n\n\n\nBeautiful Sudoku Solver by Peter Norvig\n\n\nPython code that solves any Sudoku puzzles systematically\n\n\n\nJan 28, 2017\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "blog/2017-01-28-sudoku-solver-by-peter-norvig/index.html",
@@ -75,5 +257,61 @@
     "title": "Beautiful Sudoku Solver by Peter Norvig",
     "section": "8 References",
     "text": "8 References\n\nSolving Every Sudoku Puzzle\nPeter Norvig\nSolving Any Sudoku Puzzle\nPeter Norvig’s Python notebook"
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html",
+    "title": "Cross-Entropy Demystified",
+    "section": "",
+    "text": "What is it? Is there any relation to the entropy concept? Why is it used for classification loss? What about the binary cross-entropy?\nSome of us might have used cross-entropy for calculating classification losses and wondered why we use the natural logarithm. Some might have seen the binary cross-entropy and wondered whether it fundamentally differs from the cross-entropy. If so, reading this article should help to demystify those questions.\nThe word “cross-entropy” has “cross” and “entropy” in it, and it helps to understand the “entropy” part to understand the “cross” part.\nSo, let’s review the entropy formula."
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html#review-of-entropy-formula",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html#review-of-entropy-formula",
+    "title": "Cross-Entropy Demystified",
+    "section": "1 Review of Entropy Formula",
+    "text": "1 Review of Entropy Formula\nThe previous article should help you understand the entropy concept in case you are not already familiar with it.\nClaude Shannon defined the entropy to calculate the minimum encoding size as he was looking for a way to efficiently send messages without losing any information.\n\nAs we will see below, there are various ways of expressing entropy.\nThe entropy of a probability distribution is as follows:\n\\[\n\\text{Entropy} = - \\sum\\limits_i P(i) \\log P(i)\n\\]\nWe assume that we know the probability \\(P\\) for each \\(i\\). The term \\(i\\) indicates a discrete event that could mean different things depending on the scenario you are dealing with.\nFor continuous variables, we can be write it using the integral form:\n\\[\n\\text{Entropy} = - \\int P(x) \\log P(x) dx\n\\]\nHere, \\(x\\) is a continuous variable, and \\(P(x)\\) is the probability density function.\nIn both discrete and continuous variable cases, we are calculating the expectation (average) of the negative log probability, which is the theoretical minimum encoding size of the information from the event \\(x\\).\nSo, the above formula can be re-written in the expectation form as follows:\n\\[\n\\text{Entropy} = \\mathbb{E}_{x \\sim P} \\left[ - \\log P(x) \\right]\n\\]\n\\(x \\sim P\\) means we calculate the expectation with the probability distribution \\(P\\).\nWe can write the entropy using \\(H\\) as follows:\n\\[\nH(P) = \\mathbb{E}_{x \\sim P} \\left[ -\\log P(x) \\right]\n\\]\nPeople use all these notations interchangeably, and we see them used in different places when we read articles and papers that use entropy concepts.\nIn short, the entropy tells us the theoretical minimum average encoding size for events that follow a particular probability distribution.\nAs long as we know the probability distribution of anything, we can calculate its entropy.\nWe cannot calculate the entropy if we do not know the probability distribution. So, we would need to estimate the probability distribution.\nHowever, what does it mean to estimate the entropy?\nAlso, how accurate would that be?\nAnswering these questions gets us to the cross-entropy concept."
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html#estimating-entropy",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html#estimating-entropy",
+    "title": "Cross-Entropy Demystified",
+    "section": "2 Estimating Entropy",
+    "text": "2 Estimating Entropy\nLet’s assume we are reporting Tokyo’s weather to New York and want to encode the message into the smallest possible size. We do not know the distribution of the weather before it happens. For the sake of discussion, let’s assume we can find it out after observing the weather in Tokyo for some time.\nWe do not initially know the probability distribution of Tokyo’s weather, so we estimate it as \\(Q\\) to calculate the encoding size for transmitting our weather report from Tokyo to New York.\nUsing the estimated probability distribution \\(Q\\), the estimated entropy would be:\n\\[\n\\text{EstimatedEntropy} = \\mathbb{E}_{x \\sim Q}\\left[ -\\log Q(x) \\right]\n\\]\nIf \\(Q\\) is close to the real probability distribution, the above estimation tells us the smallest average encoding size.\nHowever, there are two kinds of uncertainty involved in the estimation formula.\nAs indicated by \\(x \\sim Q\\), we are using the estimated probability distribution \\(Q\\) to calculate the expectation, which would differ from the actual probability distribution \\(P\\).\nMoreover, we estimate the minimum encoding size as \\(-\\log Q\\), which we calculate based on the estimated probability distribution \\(Q\\). Hence, it will not be 100% accurate.\nThe estimated probability distribution \\(Q\\) affects the expectation and encoding size estimation. Therefore, the estimated entropy can be very wrong.\nAlternatively, it can be close to the real entropy by coincidence because \\(Q\\) affects both the expectation calculation and the encoding size estimation.\nSo, comparing the estimated entropy with the real entropy may not mean anything.\nLike Claude Shannon, our main concern is making the encoding size as small as possible. So, we want to compare our encoding size with the theoretical minimum encoding size based on entropy.\nSuppose we have the real distribution \\(P\\) after observing the weather in Tokyo for some period. We can calculate the realized average encoding size using the probability distribution \\(P\\) and the actual encoding size (based on \\(Q\\)) used during the weather reporting.\nIt is called the cross-entropy between \\(P\\) and \\(Q\\), which we can compare with the entropy.\n\\[\n\\begin{aligned}\n\\text{CrossEntropy} &= \\mathbb{E}_{x \\sim P} \\left[ -\\log Q(x) \\right] \\\\\\\\\n     \\text{Entropy} &= \\mathbb{E}_{x \\sim P} \\left[ -\\log P(x) \\right]\n\\end{aligned}\n\\]\nWe are comparing apple to apple as we use the same true distribution for both expectation calculations. We are comparing the theoretical minimum and actual encoding used in weather reporting.\nIn short, we are cross-checking the encoding size, which is what “cross” means in cross-entropy."
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html#cross-entropy-entropy",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html#cross-entropy-entropy",
+    "title": "Cross-Entropy Demystified",
+    "section": "3 Cross-entropy ≥ Entropy",
+    "text": "3 Cross-entropy ≥ Entropy\nCommonly, we express the cross-entropy H as follows:\n\\[\nH(P, Q) = \\mathbb{E}_{x \\sim P} \\left[ -\\log Q(x) \\right]\n\\]\n\\(H(P, Q)\\) means that we calculate the expectation using \\(P\\) and the encoding size using \\(Q\\). As such, \\(H(P, Q)\\) and \\(H(Q, P)\\) is not necessarily the same except when \\(Q=P\\), in which case \\(H(P, Q) = H(P, P) = H(P)\\) and it becomes the entropy itself.\nThis point is subtle but essential. For the expectation, we should use the true probability \\(P\\) as that tells the distribution of events. For the encoding size, we should use \\(Q\\) as that is used to encode messages.\nSince the entropy is the theoretical minimum average size, the cross-entropy is higher than or equal to the entropy but not less than that.\nIn other words, if our estimate is perfect, \\(Q = P\\) and, hence, \\(H(P, Q)=H(P)\\). Otherwise, \\(H(P, Q) &gt; H(P)\\).\nI hope the connection between hentropy and cross-entropy should be clear. Let’s talk about why we use cross-entropy for the classification loss function."
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html#cross-entropy-as-a-loss-function",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html#cross-entropy-as-a-loss-function",
+    "title": "Cross-Entropy Demystified",
+    "section": "4 Cross-Entropy as a Loss Function",
+    "text": "4 Cross-Entropy as a Loss Function\nLet’s say we have a dataset of animal images with five different animals. Each image has only one animal in it.\n\n\n\nSource: https://www.freeimages.com/\n\n\nEach image is labeled with the corresponding animal using the one-hot encoding.\n\nWe can treat one-hot encoding as a probability distribution for each image. Let’s see a few examples.\nThe probability distribution of the first image being a dog is 1.0 (=100%).\n\\[\n\\begin{aligned}\n&P_1(\\text{dog})      &= 1 \\\\\n&P_1(\\text{fox})      &= 0 \\\\\n&P_1(\\text{horse})    &= 0 \\\\\n&P_1(\\text{eagle})    &= 0 \\\\\n&P_1(\\text{squirrel}) &= 0\n\\end{aligned}\n\\]\nFor the second image, the label tells us that it is a fox with 100% certainty.\n\\[\n\\begin{aligned}\n&P_1(\\text{dog})      &= 0 \\\\\n&P_1(\\text{fox})      &= 1 \\\\\n&P_1(\\text{horse})    &= 0 \\\\\n&P_1(\\text{eagle})    &= 0 \\\\\n&P_1(\\text{squirrel}) &= 0\n\\end{aligned}\n\\]\nand so on.\nAs such, the entropy of each image is zero.\n\\[\n\\begin{aligned}\nH(P_1) &= 0 \\\\\nH(P_2) &= 0 \\\\\nH(P_3) &= 0 \\\\\nH(P_4) &= 0 \\\\\nH(P_5) &= 0\n\\end{aligned}\n\\]\nIn other words, one-hot encoded labels tell us what animal each image has with 100% certainty. It is not like the first image can be a dog for 90% and a cat for 10%. It is always a dog, and there will be no surprise.\nLet’s say we have a machine-learning model that classifies those images. When we have not adequately trained the model, it may classify the first image (dog) as follows:\n\\[\nQ_1 = \\begin{bmatrix}\n0.4 & 0.3 & 0.05 & 0.05 & 0.2\n\\end{bmatrix}\n\\]\nThe model says the first image is 40% for a dog, 30% for a fox, 5% for a horse, 5% for an eagle, and 20% for a squirrel. This estimation is not very precise or confident about what animal the first image has.\nIn contrast, the below label gives us the exact distribution of the first image’s animal class. It tells us it is a dog with 100% certainty.\n\\[\nP_1 = \\begin{bmatrix}\n1 & 0 & 0 & 0 & 0\n\\end{bmatrix}\n\\]\nSo, how well was the model’s prediction? We can calculate the cross-entropy as follows:\n\\[\n\\begin{aligned}\nH(P_1, Q_1) &= -\\sum\\limits_i P_1(i) \\log Q_1(i) \\\\\n& = -(1 \\, \\log\\, 0.4 \\quad + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0.3  \\quad + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0.05 \\ \\ + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0.05 \\ \\ + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0.2) \\\\\n&= - \\log\\, 0.4 \\\\\n&\\approx 0.916\n\\end{aligned}\n\\]\nThe value is higher than the zero entropy of the label, but we do not have an intuitive sense of what this value means. So, let’s see another cross-entropy value for comparison.\nAfter the model is well-trained, it may produce the following prediction for the first image.\n\\[\nQ_1 = \\begin{bmatrix}\n0.98 & 0.01 & 0 & 0 & 0.01\n\\end{bmatrix}\n\\]\nAs seen below, the cross-entropy is much lower than before.\n\\[\n\\begin{aligned}\nH(P_1, Q_1) &= -\\sum\\limits_i P_1(i) \\log Q_1(i) \\\\\n& = -(1 \\, \\log\\, 0.98 \\ + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0.01 \\ + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0 \\quad\\ \\  + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0 \\quad\\ \\ + \\\\\n&\\qquad\\ \\ 0\\, \\log\\, 0.01) \\\\\n&= - \\log\\, 0.98 \\\\\n&\\approx 0.02\n\\end{aligned}\n\\]\nThe cross-entropy compares the model’s prediction with the label, which is the true probability distribution. The cross-entropy goes down as the prediction gets more and more accurate. It becomes zero if the prediction is perfect. As such, cross-entropy can be a loss function to train a classification model."
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html#notes-on-nats-vs.-bits",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html#notes-on-nats-vs.-bits",
+    "title": "Cross-Entropy Demystified",
+    "section": "5 Notes on Nats vs. Bits",
+    "text": "5 Notes on Nats vs. Bits\nIn machine learning, we use base e instead of base 2 for multiple reasons (one of them being the ease of calculating the derivative).\nThe change of the logarithm base does not cause any problem since it changes the magnitude only.\n\\[\n\\log_2 x = \\frac{\\log_e x}{\\log_e 2}\n\\]\nFor example, using the cross-entropy as a classification cost function still makes sense as we only care about reducing it by training the model better and better.\nAs a side note, the information unit with the base e logarithm is nats, whereas the information unit with the base 2 logarithm is called bits. 1 nat information comes from an event with 1/e probability.\n\\[\n\\begin{aligned}\n1 &= -\\log P \\\\\n\\therefore P &= \\frac{1}{e}\n\\end{aligned}\n\\]\nThe base e logarithms are less intuitive than the base 2 logarithms. The amount of information in 1 bit comes from an event with 1/2 probability. If we can encode a piece of information in 1 bit, one such message can reduce 50% uncertainty. The same analogy is not easy to make with base e, which is why the base 2 logarithm is often used to explain the information entropy concept. However, the machine learning application uses the base e logarithm for implementation convenience."
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html#binary-cross-entropy",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html#binary-cross-entropy",
+    "title": "Cross-Entropy Demystified",
+    "section": "6 Binary Cross-Entropy",
+    "text": "6 Binary Cross-Entropy\nWe can use binary cross-entropy for binary classification where we have yes/no answers. For example, there are only dogs or cats in the images.\nFor the binary classifications, the cross-entropy formula contains only two probabilities:\n\\[\n\\begin{aligned}\nH(P, Q) &= -\\sum\\limits_{i=(\\text{cat,dog})} P(i) \\log Q(i) \\\\\\\\\n&= -P(\\text{cat}) \\log Q(\\text{cat}) - P(\\text{cat}) \\log Q(\\text{dog})\n\\end{aligned}\n\\]\nUsing the following relationship:\n\\[\nP(\\text{dog}) = 1 - P(\\text{cat})\n\\]\n, we can write the cross-entropy as follows:\n\\[\nH(P, Q) = -P(\\text{cat}) \\log Q(\\text{cat}) - (1 - P(\\text{cat})) \\log(1 - Q(\\text{cat}))\n\\]\nWe can further simplify it by changing the symbols slightly:\n\\[\n\\begin{aligned}\nP &= P(\\text{cat}) \\\\\n\\hat{P} &= Q(\\text{cat})\n\\end{aligned}\n\\]\nThen, the binary cross-entropy formula becomes:\n\\[\n\\text{BinaryCrossEntropy} = -P \\log \\hat{P} - (1 - P) \\log(1 - \\hat{P})\n\\]\n, which may look more familiar to some of us.\nIn short, the binary cross-entropy is a cross-entropy with two classes. Other than that, they are the same concept.\nNow that we know the concepts well, the entropy of the cross-entropy concept should be zero for all of us."
+  },
+  {
+    "objectID": "blog/2018-10-28-cross-entropy-demystified/index.html#references",
+    "href": "blog/2018-10-28-cross-entropy-demystified/index.html#references",
+    "title": "Cross-Entropy Demystified",
+    "section": "7 References",
+    "text": "7 References\n\nInformation Entropy\nWikipedia\nCross-entropy\nWikipedia\nA Short Introduction to Entropy, Cross-Entropy, and KL-Divergence\nAurélien Géron"
   }
 ]

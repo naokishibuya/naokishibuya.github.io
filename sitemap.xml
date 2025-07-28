@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://naokishibuya.github.io/about.html</loc>
-    <lastmod>2025-07-27T13:56:10.998Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2018-07-24-entropy-demystified/index.html</loc>
+    <lastmod>2025-07-28T11:44:24.392Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2018-11-06-kl-divergence-demystified/index.html</loc>
+    <lastmod>2025-07-28T11:44:24.421Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2017-11-14-up-sampling-with-transposed-convolution/index.html</loc>
+    <lastmod>2025-07-28T11:13:01.760Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/index.html</loc>
-    <lastmod>2025-07-27T13:56:11.001Z</lastmod>
+    <lastmod>2025-07-28T11:48:55.468Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2017-01-28-sudoku-solver-by-peter-norvig/index.html</loc>
     <lastmod>2025-07-27T13:56:11.000Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2018-10-28-cross-entropy-demystified/index.html</loc>
+    <lastmod>2025-07-28T11:44:24.404Z</lastmod>
   </url>
 </urlset>

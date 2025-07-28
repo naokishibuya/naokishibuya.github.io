@@ -8,7 +8,7 @@
 
 <meta name="dcterms.date" content="2017-01-28">
 
-<title>Beautiful Sudoku Solver by Peter Norvig – Naoki Shibuya’s Articles</title>
+<title>Beautiful Sudoku Solver by Peter Norvig – Naoki Shibuya</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -66,6 +66,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
@@ -274,11 +275,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
-    <span class="navbar-title">Naoki Shibuya’s Articles</span>
+    <span class="navbar-title">Naoki Shibuya</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -286,14 +287,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="../../index.html"> 
-<span class="menu-text">Home</span></a>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../about.html"> 
-<span class="menu-text">About</span></a>
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -1037,6 +1040,30 @@ Peter Norvig’s Python notebook</li>
 </section>
 
 </main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        'a.nav-link' // Added a.nav-link
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2018-11-06">
 
-<title>Naoki Shibuya</title>
+<title>KL Divergence Demystified – Naoki Shibuya</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,28 +24,26 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<link href="./favicon.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,35 +71,6 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
-
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-image','listing-title','listing-subtitle','listing-date',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -132,7 +102,7 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
@@ -302,7 +272,7 @@ window.Quarto = {
     <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Naoki Shibuya</span>
     </a>
   </div>
@@ -331,153 +301,231 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-does-kl-stand-for" id="toc-what-does-kl-stand-for" class="nav-link active" data-scroll-target="#what-does-kl-stand-for"><span class="header-section-number">1</span> What does KL stand&nbsp;for?</a></li>
+  <li><a href="#what-is-the-kl-divergence" id="toc-what-is-the-kl-divergence" class="nav-link" data-scroll-target="#what-is-the-kl-divergence"><span class="header-section-number">2</span> What is the KL divergence?</a></li>
+  <li><a href="#the-kl-divergence-is-non-negative" id="toc-the-kl-divergence-is-non-negative" class="nav-link" data-scroll-target="#the-kl-divergence-is-non-negative"><span class="header-section-number">3</span> The KL divergence is non-negative</a></li>
+  <li><a href="#the-kl-divergence-is-asymmetric" id="toc-the-kl-divergence-is-asymmetric" class="nav-link" data-scroll-target="#the-kl-divergence-is-asymmetric"><span class="header-section-number">4</span> The KL divergence is asymmetric</a></li>
+  <li><a href="#modeling-a-true-distribution" id="toc-modeling-a-true-distribution" class="nav-link" data-scroll-target="#modeling-a-true-distribution"><span class="header-section-number">5</span> Modeling a true distribution</a></li>
+  <li><a href="#variational-auto-encoder" id="toc-variational-auto-encoder" class="nav-link" data-scroll-target="#variational-auto-encoder"><span class="header-section-number">6</span> Variational Auto-encoder</a></li>
+  <li><a href="#a-few-mathy-points" id="toc-a-few-mathy-points" class="nav-link" data-scroll-target="#a-few-mathy-points"><span class="header-section-number">7</span> A Few Mathy&nbsp;Points</a></li>
+  <li><a href="#likelihood-ratio" id="toc-likelihood-ratio" class="nav-link" data-scroll-target="#likelihood-ratio"><span class="header-section-number">8</span> Likelihood Ratio</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">9</span> References</a></li>
+  </ul>
+</nav>
+</nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(5)</span></div><div class="category" data-category="QWxnb3JpdGhtcw==">Algorithms <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Q29udm9sdXRpb25hbCUyME5ldXJhbCUyME5ldHdvcmtz">Convolutional Neural Networks <span class="quarto-category-count">(1)</span></div><div class="category" data-category="SW5mb3JtYXRpb24lMjBUaGVvcnk=">Information Theory <span class="quarto-category-count">(3)</span></div></div></div>
-<!-- main -->
-<main class="content column-page-left" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
-
-
-
-
-
-
-
-
-
-<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
-<div class="listing-actions-group">
-   <div class="input-group input-group-sm quarto-listing-sort">
-    <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
-    <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
-      <option value="" disabled="" selected="" hidden="">Order By</option>
-      <option value="index" data-direction="asc">Default</option>
-      <option value="listing-title" data-direction="asc">
-        Title
-      </option>
-      <option value="listing-date-sort" data-direction="asc">
-        Date - Oldest
-      </option>
-      <option value="listing-date-sort" data-direction="desc">
-        Date - Newest
-      </option>
-    </select>
-  </div>
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">KL Divergence Demystified</h1>
+<p class="subtitle lead">What does measuring the similarity of two probability distributions mean?</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Information Theory</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 6, 2018</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="KL Divergence Demystified: What does measuring the similarity of two probability distributions mean?"></p>
+<p><em>What does KL stand for? Is it a distance measure? What does it mean to measure the similarity of two probability distributions?</em></p>
+<p>If you want to intuitively understand the KL divergence, you are in the right place. I’ll demystify it for you.</p>
+<p>As I will explain from the information theory point of view, knowing the entropy and the cross-entropy concepts is required to apprehend this article thoroughly. If you are not familiar with them, you may want to read the following two articles: one for the <a href="../../blog/2018/2018-07-24-entropy-demystified/" target="_blank">entropy</a> and the other for the <a href="../../blog/2018/2018-10-28-cross-entropy-demystified/" target="_blank">cross-entropy</a>.</p>
+<p>If you are ready, read on.</p>
+<section id="what-does-kl-stand-for" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="what-does-kl-stand-for"><span class="header-section-number">1</span> What does KL stand&nbsp;for?</h2>
+<p>KL in the KL divergence stands for <strong>Kullback-Leibler</strong>, which represents the following two people:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Solomon_Kullback.png" class="img-fluid figure-img"></p>
+<figcaption>Solomon Kullback (Source: <a href="https://en.wikipedia.org/wiki/Solomon_Kullback" target="_blank">Wikipedia</a>)</figcaption>
+</figure>
 </div>
-<div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1541462199000" data-listing-file-modified-sort="1753703064421" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="989">
-<a href="./blog/2018-11-06-kl-divergence-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-11-06-kl-divergence-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-KL Divergence Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-What does measuring the similarity of two probability distributions mean?
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Richard_Leibler.png" class="img-fluid figure-img"></p>
+<figcaption>Richard A. Leibler (Source: <a href="https://en.wikipedia.org/wiki/Richard_Leibler" target="_blank">Wikipedia</a>)</figcaption>
+</figure>
 </div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Nov 6, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="1" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1540720282000" data-listing-file-modified-sort="1753703064404" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1885">
-<a href="./blog/2018-10-28-cross-entropy-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-10-28-cross-entropy-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Cross-Entropy Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-What is it? Is there any relation to the entropy concept?
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Oct 28, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="2" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1532411020000" data-listing-file-modified-sort="1753703064392" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1828">
-<a href="./blog/2018-07-24-entropy-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-07-24-entropy-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Entropy Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-Is it a disorder, uncertainty, or surprise?
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Jul 24, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="3" data-categories="Q29udm9sdXRpb25hbCUyME5ldXJhbCUyME5ldHdvcmtz" data-listing-date-sort="1510597022000" data-listing-file-modified-sort="1753701181760" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1069">
-<a href="./blog/2017-11-14-up-sampling-with-transposed-convolution/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2017-11-14-up-sampling-with-transposed-convolution/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Up-sampling with Transposed Convolution
-</h5>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Nov 14, 2017
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="4" data-categories="QWxnb3JpdGhtcw==" data-listing-date-sort="1485564523000" data-listing-file-modified-sort="1753624571000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="32" data-listing-word-count-sort="6274">
-<a href="./blog/2017-01-28-sudoku-solver-by-peter-norvig/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2017-01-28-sudoku-solver-by-peter-norvig/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Beautiful Sudoku Solver by Peter Norvig
-</h5>
-<div class="card-subtitle listing-subtitle">
-Python code that solves any Sudoku puzzles systematically
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Jan 28, 2017
-</div>
-</div>
-</div>
-</div></a>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+<p>They introduced the concept of the KL divergence in 1951 (<a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence" target="_blank">Wikipedia</a>).</p>
+</section>
+<section id="what-is-the-kl-divergence" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="what-is-the-kl-divergence"><span class="header-section-number">2</span> What is the KL divergence?</h2>
+<p>The KL divergence tells us how well the probability distribution <span class="math inline">\(Q\)</span> approximates the probability distribution <span class="math inline">\(P\)</span> by calculating the cross-entropy minus the entropy.</p>
+<p><span class="math display">\[
+D_{KL}(P \| Q) = H(P, Q) - H(P)
+\]</span></p>
+<p>As a reminder, I put the cross-entropy and the entropy formula below:</p>
+<p><span class="math display">\[
+\begin{aligned}
+H(P, Q) &amp;= \mathbb{E}_{x \sim P}[ -\log Q(x)] \\
+   H(P) &amp;= \mathbb{E}_{x \sim P}[ -\log P(x)] \\
+\end{aligned}
+\]</span></p>
+<p>The KL divergence can also be expressed in the expectation form as follows:</p>
+<p><span class="math display">\[
+\begin{aligned}
+D_{KL}(P \| Q) &amp;= \mathbb{E}_{x \sim P}[ -\log Q(x)] - \mathbb{E}_{x \sim P}[ -\log P(x)] \\\\
+&amp;= \mathbb{E}_{x \sim P}[ -\log Q(x) - (-\log P(x)) ] \\\\
+&amp;= \mathbb{E}_{x \sim P}[ -\log Q(x) + \log P(x) ] \\\\
+&amp;= \mathbb{E}_{x \sim P}[ \log P(x) -\log Q(x) ] \\\\
+&amp;= \mathbb{E}_{x \sim P}\left[ \log \frac{P(x)}{Q(x)} \right]
+\end{aligned}
+\]</span></p>
+<p>The expectation formula can be expressed in the discrete summation form or the continuous integration form:</p>
+<p><span class="math display">\[
+\begin{aligned}
+D_{KL}(P \| Q) &amp;= \sum\limits_i P(i) \log \frac{P(i)}{Q(i)} \\\\
+D_{KL}(P \| Q) &amp;= \int P(x) \log \frac{P(x)}{Q(x)} dx
+\end{aligned}
+\]</span></p>
+<p>So, what does it measure? It measures the similarity (or dissimilarity) between two probability distributions.</p>
+<p>If so, is it a distance measure?</p>
+<p>To answer this question, let’s see a few more characteristics of the KL divergence.</p>
+</section>
+<section id="the-kl-divergence-is-non-negative" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="the-kl-divergence-is-non-negative"><span class="header-section-number">3</span> The KL divergence is non-negative</h2>
+<p>The KL divergence is non-negative. An intuitive proof is that:</p>
+<ul>
+<li>If <span class="math inline">\(P = Q\)</span>, the KL divergence is zero as: <span class="math inline">\(\log \frac{P}{Q} = \log 1 = 0\)</span></li>
+<li>If <span class="math inline">\(P \ne Q\)</span>, the KL divergence is positive because the entropy is the minimum average lossless encoding size.</li>
+</ul>
+<p>So, the KL divergence is a non-negative value that indicates how close two probability distributions are.</p>
+<p>It does sound like a distance measure, doesn’t it? But it is not.</p>
+</section>
+<section id="the-kl-divergence-is-asymmetric" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="the-kl-divergence-is-asymmetric"><span class="header-section-number">4</span> The KL divergence is asymmetric</h2>
+<p>The KL divergence is not symmetric:</p>
+<p><span class="math display">\[
+D_{KL}(P \| Q) \ne D_{KL}(Q \| P)
+\]</span></p>
+<p>We can deduce the above from the fact that the cross-entropy is asymmetric. The cross-entropy <span class="math inline">\(H(P, Q)\)</span> uses the probability distribution <span class="math inline">\(P\)</span> to calculate the expectation. The cross-entropy <span class="math inline">\(H(Q, P)\)</span> uses the probability distribution <span class="math inline">\(Q\)</span> to calculate the expectation.</p>
+<p>So, it cannot be a distance measure, as any distance measure should be symmetric.</p>
+<p>This asymmetric nature of the KL divergence is a crucial aspect. Let’s look at two examples to understand it intuitively.</p>
+<p>Suppose we have a probability distribution <span class="math inline">\(P\)</span> which looks like the below:</p>
+<p><img src="images/dist-P.png" class="img-fluid"></p>
+<p>Now, we want to approximate it with a normal distribution <span class="math inline">\(Q\)</span> as below:</p>
+<p><img src="images/dist-P-by-Q.png" class="img-fluid"></p>
+<p>The KL divergence measures inefficiency in using the probability distribution <span class="math inline">\(Q\)</span> to approximate the true probability distribution <span class="math inline">\(P\)</span>.</p>
+<p><span class="math display">\[
+D_{KL}(P \| Q) = \mathbb{E}_{x \sim P} \left[ \log \frac{P(x)}{Q(x)} \right]
+\]</span></p>
+<p>If we swap <em>P</em> and <em>Q</em>, it means that we use the probability distribution <em>P</em> to approximate the normal distribution <em>Q</em>, and it’d look like the below:</p>
+<p><img src="images/dist-Q-by-P.png" class="img-fluid"></p>
+<p><span class="math display">\[
+D_{KL}(Q \| P) = \mathbb{E}_{x \sim Q} \left[ \log \frac{Q(x)}{P(x)} \right]
+\]</span></p>
+<p>Both cases measure the similarity between <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>, but the result could be entirely different, and both are valid.</p>
+</section>
+<section id="modeling-a-true-distribution" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="modeling-a-true-distribution"><span class="header-section-number">5</span> Modeling a true distribution</h2>
+<p>By approximating a probability distribution with a well-known distribution like the normal distribution, binomial distribution, etc., we are modeling the true distribution with a known one.</p>
+<p>This is when we are using the below formula:</p>
+<p><span class="math display">\[
+D_{KL}(P \| Q) = \mathbb{E}_{x \sim P} \left[ \log \frac{P(x)}{Q(x)} \right]
+\]</span></p>
+<p>Calculating the KL divergence, we can find the model (the distribution and the parameters) that fits the true distribution well.</p>
+</section>
+<section id="variational-auto-encoder" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="variational-auto-encoder"><span class="header-section-number">6</span> Variational Auto-encoder</h2>
+<p>An example of using the below formula is the variational auto-encoder.</p>
+<p><span class="math display">\[
+D_{KL}(Q \| P) = \mathbb{E}_{x \sim Q} \left[ \log \frac{Q(x)}{P(x)} \right]
+\]</span></p>
+<p>I will lightly touch on this topic here as it requires much more explanation for people unfamiliar with the variational auto-encoder.</p>
+<p>The KL divergence is used to force the distribution of latent variables to be normal so that we can sample latent variables from the normal distribution. As such, it is included in the loss function to improve the similarity between the distribution of latent variables and the normal distribution.</p>
+<p>I’ve written an article on VAE in details <a href="../../blog/2023/2023-08-23-vae-2013/" target="_blank">here</a>.</p>
+</section>
+<section id="a-few-mathy-points" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="a-few-mathy-points"><span class="header-section-number">7</span> A Few Mathy&nbsp;Points</h2>
+<p>The term <span class="math inline">\(p \log p\)</span> becomes zero when <span class="math inline">\(p\)</span> goes to zero.</p>
+<p><span class="math display">\[
+\lim\limits_{p \rightarrow 0} p \log p = 0
+\]</span></p>
+<p>It is defined as infinity where <span class="math inline">\(P &gt; 0\)</span> but <span class="math inline">\(Q=0\)</span>.</p>
+<p><span class="math display">\[
+D_{KL}(P \| Q) = \infty \quad (\text{where } P &gt; 0 \text{ but } Q = 0)
+\]</span></p>
+<p>A more rigor proof of the KL divergence being non-negative is as follows:</p>
+<p><span class="math display">\[
+\begin{aligned}
+D_{KL}(P \| Q) &amp;= \mathbb{E}_{x \sim P}\left[ \log \frac{P(x)}{Q(x)} \right] \\
+&amp;= \mathbb{E}_{x \sim P}\left[ -\log \frac{Q(x)}{P(x)} \right]
+\end{aligned}
+\]</span></p>
+<p>Since <span class="math inline">\(-\log\)</span> is a convex function, we can apply Jensen’s inequality:</p>
+<p><span class="math display">\[
+\begin{aligned}
+D_{KL}(P \| Q) &amp;\ge -\log \left(\mathbb{E}_{x \sim P}\left[ \frac{Q(x)}{P(x)} \right] \right) \\
+&amp;= -\log \left( \int P(x) \frac{Q(x)}{P(x)} dx \right) \\
+&amp;= -\log \left( \int Q(x) dx \right) \\
+&amp;= -\log(1) \\
+&amp;= 0
+\end{aligned}
+\]</span></p>
+</section>
+<section id="likelihood-ratio" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="likelihood-ratio"><span class="header-section-number">8</span> Likelihood Ratio</h2>
+<p>Another way to describe the KL divergence from a probabilistic perspective is to use the following likelihood ratio.</p>
+<p><span class="math display">\[
+\frac{P(x)}{Q(x)}
+\]</span></p>
+<p>If you are interested in this approach, I recommend the article by Marko Cotra (the link in the references section below).</p>
+<hr>
+<p>That is all for now. I hope this article is helpful to you.</p>
+</section>
+<section id="references" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="references"><span class="header-section-number">9</span> References</h2>
+<ul>
+<li><a href="../../blog/2023/2023-08-23-vae-2013/" target="_blank">VAE: Variational Auto-Encoder (2013)</a></li>
+<li><a href="../../blog/2018/2018-10-28-cross-entropy-demystified/" target="_blank">Cross-Entropy Demystified</a></li>
+<li><a href="../../blog/2018/2018-07-24-entropy-demystified/" target="_blank">Entropy Demystified</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence" target="_blank">Kullback Leibler divergence</a><br>
+Wikipedia</li>
+<li><a href="http://hanj.cs.illinois.edu/cs412/bk3/KL-divergence.pdf" target="_blank">CS412 Fall 2008. Introduction to Data Warehousing and Data Mining</a><br>
+Jiawei Han</li>
+<li><a href="http://nowak.ece.wisc.edu/ece830/ece830_fall11_lecture7.pdf" target="_blank">ECE 830 Fall 2011 Statistical Signal Processing</a><br>
+Robert Nowak</li>
+<li><a href="https://medium.com/@cotra.marko/making-sense-of-the-kullback-leibler-kl-divergence-b0d57ee10e0a" target="_blank">Making sense of the Kullback–Leibler (KL) Divergence</a><br>
+Marko Cotra</li>
+<li><a href="https://www.youtube.com/watch?v=ErfnhcEV1O8" target="_blank">A Short Introduction to Entropy, Cross-Entropy, and KL-Divergence</a><br>
+Aurélien Géron</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const linkSelectors = [
@@ -921,6 +969,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">

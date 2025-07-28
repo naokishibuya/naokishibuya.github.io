@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2017-11-14">
 
-<title>Naoki Shibuya</title>
+<title>Up-sampling with Transposed Convolution – Naoki Shibuya</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,28 +24,26 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<link href="./favicon.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,67 +71,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
 
-    const options = {
-      valueNames: ['listing-image','listing-title','listing-subtitle','listing-date',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description","listing-categories"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
@@ -302,7 +243,7 @@ window.Quarto = {
     <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Naoki Shibuya</span>
     </a>
   </div>
@@ -331,153 +272,198 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-need-for-up-sampling" id="toc-the-need-for-up-sampling" class="nav-link active" data-scroll-target="#the-need-for-up-sampling"><span class="header-section-number">1</span> The Need for Up-sampling</a></li>
+  <li><a href="#why-transposed-convolution" id="toc-why-transposed-convolution" class="nav-link" data-scroll-target="#why-transposed-convolution"><span class="header-section-number">2</span> Why Transposed Convolution?</a></li>
+  <li><a href="#convolution-operation" id="toc-convolution-operation" class="nav-link" data-scroll-target="#convolution-operation"><span class="header-section-number">3</span> Convolution Operation</a></li>
+  <li><a href="#going-backward" id="toc-going-backward" class="nav-link" data-scroll-target="#going-backward"><span class="header-section-number">4</span> Going Backward</a></li>
+  <li><a href="#convolution-matrix" id="toc-convolution-matrix" class="nav-link" data-scroll-target="#convolution-matrix"><span class="header-section-number">5</span> Convolution Matrix</a></li>
+  <li><a href="#transposed-convolution-matrix" id="toc-transposed-convolution-matrix" class="nav-link" data-scroll-target="#transposed-convolution-matrix"><span class="header-section-number">6</span> Transposed Convolution Matrix</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">7</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">8</span> References</a></li>
+  </ul>
+</nav>
+</nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(5)</span></div><div class="category" data-category="QWxnb3JpdGhtcw==">Algorithms <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Q29udm9sdXRpb25hbCUyME5ldXJhbCUyME5ldHdvcmtz">Convolutional Neural Networks <span class="quarto-category-count">(1)</span></div><div class="category" data-category="SW5mb3JtYXRpb24lMjBUaGVvcnk=">Information Theory <span class="quarto-category-count">(3)</span></div></div></div>
-<!-- main -->
-<main class="content column-page-left" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
-
-
-
-
-
-
-
-
-
-<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
-<div class="listing-actions-group">
-   <div class="input-group input-group-sm quarto-listing-sort">
-    <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
-    <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
-      <option value="" disabled="" selected="" hidden="">Order By</option>
-      <option value="index" data-direction="asc">Default</option>
-      <option value="listing-title" data-direction="asc">
-        Title
-      </option>
-      <option value="listing-date-sort" data-direction="asc">
-        Date - Oldest
-      </option>
-      <option value="listing-date-sort" data-direction="desc">
-        Date - Newest
-      </option>
-    </select>
-  </div>
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Up-sampling with Transposed Convolution</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Convolutional Neural Networks</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 14, 2017</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Up-sampling with Transposed Convolution"></p>
+<p>If you’ve heard about the transposed convolution and got confused about its meaning, this article is for you.</p>
+<p>The content of this article is as follows:</p>
+<ul>
+<li>The Need for Up-sampling</li>
+<li>Why Transposed Convolution?</li>
+<li>Convolution Operation</li>
+<li>Going Backward</li>
+<li>Convolution Matrix</li>
+<li>Transposed Convolution Matrix</li>
+<li>Summary</li>
+</ul>
+<p>The notebook is available on my <a href="https://github.com/naokishibuya/deep-learning/blob/master/python/transposed_convolution.ipynb" target="_blank">GitHub</a>.</p>
+<section id="the-need-for-up-sampling" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-need-for-up-sampling"><span class="header-section-number">1</span> The Need for Up-sampling</h2>
+<p>Using neural networks to generate images usually involves up-sampling from low resolution to high resolution.</p>
+<p><img src="images/need-for-up-sampling.png" class="img-fluid"></p>
+<p>There are various methods to conduct up-sampling operations:</p>
+<ul>
+<li>Nearest neighbor interpolation</li>
+<li>Bi-linear interpolation</li>
+<li>Bi-cubic interpolation</li>
+</ul>
+<p>All these methods involve some interpolation method we must choose when deciding on network architecture. It is like manual feature engineering, and there is nothing that the network can learn.</p>
+</section>
+<section id="why-transposed-convolution" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="why-transposed-convolution"><span class="header-section-number">2</span> Why Transposed Convolution?</h2>
+<p>We can use the transposed convolution if we want our network to learn how to up-sample optimally. It does not use a predefined interpolation method. It has learnable parameters.</p>
+<p>It is helpful to understand the transposed convolution concept as essential papers and projects use it, such as:</p>
+<ul>
+<li>the generator in <a href="https://arxiv.org/pdf/1511.06434v2.pdf" target="_blank">DCGAN</a> takes randomly sampled values to produce a full-size image.</li>
+<li>semantic segmentation uses convolutional layers to extract features in the encoder. Then it restores the original image size in the decoder to classify every pixel in the original image.</li>
+</ul>
+<p>FYI — the transposed convolution is also known as:</p>
+<ul>
+<li>Fractionally-strided convolution</li>
+<li>Deconvolution</li>
+</ul>
+<p>We will only use the word <strong>transposed convolution</strong> in this article, but you may notice alternative names in other articles.</p>
+</section>
+<section id="convolution-operation" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="convolution-operation"><span class="header-section-number">3</span> Convolution Operation</h2>
+<p>Let’s use a simple example to explain how convolution operation works. Suppose we have a 4x4 matrix and apply a convolution operation with a 3 x 3 kernel, with no padding and a stride of 1. As shown further below, the output is a 2x2 matrix.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/convolution-operation.png" class="img-fluid figure-img"></p>
+<figcaption>Convolution Operation</figcaption>
+</figure>
 </div>
-<div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1541462199000" data-listing-file-modified-sort="1753703064421" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="989">
-<a href="./blog/2018-11-06-kl-divergence-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-11-06-kl-divergence-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-KL Divergence Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-What does measuring the similarity of two probability distributions mean?
+<p>The convolution operation calculates the sum of the element-wise multiplication between the input and kernel matrices. We can do this only four times since we have no padding and a stride of 1. Hence, the output matrix is 2x2.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/sum-of-element-wise-multiplication.png" class="img-fluid figure-img"></p>
+<figcaption>Sum of Element-wise Multiplication</figcaption>
+</figure>
 </div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Nov 6, 2018
+<p>A critical point of such convolution operation is that positional connectivity exists between input and output values.</p>
+<p>For example, the input matrix’s top left values affect the output matrix’s top left value.</p>
+<p>We use the 3 x 3 kernel to connect the nine input matrix values to one output matrix value. <strong>A convolution operation forms a many-to-one relationship</strong>. Let’s keep this in mind as we need it later on.</p>
+</section>
+<section id="going-backward" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="going-backward"><span class="header-section-number">4</span> Going Backward</h2>
+<p>Now, suppose we want to go in the other direction. We want to associate one value in a matrix with nine values in another. It’s a one-to-many relationship. It is like going backward in convolution operation, which is the core idea of <strong>transposed convolution</strong>.</p>
+<p>For example, we up-sample a 2x2 matrix to a 4x4 matrix. The operation maintains the 1-to-9 relationship.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/backward-convolution.png" class="img-fluid figure-img"></p>
+<figcaption>Going Backward of Convolution</figcaption>
+</figure>
 </div>
+<p>But how do we perform such an operation?</p>
+<p>To talk about how we need to define the <strong>convolution matrix</strong> and the <strong>transposed convolution matrix</strong>.</p>
+</section>
+<section id="convolution-matrix" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="convolution-matrix"><span class="header-section-number">5</span> Convolution Matrix</h2>
+<p>We can express a convolution operation using a matrix. It is a kernel matrix rearranged so that we can use matrix multiplication to conduct convolution operations.</p>
+<p><img src="images/3x3-kernel.png" class="img-fluid"></p>
+<p>We rearrange the 3x3 kernel into a 4x16 matrix as below:</p>
+<p><img src="images/4x16-kernel.png" class="img-fluid"></p>
+<p>It is a convolution matrix. Each row defines one convolution operation. If you do not see it, the below diagram may help. Each row of the convolution matrix is just a rearranged kernel matrix with zero padding in different places.</p>
+<p><img src="images/3x3-4x16.png" class="img-fluid"></p>
+<p>To use it, we flatten the input matrix (4x4) into a column vector (16x1).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/16x1-input.png" class="img-fluid figure-img"></p>
+<figcaption>Flattened Input Matrix</figcaption>
+</figure>
 </div>
+<p>We can matrix-multiply the 4x16 convolution matrix with the 16x1 input matrix (16-dimensional column vector).</p>
+<p><img src="images/4x16-convolution.png" class="img-fluid"></p>
+<p>The output 4x1 matrix can be reshaped into a 2x2 matrix, giving us the same result.</p>
+<p><img src="images/2x2-output.png" class="img-fluid"></p>
+<p>In short, a convolution matrix is nothing but rearranged kernel weights, and we can express a convolution operation using the convolution matrix.</p>
+<p>So what?</p>
+<p>The point is that with the convolution matrix, you can go from 16 (4x4) to 4 (2x2) because the convolution matrix is 4x16. Then, if you have a 16x4 matrix, you can go from 4 (2x2) to 16 (4x4).</p>
+<p>Confused?</p>
+<p>Please read on.</p>
+</section>
+<section id="transposed-convolution-matrix" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="transposed-convolution-matrix"><span class="header-section-number">6</span> Transposed Convolution Matrix</h2>
+<p>We want to go from 4 (2x2) to 16 (4x4). So, we use a 16x4 matrix. But there is one more thing here. We want to maintain the 1-to-9 relationship.</p>
+<p>Suppose we transpose the convolution matrix C (4x16) to C.T (16x4). We can matrix-multiply C.T (16x4) with a column vector (4x1) to generate an output matrix (16x1). The transposed matrix connects one value to 9 values in the output.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/transposed-convolution.png" class="img-fluid figure-img"></p>
+<figcaption>Convolution By Matrix Multiplication</figcaption>
+</figure>
 </div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="1" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1540720282000" data-listing-file-modified-sort="1753703064404" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1885">
-<a href="./blog/2018-10-28-cross-entropy-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-10-28-cross-entropy-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Cross-Entropy Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-What is it? Is there any relation to the entropy concept?
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Oct 28, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="2" data-categories="SW5mb3JtYXRpb24lMjBUaGVvcnk=" data-listing-date-sort="1532411020000" data-listing-file-modified-sort="1753703064392" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1828">
-<a href="./blog/2018-07-24-entropy-demystified/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2018-07-24-entropy-demystified/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Entropy Demystified
-</h5>
-<div class="card-subtitle listing-subtitle">
-Is it a disorder, uncertainty, or surprise?
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Jul 24, 2018
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="3" data-categories="Q29udm9sdXRpb25hbCUyME5ldXJhbCUyME5ldHdvcmtz" data-listing-date-sort="1510597022000" data-listing-file-modified-sort="1753701181760" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1069">
-<a href="./blog/2017-11-14-up-sampling-with-transposed-convolution/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2017-11-14-up-sampling-with-transposed-convolution/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Up-sampling with Transposed Convolution
-</h5>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Nov 14, 2017
-</div>
-</div>
-</div>
-</div></a>
-</div>
-<div class="g-col-1" data-index="4" data-categories="QWxnb3JpdGhtcw==" data-listing-date-sort="1485564523000" data-listing-file-modified-sort="1753624571000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="32" data-listing-word-count-sort="6274">
-<a href="./blog/2017-01-28-sudoku-solver-by-peter-norvig/index.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-center">
-<p class="card-img-top">
-<img loading="lazy" src="./blog/2017-01-28-sudoku-solver-by-peter-norvig/images/thumbnail.png" class="thumbnail-image card-img" style="height: 150px;">
-</p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Beautiful Sudoku Solver by Peter Norvig
-</h5>
-<div class="card-subtitle listing-subtitle">
-Python code that solves any Sudoku puzzles systematically
-</div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Jan 28, 2017
-</div>
-</div>
-</div>
-</div></a>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+<p>We can reshape the output into 4x4.</p>
+<p><img src="images/4x4-output.png" class="img-fluid"></p>
+<p>We have up-sampled a smaller matrix (2x2) into a larger one (4x4). The transposed convolution maintains the 1 to 9 relationship because of the way it lays out the weights.</p>
+<p>NB: the actual weight values in the matrix do not come from the original convolution matrix. What’s important is that the weight layout is the same as the transpose of the convolution matrix shape.</p>
+</section>
+<section id="summary" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="summary"><span class="header-section-number">7</span> Summary</h2>
+<p>The transposed convolution operation forms the same connectivity as the regular convolution but in the backward direction.</p>
+<p>We can use it to conduct up-sampling. Moreover, the weights in the transposed convolution are learnable. So we do not need a predefined interpolation method.</p>
+<p>Even though it is called the <em>transposed</em> convolution, it does not mean we take some existing convolution matrix and use the transposed version. The main point is that the association between the input and the output is handled backward compared with a standard convolution matrix (one-to-many rather than many-to-one association).</p>
+<p>As such, the transposed convolution is not a convolution. But we can emulate the transposed convolution using a convolution. We up-sample the input by adding zeros between the values in the input matrix so that the direct convolution produces the same effect as the transposed convolution. You may find some article that explains the transposed convolution in this way. However, it is less efficient due to the need to add zeros to up-sample the input before the convolution.</p>
+<p><strong>One caution</strong>: the transposed convolution is the cause of the checkerboard artifacts in generated images. <a href="https://distill.pub/2016/deconv-checkerboard/" target="_blank">This article</a> recommends an up-sampling operation (i.e., an interpolation method) followed by a convolution operation to reduce such issues. If your main objective is generating images without such artifacts, it is worth reading the paper to learn more.</p>
+</section>
+<section id="references" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="references"><span class="header-section-number">8</span> References</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1603.07285" target="_blank">A guide to convolution arithmetic for deep learning</a><br>
+Vincent Dumoulin, Francesco Visin</li>
+<li><a href="https://arxiv.org/pdf/1511.06434v2.pdf" target="_blank">Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks</a><br>
+Alec Radford, Luke Metz, Soumith Chintala</li>
+<li><a href="https://arxiv.org/abs/1411.4038" target="_blank">Fully Convolutional Networks for Semantic Segmentation</a><br>
+Jonathan Long, Evan Shelhamer, Trevor Darrell</li>
+<li><a href="https://distill.pub/2016/deconv-checkerboard/" target="_blank">Deconvolution and Checkerboard Artifacts</a><br>
+Augustus Odena, Vincent Dumoulin, Chris Olah</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const linkSelectors = [
@@ -921,6 +907,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
