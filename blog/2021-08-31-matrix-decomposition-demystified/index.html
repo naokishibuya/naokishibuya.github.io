@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2021-08-31">
+
+<title>Matrix Decomposition Demystified – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#matrix-decomposition" id="toc-matrix-decomposition" class="nav-link active" data-scroll-target="#matrix-decomposition"><span class="header-section-number">1</span> Matrix Decomposition</a></li>
+  <li><a href="#square-matrix" id="toc-square-matrix" class="nav-link" data-scroll-target="#square-matrix"><span class="header-section-number">2</span> Square Matrix</a></li>
+  <li><a href="#eigenvalue-and-eigenvector" id="toc-eigenvalue-and-eigenvector" class="nav-link" data-scroll-target="#eigenvalue-and-eigenvector"><span class="header-section-number">3</span> Eigenvalue and Eigenvector</a></li>
+  <li><a href="#symmetric-matrix" id="toc-symmetric-matrix" class="nav-link" data-scroll-target="#symmetric-matrix"><span class="header-section-number">4</span> Symmetric Matrix</a></li>
+  <li><a href="#eigen-decomposition" id="toc-eigen-decomposition" class="nav-link" data-scroll-target="#eigen-decomposition"><span class="header-section-number">5</span> Eigen Decomposition</a></li>
+  <li><a href="#orthogonal-matrix" id="toc-orthogonal-matrix" class="nav-link" data-scroll-target="#orthogonal-matrix"><span class="header-section-number">6</span> Orthogonal Matrix</a></li>
+  <li><a href="#singular-value-decomposition" id="toc-singular-value-decomposition" class="nav-link" data-scroll-target="#singular-value-decomposition"><span class="header-section-number">7</span> Singular Value Decomposition</a></li>
+  <li><a href="#pseudo-inverse-matrix" id="toc-pseudo-inverse-matrix" class="nav-link" data-scroll-target="#pseudo-inverse-matrix"><span class="header-section-number">8</span> Pseudo-inverse Matrix</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">9</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Matrix Decomposition Demystified</h1>
+<p class="subtitle lead">Eigen Decomposition, SVD, and Pseudo-inverse Matrix Made Easy</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Fundamentals</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 31, 2021</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Matrix Decomposition Demystified: Eigen Decomposition, SVD, and Pseudo-inverse Matrix Made Easy"></p>
+<section id="matrix-decomposition" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="matrix-decomposition"><span class="header-section-number">1</span> Matrix Decomposition</h2>
+<p>In this article, we discuss the following Matrix Decomposition topics:</p>
+<ul>
+<li>Square Matrix</li>
+<li>Eigenvalue and Eigenvector</li>
+<li>Symmetric Matrix</li>
+<li>Eigen Decomposition</li>
+<li>Orthogonal Matrix</li>
+<li>Singular Value Decomposition</li>
+<li>PSeudo-inverse Matrix</li>
+</ul>
+</section>
+<section id="square-matrix" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="square-matrix"><span class="header-section-number">2</span> Square Matrix</h2>
+<p>Eigen Decomposition works only with square matrices.</p>
+<p>As a quick reminder, let’s look at a square matrix. In square matrices, the number of rows and columns are the same.</p>
+<p>For example,</p>
+<p><span class="math display">\[
+A = \begin{bmatrix}
+4 &amp; 1 \\
+3 &amp; 2
+\end{bmatrix}
+\]</span></p>
+<p>That was easy. Let’s continue with Eigenvalue and Eigenvector concepts.</p>
+</section>
+<section id="eigenvalue-and-eigenvector" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="eigenvalue-and-eigenvector"><span class="header-section-number">3</span> Eigenvalue and Eigenvector</h2>
+<p>When a square matrix A and a vector <span class="math inline">\(x\)</span> have the following relationship:</p>
+<p><span class="math display">\[
+A \mathbf{x} = \lambda \mathbf{x}
+\]</span></p>
+<p>, we call λ <strong>eigenvalue</strong> and the vector x <strong>eigenvector</strong>. λ is a scalar.</p>
+<p>The above means that multiplying vector <span class="math inline">\(x\)</span> with matrix <span class="math inline">\(A\)</span> produces the same result as multiplying vector <span class="math inline">\(x\)</span> with scalar value <span class="math inline">\(\lambda\)</span>.</p>
+<p><img src="images/eigenvalues.png" class="img-fluid"></p>
+<p>Let’s move everything to the left side of the equation to find the condition for having eigenvalues and eigenvectors.</p>
+<p><span class="math display">\[
+(A - \lambda I) \mathbf{x} = \mathbf{0}
+\]</span></p>
+<p>For vector <span class="math inline">\(x\)</span> to be non-zero, no inverse matrix of <span class="math inline">\((A— \lambda I)\)</span> should exist. In other words, $(A — I) $’s determinant must be zero.</p>
+<p><span class="math display">\[
+\det(A - \lambda I) = 0
+\]</span></p>
+<p>Let’s use the 2x2 square matrix as an example to calculate the determinant:</p>
+<p><span class="math display">\[
+A = \begin{bmatrix}
+4 &amp; 1 \\
+3 &amp; 2
+\end{bmatrix}
+\]</span></p>
+<p>So, <span class="math inline">\((A — \lambda I)\)</span> is:</p>
+<p><span class="math display">\[
+A - \lambda I = \begin{bmatrix}
+4 - \lambda &amp; 1 \\
+3 &amp; 2 - \lambda
+\end{bmatrix}
+\]</span></p>
+<p>And we calculate the determinant (and we want it to be zero):</p>
+<p><span class="math display">\[
+\begin{aligned}
+\det(A - \lambda I) &amp;= \begin{vmatrix}
+4 - \lambda &amp; 1 \\
+3 &amp; 2 - \lambda
+\end{vmatrix} \\\\
+&amp;= (4 - \lambda)(2 - \lambda) - 3 \\\\
+&amp;= 8 - 6\lambda + \lambda^2 - 3 \\\\
+&amp;= \lambda^2 - 6\lambda + 5 \\\\
+&amp;= (\lambda - 1)(\lambda - 5) \\\\
+&amp;= 0
+\end{aligned}
+\]</span></p>
+<p>Therefore, <span class="math inline">\(\lambda\)</span> is either 1 or 5.</p>
+<p>Let’s define the eigenvector as follows:</p>
+<p><span class="math display">\[
+\mathbf{x} = \begin{bmatrix}
+x_1 \\
+x_2
+\end{bmatrix}
+\]</span></p>
+<p>As a reminder, we have the following equation for eigenvalue and eigenvector:</p>
+<p><span class="math display">\[
+(A - \lambda I) = 0
+\]</span></p>
+<p>We can calculate the eigenvector <span class="math inline">\(x\)</span> for <span class="math inline">\(\lambda=1\)</span> as follows:</p>
+<p><span class="math display">\[
+\begin{aligned}
+A &amp;= \begin{bmatrix}
+4 - 1 &amp; 1 \\
+3 &amp; 2 - 1
+\end{bmatrix} \begin{bmatrix}
+x_1 \\
+x_2
+\end{bmatrix} = \begin{bmatrix}
+0 \\
+0
+\end{bmatrix} \\\\
+&amp;\therefore 3 x_1 + x_2 = 0
+\end{aligned}
+\]</span></p>
+<p>To satisfy the above conditions, <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> are:</p>
+<p><span class="math display">\[
+\begin{aligned}
+x_1 &amp;= -\frac{1}{3} t \\
+x_2 &amp;= t
+\end{aligned}
+\]</span></p>
+<p>Although <em>t</em> can be any value, we often make the L2 norm to be a size of 1 since, otherwise, we have an infinite number of possible solutions:</p>
+<p><span class="math display">\[
+x_1^2 + x_2^2 = 1
+\]</span></p>
+<p>The eigenvector for the eigenvalue <span class="math inline">\(\lambda=1\)</span> is:</p>
+<p><span class="math display">\[
+\mathbf{x} = \begin{bmatrix}
+-\frac{1}{\sqrt{10}} \\
+\frac{3}{\sqrt{10}}
+\end{bmatrix}
+\]</span></p>
+<p>or</p>
+<p><span class="math display">\[
+\mathbf{x} = \begin{bmatrix}
+\frac{1}{\sqrt{10}} \\
+-\frac{3}{\sqrt{10}}
+\end{bmatrix}
+\]</span></p>
+<p>They are the same, except that one vector direction is the opposite. So, I’ll choose the first one as the eigenvector for <span class="math inline">\(\lambda=1\)</span>.</p>
+<p>Let’s make sure this works as intended:</p>
+<p><span class="math display">\[
+\begin{aligned}
+A\mathbf{x} &amp;= \begin{bmatrix}
+4 &amp; 1 \\
+3 &amp; 2
+\end{bmatrix} \begin{bmatrix}
+-\frac{1}{\sqrt{10}} \\
+\frac{3}{\sqrt{10}}
+\end{bmatrix} \\\\
+&amp;= \begin{bmatrix}
+4 \cdot -\frac{1}{\sqrt{10}} + 1 \cdot \frac{3}{\sqrt{10}} \\
+3 \cdot -\frac{1}{\sqrt{10}} + 2 \cdot \frac{3}{\sqrt{10}}
+\end{bmatrix} \\\\
+&amp; = \begin{bmatrix}
+-\frac{1}{\sqrt{10}} \\
+\frac{3}{\sqrt{10}}
+\end{bmatrix} \\\\
+&amp;= 1 \mathbf{x}
+\end{aligned}
+\]</span></p>
+<p>We can solve for <span class="math inline">\(\lambda=5\)</span> using the same process:</p>
+<p><span class="math display">\[
+\mathbf{x} = \begin{bmatrix}
+\frac{1}{sqrt{2}} \\
+\frac{1}{sqrt{2}}
+\end{bmatrix}
+\]</span></p>
+<p>For 3×3 or larger matrices, it becomes too tedious to calculate all that manually. We can write a Python script with NumPy to do the same:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.array([</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>],</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>],</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">9</span>]])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'A='</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(A)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>values, vectors <span class="op">=</span> np.linalg.eig(A)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'eigenvalues'</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(values)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'eigenvectors'</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(vectors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>A=
+[[1 2 3]
+ [4 5 6]
+ [7 8 9]]
+
+eigenvalues
+[ 1.61168440e+01 -1.11684397e+00 -1.30367773e-15]
+
+eigenvectors
+[[-0.23197069 -0.78583024 0.40824829]
+ [-0.52532209 -0.08675134 -0.81649658]
+ [-0.8186735 0.61232756 0.40824829]]</code></pre>
+<p>We can confirm they work as expected:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>λ <span class="op">=</span> values[<span class="dv">0</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> vectors[:, <span class="dv">0</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'λ * x'</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(λ <span class="op">*</span> x)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'A @ x'</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(A <span class="op">@</span> x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>λ * x
+[ -3.73863537 -8.46653421 -13.19443305]
+
+A @ x
+[ -3.73863537 -8.46653421 -13.19443305]</code></pre>
+<p>This works fine but if you want to keep the vectors in column format, you can do the following:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>λ <span class="op">=</span> values[<span class="dv">0</span>]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> vectors[:, <span class="dv">0</span>:<span class="dv">1</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'λ * x'</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(λ <span class="op">*</span> x)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'A @ x'</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(A <span class="op">@</span> x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>λ * x
+[[ -3.73863537]
+ [ -8.46653421]
+ [-13.19443305]]
+
+A @ x
+[[ -3.73863537]
+ [ -8.46653421]
+ [-13.19443305]]</code></pre>
+</section>
+<section id="symmetric-matrix" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="symmetric-matrix"><span class="header-section-number">4</span> Symmetric Matrix</h2>
+<p>Eigenvectors of a symmetric matrix are orthogonal to each other. This fact will become helpful later on. So, let’s prove it here.</p>
+<p>Suppose <span class="math inline">\(\lambda_1\)</span> and <span class="math inline">\(\lambda_2\)</span> (<span class="math inline">\(\lambda_1 \ne \lambda_2\)</span>) are eigenvalues, and <span class="math inline">\(\mathbf{x}_1\)</span> and <span class="math inline">\(\mathbf{x}_2\)</span> are the corresponding eigenvectors:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\lambda_1 \mathbf{x}_1 \cdot \mathbf{x}_2 &amp;= (\lambda_1 \mathbf{x}_1)^\top \mathbf{x}_2 \\
+&amp;= (A \mathbf{x}_1)^\top \mathbf{x}_2 \\
+&amp;= \mathbf{x}_1^\top A^\top \mathbf{x}_2 \\
+&amp;= \mathbf{x}_1^\top A \mathbf{x}_2 \qquad \text{A is symmetric} \\
+&amp;= \mathbf{x}_1^\top \lambda_2 \mathbf{x}_2 \\
+&amp;= \lambda_2 \mathbf{x}_1^\top \mathbf{x}_2 \\
+&amp;= \lambda_2 \mathbf{x}_1 \cdot \mathbf{x}_2 \\
+\end{aligned}
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+\lambda_1 \mathbf{x}_1 \cdot \mathbf{x}_2 = \lambda_2 \mathbf{x}_1 \cdot \mathbf{x}_2
+\]</span></p>
+<p>However, <span class="math inline">\(\lambda_1 \ne \lambda_2\)</span>. As such, the following must be true:</p>
+<p><span class="math display">\[
+\mathbf{x}_1 \cdot \mathbf{x}_2 = \mathbf{0}
+\]</span></p>
+<p>Therefore, eigenvectors of a symmetric matrix are orthogonal to each other.</p>
+<p>Now we are ready to discuss how Eigen Decomposition works.</p>
+</section>
+<section id="eigen-decomposition" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="eigen-decomposition"><span class="header-section-number">5</span> Eigen Decomposition</h2>
+<p>Using eigenvalues and eigenvectors, we can decompose a square matrix A as follows:</p>
+<p><span class="math display">\[
+A = Q \Lambda Q^{-1}
+\]</span></p>
+<p>Q is a matrix that has eigenvectors in the columns.</p>
+<p><span class="math display">\[
+Q = [ \mathbf{x}_1 \ \mathbf{x}_2 \ \dots \ \mathbf{x}_n]
+\]</span></p>
+<p><span class="math inline">\(\Lambda\)</span> (uppercase lambda) is a diagonal matrix that has eigenvalues as the diagonal elements:</p>
+<p><span class="math display">\[
+\Lambda = \begin{bmatrix}
+\lambda_1 &amp; 0 &amp; \dots &amp; 0 \\
+0 &amp; \lambda_2 &amp; \dots &amp; 0 \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+0 &amp; 0 &amp; \dots &amp; \lambda_n
+\end{bmatrix}
+\]</span></p>
+<p>We put eigenvalues in descending order to make the diagonal matrix <span class="math inline">\(\Lambda\)</span> unique:</p>
+<p><span class="math display">\[
+\lambda_1 \gt \lambda_2 \gt \dots \gt \lambda_n
+\]</span></p>
+<p>To prove that such Eigen Decomposition is possible, we adjust the equation slightly:</p>
+<p><span class="math display">\[
+\begin{aligned}
+A &amp;= Q \Lambda Q^{-1} \\
+AQ &amp;= Q \Lambda
+\end{aligned}
+\]</span></p>
+<p>And we will show that <span class="math inline">\(AQ = Q \Lambda\)</span> is true.</p>
+<p><span class="math display">\[
+\begin{aligned}
+AQ &amp;= A [ \mathbf{x}_1 \ \mathbf{x}_2 \ \dots \ \mathbf{x}_n ] \\
+&amp;= [ A\mathbf{x}_1 \ A\mathbf{x}_2 \ \dots \ A\mathbf{x}_n] \\
+&amp;= [ \lambda_1 \mathbf{x}_1 \ \lambda_2 \mathbf{x}_2 \ \dots \ \lambda_n \mathbf{x}_n] \\
+&amp;= [ \mathbf{x}_1 \ \mathbf{x}_2 \ \dots \ \mathbf{x}_n ] \begin{bmatrix}
+\lambda_1 &amp; 0 &amp; \dots &amp; 0 \\
+0 &amp; \lambda_2 &amp; \dots &amp; 0 \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+0 &amp; 0 &amp; \dots &amp; \lambda_n
+\end{bmatrix} \\
+&amp;= Q \Lambda
+\end{aligned}
+\]</span></p>
+<p>In other words, AQ is equivalent to each eigenvector inside matrix Q multiplied by the corresponding eigenvalue.</p>
+<p>So, we have proved that Eigen Decomposition is possible.</p>
+<p>Let’s try Eigen Decomposition with Numpy:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.array([</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>],</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>],</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">9</span>]], dtype<span class="op">=</span>np.float64)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'A='</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(A)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Eigenvalue and Eigenvector</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>values, vectors <span class="op">=</span> np.linalg.eig(A)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>Λ <span class="op">=</span> np.diag(values)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>Q <span class="op">=</span> vectors</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>QΛQinv <span class="op">=</span> Q <span class="op">@</span> Λ <span class="op">@</span> np.linalg.inv(Q)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'QΛQinv='</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(QΛQinv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>A=
+[[1. 2. 3.]
+ [4. 5. 6.]
+ [7. 8. 9.]]
+
+QΛQinv=
+[[1. 2. 3.]
+ [4. 5. 6.]
+ [7. 8. 9.]]</code></pre>
+</section>
+<section id="orthogonal-matrix" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="orthogonal-matrix"><span class="header-section-number">6</span> Orthogonal Matrix</h2>
+<p>As mentioned before, when matrix A is symmetric, eigenvectors in matrix Q are orthogonal to each other.</p>
+<p>When we also make the L2 norm of all eigenvectors 1 (orthonormal), we call Q an orthogonal matrix.</p>
+<p>When Q is an orthogonal matrix,</p>
+<p><span class="math display">\[
+Q Q^\top = I
+\]</span></p>
+<p>As such,</p>
+<p><span class="math display">\[
+Q^\top = Q^{-1}
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+A = Q \Lambda Q^{-1} = Q \Lambda Q^\top
+\]</span></p>
+<p>The above fact will be helpful when we discuss the singular value decomposition.</p>
+<p>Let’s do QΛQ^T with Numpy:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Asymmetric Matrix</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.array([</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>],</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">6</span>],</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>]], dtype<span class="op">=</span>np.float64)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'A='</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(A)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Eigenvalue and Eigenvector</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>values, vectors <span class="op">=</span> np.linalg.eig(A)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>Λ <span class="op">=</span> np.diag(values)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>Q <span class="op">=</span> vectors</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>QΛQT <span class="op">=</span> Q <span class="op">@</span> Λ <span class="op">@</span> Q.T</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'QΛQT='</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(QΛQT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>A=
+[[1. 2. 3.]
+ [2. 5. 6.]
+ [3. 6. 9.]]
+
+QΛQT=
+[[1. 2. 3.]
+ [2. 5. 6.]
+ [3. 6. 9.]]</code></pre>
+<p>It’s fun to see the theory works precisely as expected.</p>
+<p>Also, let’s check Q is an orthogonal matrix:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>QQT <span class="op">=</span> Q <span class="op">@</span> Q.T</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'QQT='</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(QQT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>QQT=
+[[ 1.00000000e+00 5.55111512e-17 -1.80411242e-16]
+ [ 5.55111512e-17 1.00000000e+00 0.00000000e+00]
+ [-1.80411242e-16 0.00000000e+00 1.00000000e+00]]</code></pre>
+<p>Here we see the limitation of numerical computing. Non-diagonal elements should be 0; instead, some are very small values.</p>
+<p>So far, we are dealing with square matrices as Eigen Decomposition works only with square matrices. Next, we’ll see SVD that works with non-square matrices.</p>
+</section>
+<section id="singular-value-decomposition" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="singular-value-decomposition"><span class="header-section-number">7</span> Singular Value Decomposition</h2>
+<p>SVD exists for any matrix, even for non-square matrices.</p>
+<p>Suppose matrix A is m×n (m ≠ n), we can still decompose matrix A as follows:</p>
+<p><span class="math display">\[
+A = U \Sigma V^\top
+\]</span></p>
+<ul>
+<li><span class="math inline">\(U\)</span> is an orthogonal matrix (m×m).</li>
+<li><span class="math inline">\(\Sigma\)</span> is a diagonal matrix (m×n).</li>
+<li><span class="math inline">\(V\)</span> is an orthogonal matrix (n×n).</li>
+</ul>
+<p>It looks too abstract — a visualization may help:</p>
+<p><img src="images/svd.png" class="img-fluid"></p>
+<p><span class="math inline">\(\Sigma\)</span> has the following structure. The top-left part is a diagonal matrix with singular values (more on this later) in the diagonal elements. Other elements of <span class="math inline">\(\Sigma\)</span> are all zeros.</p>
+<p><img src="images/Sigma.png" class="img-fluid"></p>
+<p>As a convention, we sort the singular values in descending order:</p>
+<p><span class="math display">\[
+\sigma_1 \ \ge \ \sigma_2 \ \ge \ \dots \ \ge \ \sigma_s \ \ge \ 0
+\]</span></p>
+<p>The number of singular values is the same as the rank of matrix A, which is the number of independent column vectors.</p>
+<p>So, how can we create such a decomposition?</p>
+<p>The main idea is that we make a square matrix like the one below:</p>
+<p><span class="math display">\[
+A A^\top
+\]</span></p>
+<p>or</p>
+<p><span class="math display">\[
+A^\top A
+\]</span></p>
+<p>We can choose either, but using the one with fewer elements is easier.</p>
+<p>For example, if matrix A is 100×10,000. <span class="math inline">\(AA^T\)</span> is 100×100, and <span class="math inline">\(A^TA\)</span> is 10,000×10,000. So, I would choose <span class="math inline">\(AA^T\)</span>. How about you?</p>
+<p>Suppose we perform SVD on matrix A using <span class="math inline">\(AA^T\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+AA^\top &amp;= U \Sigma V^\top (U \Sigma V^\top)^\top \\
+&amp;= U \Sigma V^\top V \Sigma^\top U^\top \qquad \text{V is an orthogonal matrix} \\
+&amp;= U \Sigma \Sigma^\top U^\top \\
+&amp;= U \Sigma_m^2 U^\top
+\end{aligned}
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+\Sigma_m^2 = \Sigma \Sigma^\top
+\]</span></p>
+<p>is a diagonal matrix (m×m) with squared sigmas as the top-left diagonal elements. These values are eigenvalues of AA^T since we have eigen-decomposed <span class="math inline">\(AA^T\)</span> as follows:</p>
+<p><span class="math display">\[
+AA^\top = U \Sigma_m^2 U^\top
+\]</span></p>
+<p>The column vectors in matrix U are eigenvectors because:</p>
+<p><span class="math display">\[
+A A^\top U = U \Sigma_m^2 \qquad \text{U is an orthogonal matrix}
+\]</span></p>
+<p>In other words, if we can eigen-decompose <span class="math inline">\(AA^T\)</span>, we can calculate U and diagonal sigmas, and then we can calculate V.</p>
+<p>We can consider the same calculation with <span class="math inline">\(A^TA\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+A^\top A &amp;= (U \Sigma V^\top)^\top U \Sigma V^\top \\
+&amp;= V \Sigma^\top U^\top U \Sigma V^\top \qquad \text{U is an orthogonal matrix} \\
+&amp;= V \Sigma^\top \Sigma V^\top \\
+&amp;= V \Sigma_n^2 V^\top
+\end{aligned}
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+\Sigma_n^2 = \Sigma^\top \Sigma
+\]</span></p>
+<p>is a diagonal matrix (n×n) with squared sigmas as the top-left diagonal elements. These values are eigenvalues since we eigen-decompose <span class="math inline">\(A^TA\)</span> as follows:</p>
+<p><span class="math display">\[
+A^\top A = V \Sigma_n^2 V^\top
+\]</span></p>
+<p>The column vectors in matrix V are eigenvectors because:</p>
+<p><span class="math display">\[
+A^\top AV = V \Sigma_n^2
+\]</span></p>
+<p>In other words, if we can eigen-decompose A^TA, we can calculate V and diagonal sigmas, and then we can calculate U.</p>
+<p>So, if we eigen-decompose either <span class="math inline">\(AA^T\)</span> or <span class="math inline">\(A^TA\)</span>, we can perform singular value decomposition.</p>
+<p>Again, we should choose a smaller one of <span class="math inline">\(AA^T\)</span> or <span class="math inline">\(A^TA\)</span> to make our life easier.</p>
+<p>Let’s try SVD with Numpy:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.array([</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">3</span>, <span class="dv">4</span>],</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">5</span>, <span class="dv">6</span>]], dtype<span class="op">=</span>np.float64)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'A='</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(A)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>U, S, VT <span class="op">=</span> np.linalg.svd(A)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'U='</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(U)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'S='</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(S)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'VT='</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(VT)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>A=
+[[1. 2.]
+ [3. 4.]
+ [5. 6.]]
+
+U=
+[[-0.2298477 0.88346102 0.40824829]
+ [-0.52474482 0.24078249 -0.81649658]
+ [-0.81964194 -0.40189603 0.40824829]]
+
+S=
+[9.52551809 0.51430058]
+
+VT=
+[[-0.61962948 -0.78489445]
+ [-0.78489445 0.61962948]]</code></pre>
+<p>Let’s set up matrix Σ as follows:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Σ <span class="op">=</span> np.zeros_like(A, dtype<span class="op">=</span>np.float64)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>Σ[:<span class="dv">2</span>] <span class="op">=</span> np.diag(S)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Σ='</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Σ)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>Σ=
+[[9.52551809 0. ]
+ [0. 0.51430058]
+ [0. 0. ]]</code></pre>
+<p>Now, we can confirm <span class="math inline">\(A = U\Sigma V^\top\)</span>.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'UΣVT='</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(U <span class="op">@</span> Σ <span class="op">@</span> VT)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output:</p>
+<pre><code>UΣVT=
+[[1. 2.]
+ [3. 4.]
+ [5. 6.]]</code></pre>
+<p>Now that we know how SVD works, we are ready to work on pseudo-inverse matrices.</p>
+</section>
+<section id="pseudo-inverse-matrix" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="pseudo-inverse-matrix"><span class="header-section-number">8</span> Pseudo-inverse Matrix</h2>
+<p>An inverse matrix does not always exist, even for a square matrix. However, a pseudo-inverse — also called Moore Penrose inverse — matrix exists for non-square matrices.</p>
+<p>For example, matrix A is m×n.</p>
+<p><span class="math display">\[
+A \mathbf{x} = \mathbf{y}
+\]</span></p>
+<p>Using a pseudo-inverse matrix <span class="math inline">\(A^+\)</span>, we can perform the following conversion:</p>
+<p><span class="math display">\[
+\mathbf{x} = A^+ \mathbf{y}
+\]</span></p>
+<p>We define a pseudo-inverse matrix <span class="math inline">\(A^+\)</span> as:</p>
+<p><span class="math display">\[
+A+ = VD^+U^\top
+\]</span></p>
+<p>V and U are from SVD:</p>
+<p><span class="math display">\[
+A = U\Sigma V^\top
+\]</span></p>
+<p>We make <span class="math inline">\(D^+\)</span> by transposing <span class="math inline">\(\Sigma\)</span> and inverse all the diagonal elements. Suppose <span class="math inline">\(\Sigma\)</span> is defined as follows:</p>
+<p><span class="math display">\[
+\Sigma = \begin{bmatrix}
+\sigma_1 &amp; &amp; &amp; &amp; &amp; \\
+&amp; \sigma_2 &amp; &amp; &amp; &amp; \\
+&amp; &amp; \ddots &amp; &amp; &amp; &amp; \\
+&amp; &amp; &amp; \sigma_s &amp; &amp; &amp; \\
+&amp; &amp; &amp; &amp; 0 &amp; &amp; \\
+&amp; &amp; &amp; &amp; &amp; \ddots &amp; \\
+&amp; &amp; &amp; &amp; &amp; &amp; 0
+\end{bmatrix}
+\]</span></p>
+<p>Then <span class="math inline">\(D^+\)</span> is defined as follows:</p>
+<p><span class="math display">\[
+D^+ = \begin{bmatrix}
+\frac{1}{\sigma_1} &amp; &amp; &amp; &amp; &amp; \\
+&amp; \frac{1}{\sigma_2} &amp; &amp; &amp; &amp; \\
+&amp; &amp; \ddots &amp; &amp; &amp; &amp; \\
+&amp; &amp; &amp; \frac{1}{\sigma_s} &amp; &amp; &amp; \\
+&amp; &amp; &amp; &amp; 0 &amp; &amp; \\
+&amp; &amp; &amp; &amp; &amp; \ddots &amp; \\
+&amp; &amp; &amp; &amp; &amp; &amp; 0
+\end{bmatrix}
+\]</span></p>
+<p>Now, we can see how <span class="math inline">\(A^+A\)</span> works:</p>
+<p><span class="math display">\[
+\begin{aligned}
+A^+ A &amp;= (VD^+U^\top)(U\Sigma V^\top) \\
+&amp;= VD^+\Sigma V^\top \qquad\qquad \text{Note: } D^+\Sigma = I \\
+&amp;= VV^\top \\
+&amp;= I
+\end{aligned}
+\]</span></p>
+<p>In the same way, <span class="math inline">\(AA^+ = I\)</span>.</p>
+<p>In summary, if we can perform SVD on matrix A, we can calculate A^+ by VD^+UT, which is a pseudo-inverse matrix of A.</p>
+<p>Let’s try Pseudo-inverse with Numpy:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.array([</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">3</span>, <span class="dv">4</span>],</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">5</span>, <span class="dv">6</span>]], dtype<span class="op">=</span>np.float64)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>AP <span class="op">=</span> np.linalg.pinv(A)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(‘AP <span class="op">@</span> A’)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(AP <span class="op">@</span> A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The below is the output:</p>
+<pre><code>AP @ A
+[[ 1.0000000000000004e+00 0.0000000000000000e+00]
+ [-4.4408920985006262e-16 9.9999999999999956e-01]]</code></pre>
+<p>Congratulations! You’ve made it this far. I hope you’ve enjoyed it!</p>
+</section>
+<section id="references" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="references"><span class="header-section-number">9</span> References</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix" target="_blank">Eigendecomposition of a matrix</a><br>
+Wikipedia</li>
+<li><a href="https://en.wikipedia.org/wiki/Singular_value_decomposition" target="_blank">Singular Value Decomposition</a><br>
+Wikipedia</li>
+<li><a href="https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse" target="_blank">Moore Penrose inverse</a><br>
+Wikipedia</li>
+<li><a href="../../blog/2017/2017-11-14-up-sampling-with-transposed-convolution/" target="_blank">Up-sampling with Transposed Convolution</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-11-04">
+
+<title>Swin Transformer for Hierarchical Vision (2021) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#swin-transformer-architecture" id="toc-swin-transformer-architecture" class="nav-link active" data-scroll-target="#swin-transformer-architecture"><span class="header-section-number">1</span> Swin Transformer Architecture</a>
+  <ul class="collapse">
+  <li><a href="#vit-is-not-suitable-for-dense-prediction" id="toc-vit-is-not-suitable-for-dense-prediction" class="nav-link" data-scroll-target="#vit-is-not-suitable-for-dense-prediction"><span class="header-section-number">1.1</span> ViT is NOT Suitable for Dense Prediction</a></li>
+  <li><a href="#hierarchical-feature-maps-by-swin-transformer" id="toc-hierarchical-feature-maps-by-swin-transformer" class="nav-link" data-scroll-target="#hierarchical-feature-maps-by-swin-transformer"><span class="header-section-number">1.2</span> Hierarchical Feature Maps by Swin Transformer</a></li>
+  <li><a href="#patch-merging-layers" id="toc-patch-merging-layers" class="nav-link" data-scroll-target="#patch-merging-layers"><span class="header-section-number">1.3</span> Patch Merging Layers</a></li>
+  <li><a href="#shifted-window-multi-head-self-attention-sw-msa" id="toc-shifted-window-multi-head-self-attention-sw-msa" class="nav-link" data-scroll-target="#shifted-window-multi-head-self-attention-sw-msa"><span class="header-section-number">1.4</span> Shifted Window Multi-head Self-Attention (SW-MSA)</a></li>
+  </ul></li>
+  <li><a href="#swin-transformer-experiments" id="toc-swin-transformer-experiments" class="nav-link" data-scroll-target="#swin-transformer-experiments"><span class="header-section-number">2</span> Swin Transformer Experiments</a>
+  <ul class="collapse">
+  <li><a href="#classification-results-with-imagenet-1k-regular-training" id="toc-classification-results-with-imagenet-1k-regular-training" class="nav-link" data-scroll-target="#classification-results-with-imagenet-1k-regular-training"><span class="header-section-number">2.1</span> Classification Results with ImageNet-1K Regular Training</a></li>
+  <li><a href="#classification-results-with-imagenet-22k-pre-training" id="toc-classification-results-with-imagenet-22k-pre-training" class="nav-link" data-scroll-target="#classification-results-with-imagenet-22k-pre-training"><span class="header-section-number">2.2</span> Classification Results with ImageNet-22K Pre-training</a></li>
+  <li><a href="#object-detection-results" id="toc-object-detection-results" class="nav-link" data-scroll-target="#object-detection-results"><span class="header-section-number">2.3</span> Object Detection Results</a></li>
+  <li><a href="#semantic-segmentation-results" id="toc-semantic-segmentation-results" class="nav-link" data-scroll-target="#semantic-segmentation-results"><span class="header-section-number">2.4</span> Semantic Segmentation Results</a></li>
+  <li><a href="#performance-improvement-by-shifted-windows" id="toc-performance-improvement-by-shifted-windows" class="nav-link" data-scroll-target="#performance-improvement-by-shifted-windows"><span class="header-section-number">2.5</span> Performance Improvement by Shifted Windows</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">3</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Swin Transformer for Hierarchical Vision (2021)</h1>
+<p class="subtitle lead">A new Vision Transformer with Shifted Windows</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Vision Transformer</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 4, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Swin Transformer for Hierarchical Vision (2021)"></p>
+<p>In 2021, Microsoft announced a new Vision Transformer called Swin Transformer, which can act as a backbone for computer vision tasks like image classification, object detection, and semantic segmentation.</p>
+<p>The word Swin stands for <strong>S</strong>hifted <strong>win</strong>dows that provide the Transformer with hierarchical vision, which is the main topic of this article.</p>
+<section id="swin-transformer-architecture" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="swin-transformer-architecture"><span class="header-section-number">1</span> Swin Transformer Architecture</h2>
+<section id="vit-is-not-suitable-for-dense-prediction" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="vit-is-not-suitable-for-dense-prediction"><span class="header-section-number">1.1</span> ViT is NOT Suitable for Dense Prediction</h3>
+<p><a href="../../blog/2022/2022-11-02-vit-vision-transformer-image-classifier-2020/" target="_blank">ViT</a> (the original Vision Transformer from Google) uses fixed-scale image patches (i.e., 16 x 16) as inputs to the encoder to extract features. Although ViT works well for image classification, it is unsuitable for more dense vision tasks, such as object detection and semantic segmentation, which require finer visual details than 16 x 16 patches. Moreover, images in those tasks are typically larger than those in image classification datasets. Using smaller image patches on larger images will increase the number of patches that self-attention layers must process.</p>
+<p>For example, if we use 32 x 32 images, a 16 x 16 patch will produce four patches per image. For 64 x 64 images, a 16 x 16 patch means 16 patches per image. Therefore the attention mechanism must deal with four times more patches. For 128 x 128 images, the number of patches becomes 64.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Swin-Transformer-vs-ViT-960x482.png" class="img-fluid figure-img"></p>
+<figcaption>In ViT, the number of image patches increases quadratically.</figcaption>
+</figure>
+</div>
+<p>Swin Transformer uses a patch size of 4 x 4, so the number of patches would be much more than the above. ViT’s global attention approach is impractical for semantic segmentation on high-resolution images.</p>
+<p>So, we face the dilemma:</p>
+<ul>
+<li>We need finer details for pixel-level prediction, so we want to use smaller patches.</li>
+<li>The computation complexity of the attention mechanism increases quadratically to the number of image patches.</li>
+</ul>
+</section>
+<section id="hierarchical-feature-maps-by-swin-transformer" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="hierarchical-feature-maps-by-swin-transformer"><span class="header-section-number">1.2</span> Hierarchical Feature Maps by Swin Transformer</h3>
+<p>Swin Transformer builds hierarchical feature maps by starting from small-sized patches and gradually merging neighboring patches in deeper Transformer layers. For example, Swin Transformer starts with non-overlapping 16 (= 4 x 4) local windows (the red squares at the bottom of figure 1-(a) below). Each local window has 16 (= 4 x 4) image patches. As self-attention layers compute within each local window, they only handle the relationships between 16 image patches.</p>
+<p>Contrary to that, ViT’s attention layers work on the entire image patches (figure 1-(b) below). If it used the same small patch size, the attention layers would need to deal with 256 patches. Since ViT is an image classification model, it is okay with larger patches (coarser features). However, Swin Transformer needs both fine and coarse features.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-1.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>At the next level in the hierarchy, Swin Transformer merges neighboring patches to form 4 (= 2 x 2) local windows. Again, self-attention layers compute within each local window. Therefore, those layers only deal with 16 feature patches. In other words, the number of patches in each window is the same at any level. Eventually, one local window covers the entire image with 16 feature patches.</p>
+<p>So, the computation complexity is linear to the input image size. The below figure illustrates the point with various image sizes processed by a patch size of 4 x 4. Merging of neighboring patches reduces the image size while increasing the receptive field of each patch, like how ResNet’s convolution and max-pool layers reduce feature map size while increasing the receptive field.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Swin-Transformer-hierarchical.png" class="img-fluid figure-img"></p>
+<figcaption>Swin Transformer builds a hierarchy of feature maps by merging neighboring patches.</figcaption>
+</figure>
+</div>
+<p>The idea of hierarchical feature maps is similar to <a href="../../blog/2022/2022-08-21-fpn-2016/" target="_blank">FPN (Feature Pyramid Network)</a>, which provides fine and coarse features useful for all image-related tasks.</p>
+</section>
+<section id="patch-merging-layers" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="patch-merging-layers"><span class="header-section-number">1.3</span> Patch Merging Layers</h3>
+<p>Swin Transformer’s patch-merging reduces the number of patches by concatenating features of 4 (= 2 x 2) neighboring patches and applying a linear layer to reduce the feature dimensions.</p>
+<p>The below figure shows the overall architecture of Swin Transformer, including patch merging layers.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-3a.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3 (a) of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The image shape is H x W x 3 (height, width, three channels), on which Swin Transformer uses a patch size of 4 x 4. As such, we have H/4 x W/4 patches, and each patch’s feature dimension is 48 (= 4 x 4 x 3). In stage 1, the linear layer projects the raw-valued features to an arbitrary dimension C.</p>
+<p>Then, in stage 2, the patch merging concatenates the features of each group of 2 x 2 neighboring patches. Each patch’s feature dimension becomes 4C, on which it applies a linear layer, reducing the output dimension to 2C. So, we have H/8 x W/8 patches, each of which has 2C-dimensional features. The process repeats in stages 3 and 4, reducing the size by 4 (= 2 x 2) and increasing the feature dimension by 2.</p>
+<p>Again, it’s like how ResNet reduces the image size while increasing the feature dimension with its alternating convolution and max-pooling layers. As a result, Swin Transformer can conveniently replace the backbone networks in existing methods for various vision tasks.</p>
+<p>Next, let’s look at the details of the Swin Transformer Blocks.</p>
+</section>
+<section id="shifted-window-multi-head-self-attention-sw-msa" class="level3" data-number="1.4">
+<h3 data-number="1.4" class="anchored" data-anchor-id="shifted-window-multi-head-self-attention-sw-msa"><span class="header-section-number">1.4</span> Shifted Window Multi-head Self-Attention (SW-MSA)</h3>
+<p>The window-based self-attention module lacks connections across windows. While it reduces the computation complexity, it limits its modeling power. Therefore, they proposed a shifted window approach to overcome the limitation while maintaining the efficiency benefit of non-overlapping windows. It alternates between two partitioning configurations in consecutive Swin Transformer blocks.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>As illustrated in the above figure, layer 1 uses regular partitioning, and layer 2 uses a windowing configuration shifted by half of the window size. Therefore, it introduces connections between neighboring windows while keeping the local computation within each non-overlapping window.</p>
+<p>This approach has an issue because the number of local windows increased from 4 (= 2 x 2) to 9 (= 3 x 3), which makes batch computation tricky. As such, Swin Transformer uses cyclic shifting of image patches toward the top-left direction and then applies a masking mechanism to limit self-attention within adjacent patches. Also, it uses reverse cyclic shifting to cover the other areas.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-4.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4 of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Note: MSA stands for Multi-head Self-Attention.</p>
+<p>As a result, shifted windows introduce connections across windows while masking prevents the attention computation from processing across the image boundary. This approach is efficient since we always have the same number of windows.</p>
+<p>The below shows two successive Swin Transformer blocks:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-3b.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3 (b) of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Note:</p>
+<ul>
+<li>W-MSA and SW-MSA stand for regular and shifted windowing configurations, respectively.</li>
+<li>MLP is a multi-layer (2-layer) perception with GELU non-linearity in between.</li>
+<li>LN is a LayerNorm layer.</li>
+</ul>
+</section>
+</section>
+<section id="swin-transformer-experiments" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="swin-transformer-experiments"><span class="header-section-number">2</span> Swin Transformer Experiments</h2>
+<section id="classification-results-with-imagenet-1k-regular-training" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="classification-results-with-imagenet-1k-regular-training"><span class="header-section-number">2.1</span> Classification Results with ImageNet-1K Regular Training</h3>
+<p>With regular (from scratch) training on ImageNet-1K, Swin Transformer models perform better than other vision Transformers (DeiT and ViT) and are comparable with EfficientNet and RegNet models. Moreover, the Swin Transfomer models achieve a slightly better speed-accuracy trade-off than EfficientNet and RegNet models.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-1a.png" class="img-fluid figure-img"></p>
+<figcaption>Table 1 (a) of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>While both EfficientNet and RegNet models are the results of extensive architecture searches, Swin Transformer is a modification of the standard Transformer and has some potential for further improvement.</p>
+<p>Note:</p>
+<ul>
+<li>Google’s research team with Quoc V. Le, well-known in Neural Architecture Search (NAS) research, developed EfficientNet models.</li>
+<li>RegNet models are also the results of NAS by Meta’s FAIR team with Ross Girshick and Kaiming He, who are well-known for Faster R-CNN and related works.</li>
+</ul>
+</section>
+<section id="classification-results-with-imagenet-22k-pre-training" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="classification-results-with-imagenet-22k-pre-training"><span class="header-section-number">2.2</span> Classification Results with ImageNet-22K Pre-training</h3>
+<p>They pre-trained the larger models (Swin-B and Swin-L) on ImageNet-22K and fine-tuned them on ImageNet-1K for image classification. Swin-B achieves 1.8% to 1.9% gains over training on ImageNet-1K from scratch. The larger Swin-L model achieves 87.3% top-1 accuracy, +0.9% better than the Swin-B model. Similarly, ViT models perform better with pre-training but not as better than Swin Transformer models.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-1b.png" class="img-fluid figure-img"></p>
+<figcaption>Table 1 (b) of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>In short, larger Swin Transformer models with pre-training on massive datasets can bring better performance. Transformer-based models generally scale better with pre-training, as we have seen with ViT and BERT, while CNN-based models may not scale that well.</p>
+</section>
+<section id="object-detection-results" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="object-detection-results"><span class="header-section-number">2.3</span> Object Detection Results</h3>
+<p>The below table compares Swin Transformer and ResNe(X)t as backbones with various capacities for the Cascade Mask R-CNN object detection model.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-2b.png" class="img-fluid figure-img"></p>
+<figcaption>Table 2 (b) of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Swin Transformer backbones perform better than other models, proving they are better alternative backbones.</p>
+</section>
+<section id="semantic-segmentation-results" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="semantic-segmentation-results"><span class="header-section-number">2.4</span> Semantic Segmentation Results</h3>
+<p>They used Swin Transformer as a backbone for semantic segmentation tasks on the ADE20K dataset. Swin-L model with ImageNet-22K pre-training achieves 53.5 mIoU (mean IoU) on the validation set, which is better than the previous best model (SETR) by +3.2 mIoU, even though the Swin-L model has fewer parameters (234M) than SETR (308M).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-3.png" class="img-fluid figure-img"></p>
+<figcaption>Table 3 of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Note: ‡ in the table indicates that the model is pre-trained on ImageNet-22K.</p>
+</section>
+<section id="performance-improvement-by-shifted-windows" class="level3" data-number="2.5">
+<h3 data-number="2.5" class="anchored" data-anchor-id="performance-improvement-by-shifted-windows"><span class="header-section-number">2.5</span> Performance Improvement by Shifted Windows</h3>
+<p>The below table compares the performance results on ImageNet classification, COCO object detection, and ADE20k semantic segmentation tasks, with and without shifted windows.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-4-upper.png" class="img-fluid figure-img"></p>
+<figcaption>Table 4 (upper part) of <a href="https://arxiv.org/abs/2103.14030" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Swin Transformer performs better with shifted windows for all vision tasks.</p>
+<hr>
+<p>There you have it. We have just witnessed that Transformer can handle typical vision tasks instead of convolutional neural networks and does it better.</p>
+</section>
+</section>
+<section id="references" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="references"><span class="header-section-number">3</span> References</h2>
+<ul>
+<li><a href="../../blog/2022/2022-11-02-vit-vision-transformer-image-classifier-2020/" target="_blank">ViT: Vision Transformer</a></li>
+<li><a href="../../blog/2021/2021-12-13-transformers-encoder-decoder/" target="_blank">Transformer’s Encoder-Decoder</a></li>
+<li><a href="../../blog/2022/2022-08-21-fpn-2016/" target="_blank">FPN: Feature Pyramid Network</a></li>
+<li><a href="https://arxiv.org/abs/2103.14030" target="_blank">Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</a><br>
+Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, Baining Guo<br>
+<a href="https://github.com/microsoft/Swin-Transformer" target="_blank">GitHub</a></li>
+<li><a href="https://arxiv.org/abs/1905.11946" target="_blank">EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks</a><br>
+Mingxing Tan, Quoc V. Le</li>
+<li><a href="https://arxiv.org/abs/2003.13678" target="_blank">Designing Network Design Spaces</a><br>
+Ilija Radosavovic, Raj Prateek Kosaraju, Ross Girshick, Kaiming He, Piotr Dollár</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

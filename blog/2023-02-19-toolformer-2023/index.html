@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-02-19">
+
+<title>Toolformer (2023-02) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#limitations-of-llms" id="toc-limitations-of-llms" class="nav-link active" data-scroll-target="#limitations-of-llms"><span class="header-section-number">1</span> Limitations of LLMs</a></li>
+  <li><a href="#approach-by-toolformer" id="toc-approach-by-toolformer" class="nav-link" data-scroll-target="#approach-by-toolformer"><span class="header-section-number">2</span> Approach by Toolformer</a></li>
+  <li><a href="#sampling-api-calls" id="toc-sampling-api-calls" class="nav-link" data-scroll-target="#sampling-api-calls"><span class="header-section-number">3</span> Sampling API Calls</a></li>
+  <li><a href="#filtering-api-calls" id="toc-filtering-api-calls" class="nav-link" data-scroll-target="#filtering-api-calls"><span class="header-section-number">4</span> Filtering API Calls</a></li>
+  <li><a href="#fine-tuning-the-model" id="toc-fine-tuning-the-model" class="nav-link" data-scroll-target="#fine-tuning-the-model"><span class="header-section-number">5</span> Fine-tuning the Model</a></li>
+  <li><a href="#decoding-with-api-calls" id="toc-decoding-with-api-calls" class="nav-link" data-scroll-target="#decoding-with-api-calls"><span class="header-section-number">6</span> Decoding with API calls</a></li>
+  <li><a href="#experiments" id="toc-experiments" class="nav-link" data-scroll-target="#experiments"><span class="header-section-number">7</span> Experiments</a>
+  <ul class="collapse">
+  <li><a href="#lama" id="toc-lama" class="nav-link" data-scroll-target="#lama"><span class="header-section-number">7.1</span> LAMA</a></li>
+  <li><a href="#math-datasets" id="toc-math-datasets" class="nav-link" data-scroll-target="#math-datasets"><span class="header-section-number">7.2</span> Math Datasets</a></li>
+  <li><a href="#question-answering" id="toc-question-answering" class="nav-link" data-scroll-target="#question-answering"><span class="header-section-number">7.3</span> Question Answering</a></li>
+  <li><a href="#multilingual-question-answering" id="toc-multilingual-question-answering" class="nav-link" data-scroll-target="#multilingual-question-answering"><span class="header-section-number">7.4</span> Multilingual Question Answering</a></li>
+  <li><a href="#temporal-datasets" id="toc-temporal-datasets" class="nav-link" data-scroll-target="#temporal-datasets"><span class="header-section-number">7.5</span> Temporal Datasets</a></li>
+  <li><a href="#language-modeling" id="toc-language-modeling" class="nav-link" data-scroll-target="#language-modeling"><span class="header-section-number">7.6</span> Language Modeling</a></li>
+  <li><a href="#scaling-law" id="toc-scaling-law" class="nav-link" data-scroll-target="#scaling-law"><span class="header-section-number">7.7</span> Scaling Law</a></li>
+  </ul></li>
+  <li><a href="#limitations-of-toolformer" id="toc-limitations-of-toolformer" class="nav-link" data-scroll-target="#limitations-of-toolformer"><span class="header-section-number">8</span> Limitations of Toolformer</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">9</span> Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">10</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Toolformer (2023-02)</h1>
+<p class="subtitle lead">Language Models Can Teach Themselves to Use Tools</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Large Language Models</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 19, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Toolformer: Language Models Can Teach Themselves to Use Tools"></p>
+<p>Meta AI Research recently published the paper <a href="https://arxiv.org/abs/2302.04761" target="_blank">Toolformer: Language Models Can Teach Themselves to Use Tools</a> to overcome the limitations of today’s LLMs.</p>
+<p>Many who have played with ChatGPT realize that it hallucinates from time to time. In other words, it generates texts containing factually wrong information. Yann LeCun also pointed out the weakness of LLMs in a series of tweets.</p>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+LLMs have no physical intuition as they are trained exclusively on text.<br>They may correctly answer physical intuition questions <em>if</em> they can retrieve answers to similar questions from their vast associative memory.<br>But they may get the answer <em>completely</em> wrong<br>1/ <a href="https://t.co/qtrbc4UrIY">pic.twitter.com/qtrbc4UrIY</a>
+</p>
+— Yann LeCun (<span class="citation" data-cites="ylecun">@ylecun</span>) <a href="https://twitter.com/ylecun/status/1619004942693601284?ref_src=twsrc%5Etfw">January 27, 2023</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>When training LLMs, we expect them to generate natural-sounding text. With InstructGPT and ChatGPT, OpenAI added RLHF (reinforcement learning from human feedback) so that the models generate text aligned with what human expects. However, RLHF does not ensure that the models fact-check their outputs.</p>
+<p>Recently, Microsoft released the new Bing AI for public beta testing. Those who’ve signed up and received an invitation can now play with the chat-based search engine. While it does search the web to retrieve information and then generates texts on top of it, it still hallucinates when there is insufficient information. Although it is one step in the right direction as it uses more factual information, it does not seem enough to integrate web search alone.</p>
+<p>As such, I’m interested in the <strong>Toolformer</strong> from Meta AI Research, which incorporates a range of external tools listed below:</p>
+<ul>
+<li>a question-answering system</li>
+<li>a Wikipedia search engine</li>
+<li>a calculator</li>
+<li>a calendar</li>
+<li>a machine translation system</li>
+</ul>
+<p>They trained a model (based on a pre-trained GPT-J model with 6.7B parameters) to use the above-mentioned external tools. It achieves much stronger zero-shot results, clearly outperforming a much larger GPT-3 model.</p>
+<p>This article summarizes what Toolformer is about.</p>
+<section id="limitations-of-llms" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="limitations-of-llms"><span class="header-section-number">1</span> Limitations of LLMs</h2>
+<p>The paper enumerates a list of limitations in LLMs.</p>
+<ul>
+<li>An inability to access up-to-date information on recent events</li>
+<li>The tendency to hallucinate facts</li>
+<li>Difficulty in understanding low-resource languages</li>
+<li>A lack of mathematical skills to perform precise calculations</li>
+<li>Unawareness of the progression of time</li>
+</ul>
+<p>Microsoft’s new Bing AI is also an effort to address the first point.</p>
+<p>The second point requires fact-checking, which may require a Q&amp;A system and search within Wikipedia.</p>
+<p>The third point may not be evident for people who only use English. For example, I often use Japanese with ChatGPT or Bing AI. Although ChatGPT works reasonably well in Japanese, it sometimes works better if we chat in English and then ask it to summarize the answer in Japanese or use a translation service.</p>
+<p>The lack of mathematical skills means it does not always produce correct calculation results. There is no need to learn how to calculate correctly based on millions of texts. It should simply use a calculator.</p>
+<p>As for the unawareness of the progression of time, one should use a calendar to obtain the current date.</p>
+</section>
+<section id="approach-by-toolformer" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="approach-by-toolformer"><span class="header-section-number">2</span> Approach by Toolformer</h2>
+<p>The idea is to use the <a href="../../blog/2023/2023-01-30-why-gpt-icl/" target="_blank">ICL</a> (in-context learning) capability of LLMs to learn how to use external APIs to overcome the limitations mentioned above.</p>
+<p>They give a handful of human-written examples of using API calls and let an LM generate potential API calls. For example, a human-written prompt below demonstrates how to generate API calls for question-answering tools.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-3.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 3 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The demonstration example tells that given a prompt <code>Joe Biden was born in</code>, the model should generate the following API calls: <code>[QA("Where was Joe Biden born?")]</code> to get the answer <code>Scranton</code>. Given the name of the city, the model should continue to generate <code>[QA("In which state is Scranton?")]</code> to get the answer <code>Pennsylvania</code> to complete the sentence.</p>
+<p>Therefore, given demonstrations and a query input, the model’s ICL capability will hopefully generate API calls to retrieve expected answers. However, the model may generate API calls that do not work. Therefore, they use a self-supervised loss to filter out the API calls that do not work. As such, they can accumulate many API calls that work and use them to finetune the model.</p>
+<p>For example, the below figure illustrates the process for a question-answering tool.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The sample text from the LM dataset is <code>Pittsburgh is also known as the Steel City</code>, and the prompt given to the model is <code>Pittsburgh is also known as</code>. To find the correct answer: <code>Steel City</code>, the model must generate a text to make an API call correctly.</p>
+<p>They sample the model-generated API calls. The above figure shows two such samples:</p>
+<ul>
+<li>“What other name is Pittsburgh known by?”</li>
+<li>“Which country is Pittsburgh in?”</li>
+</ul>
+<p>The corresponding results from the API calls are:</p>
+<ul>
+<li>Steel City</li>
+<li>United States</li>
+</ul>
+<p>In this case, the first sample is better, so they include that into a new LM dataset with API calls as follows:</p>
+<p>“Pittsburgh is also known as <code>[QA("What other name is Pittsburgh known by?") -&gt; Steel City]</code> the Steel City.”</p>
+<p>It contains the expected API call and the correct answer. They repeat the above process to generate a new LM dataset with API calls. In other words, they let the LM annotate a huge language modeling dataset with API calls embedded in texts, which they use to finetune the LM to make helpful API calls.</p>
+<p>The approach has the following advantages:</p>
+<ul>
+<li>It does not require large amounts of human annotations as it can learn self-supervised.</li>
+<li>They can apply the approach to the same dataset used for pre-training the LM, ensuring the model does not lose the original language modeling capabilities.</li>
+<li>It allows the LM to use various external tools in a general way since it embeds API calls into texts.</li>
+</ul>
+<p>The below figure shows various API calls embedded in texts.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-1.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="sampling-api-calls" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sampling-api-calls"><span class="header-section-number">3</span> Sampling API Calls</h2>
+<p>The paper describes how to sample API calls from the LM dataset.</p>
+<p>Let <span class="math inline">\(P_M(z_{n+1}|z_1, \dots, z_n)\)</span> be the probability of the next token <span class="math inline">\(z_{n+1}\)</span> given the previous tokens <span class="math inline">\(z_1, \dots, z_n\)</span> and the model <span class="math inline">\(M\)</span>. They train the model to maximize the likelihood of the next token <span class="math inline">\(z_{n+1}\)</span> given the previous tokens <span class="math inline">\(z_1, \dots, z_n\)</span>.</p>
+<p>When sampling, we have a prompt <span class="math inline">\(P(\boldsymbol{x})\)</span> that demonstrates how to use the API call and an input example <span class="math inline">\(\boldsymbol{x} = x_1, \dots, x_n\)</span> to be annotated.</p>
+<p>The model generates the following probability for each token position <span class="math inline">\(i\)</span> within the input example.</p>
+<p><span class="math display">\[
+p_i = P_M(\text{&lt;API&gt;} | P(\boldsymbol{x}), x_{1:i-1})
+\]</span></p>
+<p><span class="math inline">\(\text{&lt;API&gt;}\)</span> and <span class="math inline">\(\text{&lt;/API&gt;}\)</span> are the markers to indicate the start and end of an API call. In practice, they use the token “[” and ”]” instead of <span class="math inline">\(\text{&lt;API&gt;}\)</span> and <span class="math inline">\(\text{&lt;/API&gt;}\)</span> so that the model works without modifying the existing vocabulary.</p>
+<p>As <span class="math inline">\(P(\boldsymbol{x})\)</span> is the prompt (with demonstration) and <span class="math inline">\(x_{1:i-1}\)</span> is the prefix of the input example up to the <span class="math inline">\(i\)</span>-th token, the model predicts if the next token is a start of an API call or not.</p>
+<p>Once the model <span class="math inline">\(M\)</span> assigns the above probability to each <span class="math inline">\(i \in \{1, \dots, n\}\)</span>, they apply a sampling threshold <span class="math inline">\(\tau_s\)</span>, only selecting positions with probability more than <span class="math inline">\(\tau_s\)</span>.</p>
+<p><span class="math display">\[
+I = \{i | p_i &gt; \tau_s\}
+\]</span></p>
+<p>They keep up to <span class="math inline">\(k\)</span> candidate positions for doing API calls.</p>
+<p>Then, they obtain up to <span class="math inline">\(m\)</span> API calls by sampling from the model <span class="math inline">\(M\)</span> for each candidate position <span class="math inline">\(i\)</span> in <span class="math inline">\(I\)</span> (up to <span class="math inline">\(k\)</span> positions).</p>
+<p><span class="math display">\[
+c_i^1, c_i^2, \dots, c_i^m
+\]</span></p>
+<p>The model generates an API call text, given the sequence <span class="math inline">\([P(\boldsymbol{x}), x_{1:i-1}, \text{&lt;API&gt;}]\)</span>. The resulting API call must end with the <span class="math inline">\(\text{&lt;/API&gt;}\)</span> token. Otherwise, they discard the generated API call text.</p>
+<p>The next step is to execute all API calls generated by <span class="math inline">\(M\)</span>. This step is up to the underlying API. It may invoke a Python script or something else. The response for each API call <span class="math inline">\(c_i\)</span> must be a single response text sequence <span class="math inline">\(r_i\)</span>.</p>
+</section>
+<section id="filtering-api-calls" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="filtering-api-calls"><span class="header-section-number">4</span> Filtering API Calls</h2>
+<p>Now that we have sampled API calls and executed them, we need to filter out the API calls that do not work. The paper describes how they filter API calls.</p>
+<p>They define the following weighted cross-entropy loss:</p>
+<p><span class="math display">\[
+L_i(\boldsymbol{z}) = - \sum\limits_{j=i}^n w_{j-i} \log P_M(x_j | \boldsymbol{z}, x_{1:j-1})
+\]</span></p>
+<ul>
+<li><span class="math inline">\(i\)</span> is the position of the API call <span class="math inline">\(c_i\)</span> in the sequence of tokens <span class="math inline">\(\boldsymbol{x} = x_1, \dots, x_n\)</span>.</li>
+<li><span class="math inline">\(\boldsymbol{z}\)</span> is the prefixed sequence of tokens before <span class="math inline">\(\boldsymbol{x}\)</span>. We’ll touch more on this later.</li>
+<li><span class="math inline">\(x_{1:j-1}\)</span> is the prefix of the sequence of tokens before the <span class="math inline">\(j\)</span>-th token.</li>
+<li><span class="math inline">\(w_i | i \in \mathbb{N}\)</span> is the sequence of weights.</li>
+</ul>
+<p>The loss is low if the model <span class="math inline">\(M\)</span> predicts a high probability for each token <span class="math inline">\(x_j \in \{x_i, x_{i+1}, \dots\}\)</span> (starting from the API call position to later tokens).</p>
+<p><span class="math inline">\(w_{j-i}\)</span> is the weight for tokens in the input example <span class="math inline">\(\boldsymbol{x}\)</span>, starting with position <span class="math inline">\(i\)</span>. They use the following weights:</p>
+<p><span class="math display">\[
+\begin{aligned}
+w_t &amp;= \dfrac{\tilde{w}_t}{\sum\limits_{s \in \mathbb{N}} \tilde{w}_s} \\
+\text{where}\ \tilde{w}_t &amp;= \max(0, 1 - 0.2t)
+\end{aligned}
+\]</span></p>
+<p>In short, it assigns less weight to tokens that are further away from the API call. After five tokens, the weight is 0.</p>
+<p>So far, nothing special about the loss. The loss is low if the model predicts a high probability for each token at the API call position and after in the sequence <span class="math inline">\(\boldsymbol{x}\)</span>, weighted more for tokens closer to the API call.</p>
+<p>The next step is to filter out API calls that do not produce the expected response <span class="math inline">\(r_i\)</span>. They compare the following two instantiations of the above loss:</p>
+<p><span class="math display">\[
+\begin{aligned}
+L_i^+ &amp;= L_i(e(c_i, r_i)) \\
+L_i^- &amp;= \min(L_i(\epsilon), L_i(e(c_i, \epsilon)))
+\end{aligned}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(r_i\)</span> is the response from the API call <span class="math inline">\(c_i\)</span>.</li>
+<li><span class="math inline">\(e(c_i, r_i)\)</span> means we provide the model M with the API call text <span class="math inline">\(c_i\)</span> and the response <span class="math inline">\(r_i\)</span> as the prefix <span class="math inline">\(\boldsymbol{z}\)</span>.</li>
+<li><span class="math inline">\(\epsilon\)</span> is an empty sequence. Hence, <span class="math inline">\(L_i(\epsilon)\)</span> is the loss when there is no API call.</li>
+<li><span class="math inline">\(e(c_i, \epsilon)\)</span> means we provide the model M with the API call <span class="math inline">\(c_i\)</span> only as the prefix <span class="math inline">\(\boldsymbol{z}\)</span>.</li>
+</ul>
+<p>For <span class="math inline">\(L_i^+\)</span>, they provide the API call and response texts as the prefixed sequence <span class="math inline">\(\boldsymbol{z}\)</span>. For <span class="math inline">\(L_i^-\)</span>, they provide either nothing or just API call text (without response). If <span class="math inline">\(L_i^+\)</span> is lower than <span class="math inline">\(L_i^-\)</span> by some threshold, we assume that the API call provides good context for the model to predict the subsequent texts (hence the loss is weighted more for tokens closer to <span class="math inline">\(\boldsymbol{z}\)</span>).</p>
+<p>So, ideally, <span class="math inline">\(L_i^+\)</span> should be much lower than <span class="math inline">\(L_i^-\)</span> since given the API call text and the response text as the prefix should give more context to the model <span class="math inline">\(M\)</span> than just the API call text or nothing at all in the prefix.</p>
+<p>As such, they only keep API calls for which the following condition holds:</p>
+<p><span class="math display">\[
+L_i^- - L_i^+ \ge \tau_f
+\]</span></p>
+<p><span class="math inline">\(\tau_f\)</span> is a filtering threshold.</p>
+</section>
+<section id="fine-tuning-the-model" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="fine-tuning-the-model"><span class="header-section-number">5</span> Fine-tuning the Model</h2>
+<p>After sampling and filtering calls for APIs, they merge the API calls with the input example <span class="math inline">\(\boldsymbol{x}\)</span> to form a new sequence <span class="math inline">\(\boldsymbol{x}^*\)</span>.</p>
+<p><span class="math display">\[
+\boldsymbol{x}^* = x_{1:i-1}, e(c_i, r_i), x_{i+1:n}
+\]</span></p>
+<p>For texts with multiple API calls, they merge the API calls in respective API call positions.</p>
+<p>Doing the same process for text data in the original dataset <span class="math inline">\(\mathcal{C}\)</span> will convert it into a new dataset <span class="math inline">\(\mathcal{C}^*\)</span>, augmented with API calls.</p>
+<p>They fine-tune the model <span class="math inline">\(M\)</span> on the new dataset <span class="math inline">\(\mathcal{C}^*\)</span>, which exposes the model to the original text data augmented with the API calls.</p>
+<p>The below table shows the number of examples with API calls in <span class="math inline">\(\mathcal{C}^*\)</span>. for different values of filtering threshold <span class="math inline">\(\tau_f\)</span>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-2.png" class="img-fluid figure-img"></p>
+<figcaption>Table 2 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="decoding-with-api-calls" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="decoding-with-api-calls"><span class="header-section-number">6</span> Decoding with API calls</h2>
+<p>During inference, they let the model decode until it produces the “-&gt;” token, which indicates the model expects the response for an API call execution. Then, they provide the model with a response text sequence and the <span class="math inline">\(\text{&lt;/API&gt;}\)</span> token so that the model can continue decoding.</p>
+<p>The only constraints imposed on external APIs are:</p>
+<ul>
+<li>Inputs and outputs must be text sequences.</li>
+<li>We can provide a few demonstrations of the API call and its response.</li>
+</ul>
+<p>As already mentioned, they can incorporate the following tools:</p>
+<ul>
+<li>a question-answering system</li>
+<li>a Wikipedia search engine</li>
+<li>a calculator</li>
+<li>a calendar</li>
+<li>a machine translation system</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-1.png" class="img-fluid figure-img"></p>
+<figcaption>Table 1 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="experiments" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="experiments"><span class="header-section-number">7</span> Experiments</h2>
+<p>They used <a href="https://aclanthology.org/2020.lrec-1.494/" target="_blank">CCNet</a> the following models with different fine-tuning and decoding settings.</p>
+<ul>
+<li><strong>GPT-J</strong>: A regular GPT-J model without any finetuning.</li>
+<li><strong>GPT-J + CC</strong>: GPT-J finetuned on <span class="math inline">\(C\)</span>, our subset of CCNet, without API calls.</li>
+<li><strong>Toolformer</strong>: GPT-J finetuned on <span class="math inline">\(C^*\)</span>, our subset of CCNet augmented with API calls.</li>
+<li><strong>Toolformer (disabled)</strong>: The same model as Toolformer, but API calls are disabled during decoding.</li>
+</ul>
+<section id="lama" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="lama"><span class="header-section-number">7.1</span> LAMA</h3>
+<p>The task is to complete a short statement with a missing fact (e.g., a date or a place).</p>
+<p>The table below shows the results with a subset of the LAMA dataset. In this experiment, they disabled the Wikipedia Search API to be fair since LAMA uses statements obtained directly from Wikipedia. Toolformer outperforms all the baseline and much larger models like OPT and GPT-3.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-3.png" class="img-fluid figure-img"></p>
+<figcaption>Table 3 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="math-datasets" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="math-datasets"><span class="header-section-number">7.2</span> Math Datasets</h3>
+<p>The table below shows the results for various benchmarks requiring mathematical reasoning. We can see that Toolformer outperforms all the baselines and much larger models like OPT and GPT-3 as it knows how to use the calculator API.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-4.png" class="img-fluid figure-img"></p>
+<figcaption>Table 4 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="question-answering" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="question-answering"><span class="header-section-number">7.3</span> Question Answering</h3>
+<p>The table below shows results for various question-answering datasets. Toolformer outperforms baselines of the same size but falls short of GPT-3 (175B). According to the paper, Toolformer uses the Wikipedia search tool for most examples in this experiment.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-5.png" class="img-fluid figure-img"></p>
+<figcaption>Table 5 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>They hypothesize that the poor performance of Toolformer on the question-answering task is due to the lack of quality of their search engine, which, in many cases, returns results that are not a good match for a given query. Another possible explanation is the lack of an excellent way to interact with the search engine (e.g., by browsing through multiple results and reformulating the query if results are not helpful).</p>
+</section>
+<section id="multilingual-question-answering" class="level3" data-number="7.4">
+<h3 data-number="7.4" class="anchored" data-anchor-id="multilingual-question-answering"><span class="header-section-number">7.4</span> Multilingual Question Answering</h3>
+<p>The table shows the result with MLQA (Multilingual Question Answering) dataset for Spanish (Es), German (De), Hindi (Hi), Vietnamese (Vi), Chinese (Zh), and Arabic (Ar).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-6.png" class="img-fluid figure-img"></p>
+<figcaption>Table 6 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Toolformer does not consistently outperform vanilla GPT-J. They mention it is mainly because, for some languages, finetuning on CCNet deteriorates performance, which might be due to a distribution shift compared to GPT-J’s original pretraining data.</p>
+<p>The last two rows are English only. We can see that Toolformer outperforms GPT-J on MLQA-En.</p>
+<p>OPT and GPT-3 perform very weakly because they fail to provide an answer in English despite being instructed to do so.</p>
+</section>
+<section id="temporal-datasets" class="level3" data-number="7.5">
+<h3 data-number="7.5" class="anchored" data-anchor-id="temporal-datasets"><span class="header-section-number">7.5</span> Temporal Datasets</h3>
+<p>They used TEMPLAMA - a new dataset built from Wikipedia that contains queries about facts that change with time (e.g., “Cristiano Ronaldo plays for ___”) and the correct answer for the years between 2010 and 2020.</p>
+<p>It also contains queries regarding random dates/durations (e.g., “What day of the week was it 30 days ago?”), for which knowing the current date is required to answer.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-7.png" class="img-fluid figure-img"></p>
+<figcaption>Table 7 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Toolformer outperforms all baselines. However, they discovered that it uses the calendar tool only 0.2% of all examples of TEMPLAMA. It primarily uses the Wikipedia search tool and question-answering tools.</p>
+<p>It’d be ideal if Toolformer could use the calendar tool to get the current date and then query the question-answering tool with this date. However, it is impossible since they allow only one API call per example. Also, it would be hard to learn for Toolformer since it sampled all API calls in its training data independently.</p>
+</section>
+<section id="language-modeling" class="level3" data-number="7.6">
+<h3 data-number="7.6" class="anchored" data-anchor-id="language-modeling"><span class="header-section-number">7.6</span> Language Modeling</h3>
+<p>To ensure that the language modeling performance of Toolformer does not degrade through the finetuning with API calls, they evaluate their models on two language modeling datasets: WikiText and a subset of 10,000 randomly selected documents from CCNet that are not used during training.</p>
+<p>The below shows the perplexity of the models on the two datasets. Lower perplexity is better.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-8.png" class="img-fluid figure-img"></p>
+<figcaption>Table 8 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Toolformer, GPT-J, and GPT-J + CC all perform similarly on the two datasets, which means that Toolformer does not degrade the language modeling performance of GPT-J.</p>
+</section>
+<section id="scaling-law" class="level3" data-number="7.7">
+<h3 data-number="7.7" class="anchored" data-anchor-id="scaling-law"><span class="header-section-number">7.7</span> Scaling Law</h3>
+<p>To see how the Toolformer approach scales with the model size, they evaluate the performance of four smaller models from the GPT-2 family, with 124M, 355M, 775M, and 1.6B parameters, respectively. They use only a subset of three tools: the question-answering system, the calculator, and the Wikipedia search engine.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-4.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4 of <a href="https://arxiv.org/abs/2302.04761" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<ul>
+<li>API calls are not helpful to the smallest models.</li>
+<li>Larger models learn how to use the tools well.</li>
+<li>The gap between model predictions with and without API calls remains high even for bigger models.</li>
+</ul>
+</section>
+</section>
+<section id="limitations-of-toolformer" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="limitations-of-toolformer"><span class="header-section-number">8</span> Limitations of Toolformer</h2>
+<p>Lastly, they mentioned the following limitations of Toolformer:</p>
+<ul>
+<li>The inability of Toolformer to use tools in a chain (i.e., using the output of one tool as an input for another tool) is because API calls for each tool are generated independently.</li>
+<li>Toolformer can not interactively use a tool. It can not browse through hundreds of different results from the search engine to refine its search query.</li>
+<li>Toolformer is often sensitive to the exact wording of their input when deciding whether or not to call an API.</li>
+<li>Toolformer does not consider the tool-dependent computational cost incurred from making an API call when deciding whether or not to make an API call.</li>
+</ul>
+</section>
+<section id="conclusion" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">9</span> Conclusion</h2>
+<p>Given the above limitations, Toolformer is not a perfect tool. However, it is a good start. It considerably improves the zero-shot performance of a 6.7B parameter GPT-J model, even outperforming a much larger GPT-3 model on various downstream tasks.</p>
+</section>
+<section id="references" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="references"><span class="header-section-number">10</span> References</h2>
+<ul>
+<li><a href="../../blog/2023/2023-01-30-why-gpt-icl/" target="_blank">ICL: Why Can GPT Learn In-Context? (2022)</a></li>
+<li><a href="https://arxiv.org/pdf/2203.02155.pdf" target="_blank">Training language models to follow instructions with human feedback</a><br>
+Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli, Luke Zettlemoyer, Nicola Cancedda, Thomas Scialom</li>
+<li><a href="https://openai.com/blog/chatgpt/" target="_blank">ChatGPT: Optimizing Language Models for Dialogue</a></li>
+<li><a href="https://arxiv.org/abs/2302.04761" target="_blank">Toolformer: Language Models Can Teach Themselves to Use Tools</a><br>
+Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria Lomeli, Luke Zettlemoyer, Nicola Cancedda, Thomas Scialom</li>
+<li><a href="https://github.com/kingoflolz/mesh-transformer-jax" target="_blank">GPTJ-6B: A 6 Billion Parameter Autoregressive Language Model</a><br>
+Aran Komatsuzaki, James Bradbury, Janko Prester, Laurence Golding, Leo Gao</li>
+<li><a href="https://arxiv.org/abs/2208.03299" target="_blank">Atlas: Few-shot Learning with Retrieval Augmented Language Models</a><br>
+Gautier Izacard, Patrick Lewis, Maria Lomeli, Lucas Hosseini, Fabio Petroni, Timo Schick, Jane Dwivedi-Yu, Armand Joulin, Sebastian Riedel, Edouard Grave</li>
+<li><a href="https://aclanthology.org/2020.lrec-1.494/" target="_blank">CCNet: Extracting High Quality Monolingual Datasets from Web Crawl Data</a><br>
+Guillaume Wenzek, Marie-Anne Lachaux, Alexis Conneau, Vishrav Chaudhary, Francisco Guzmán, Armand Joulin, Edouard Grave</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

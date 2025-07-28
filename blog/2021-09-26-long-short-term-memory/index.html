@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2021-09-26">
+
+<title>Long Short-Term Memory – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#bptt-back-propagation-through-time" id="toc-bptt-back-propagation-through-time" class="nav-link active" data-scroll-target="#bptt-back-propagation-through-time"><span class="header-section-number">1</span> BPTT (Back-Propagation Through Time)</a></li>
+  <li><a href="#vanishing-and-exploding-gradients" id="toc-vanishing-and-exploding-gradients" class="nav-link" data-scroll-target="#vanishing-and-exploding-gradients"><span class="header-section-number">2</span> Vanishing and Exploding Gradients</a></li>
+  <li><a href="#long-short-term-memory" id="toc-long-short-term-memory" class="nav-link" data-scroll-target="#long-short-term-memory"><span class="header-section-number">3</span> Long Short-Term Memory</a></li>
+  <li><a href="#bptt-through-lstm-cells" id="toc-bptt-through-lstm-cells" class="nav-link" data-scroll-target="#bptt-through-lstm-cells"><span class="header-section-number">4</span> BPTT Through LSTM Cells</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Long Short-Term Memory</h1>
+<p class="subtitle lead">How LSTM Mitigated the Vanishing Gradients But Not the Exploding Gradients</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Recurrent Neural Networks</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 26, 2021</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Long Short-Term Memory: How LSTM Mitigated the Vanishing Gradients But Not the Exploding Gradients"></p>
+<p>In theory, RNNs (Recurrent Neural Networks) should extract features (hidden states) from long sequential data. Researchers had difficulty training the basic RNNs using BPTT (Back-Propagation Through Time).</p>
+<p>The main reasons are the vanishing and exploding gradient problems, which LSTM (Long Short-Term Memory) mitigated enough to be more trainable but did not entirely solve the problem. Then, what are the remaining issues with LSTM?</p>
+<p>To understand the issue, we need to know how BPTT works. Then, it will be clearer how the vanishing and exploding gradients occur. After that, we can appreciate why LSTM works better than the basic RNN, especially for long sequential data. Finally, we will understand why LSTM does not entirely solving the problems.</p>
+<p>In this article, we discuss the following topics:</p>
+<ul>
+<li>BPTT (Back-Propagation Through Time)</li>
+<li>Vanishing and Exploding Gradients</li>
+<li>LSTM (Long Short-Term Memory)</li>
+<li>BPTT Through LSTM Cells</li>
+</ul>
+<section id="bptt-back-propagation-through-time" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="bptt-back-propagation-through-time"><span class="header-section-number">1</span> BPTT (Back-Propagation Through Time)</h2>
+<p>Let’s use a basic RNN to discuss how BPTT works. Suppose the RNN uses the final hidden state to predict (i.e., regression or classification) as shown below:</p>
+<p><img src="images/rnn-1.png" class="img-fluid"></p>
+<p>The model processes the input data sequentially:</p>
+<p><span class="math display">\[
+x_1, x_2, \dots, x_{n-1}, x_n
+\]</span></p>
+<p>In the first step, the RNN takes in the initial hidden state containing zeros and the input data’s first element to produce the hidden state of the first step. At the second step, the network takes in the first step’s hidden state and the input data’s second element to produce the hidden state of the second step. At each step, the network takes in the previous hidden state and the input data’s current element to produce the hidden state of that step.</p>
+<p>We can mathematically summarize the process as follows:</p>
+<p><span class="math display">\[
+\mathbf{h}_i = f_\theta(\mathbf{h}_{i-1}, \mathbf{x}_i)
+\]</span></p>
+<p>Note: the parameters θ include all weights and biases from the network except for the layers that produce the final output.</p>
+<p>We can unfold the final hidden state like below:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{h}_n &amp;= f_\theta(\mathbf{h}_{n-1}, \mathbf{x}_n) \\
+&amp;= f_\theta(f_\theta(\mathbf{h}_{n-2}, \mathbf{x}_{n-1}), \mathbf{x}_n) \\
+&amp;= f_\theta(f_\theta(f_\theta(\mathbf{h}_{n-3}, \mathbf{x}_{n-2}), \mathbf{x}_{n-1}), \mathbf{x}_n) \\
+&amp;\dots \\
+&amp;= f_\theta(f_\theta(f_\theta(\dots(f_\theta(f_\theta(f_\theta(\mathbf{h}_{0}, \mathbf{x}_{1}), \mathbf{x}_2), \mathbf{x}_3), \dots), \mathbf{x}_{n-2}), \mathbf{x}_{n-1}), \mathbf{x}_n) \\
+&amp;= F_\theta(\mathbf{h}_0, \mathbf{x}_1,  \mathbf{x}_2, \mathbf{x}_3, \dots, \mathbf{x}_{n-2}, \mathbf{x}_{n-1}, \mathbf{x}_{n})
+\end{aligned}
+\]</span></p>
+<p>As we can see, the same function with the same parameters recurs to form a function <span class="math inline">\(F\)</span> that takes in the initial hidden state (zeros) and the whole input data sequence to produce the final hidden state.</p>
+<p>Therefore, the final hidden state contains features from the entire input sequence. The above model uses the final hidden state to perform regression or classification (in the empty square) to produce an output of the network.</p>
+<p>When training the RNN, we calculate the error (loss) by comparing the model’s output and the label value from the training dataset. For example, we may use RMSE for regression and cross-entropy for classification. After that, we back-propagate the error through the network in reverse order.</p>
+<p><img src="images/rnn-2.png" class="img-fluid"></p>
+<p>We call this operation BPTT (Back-Propagation Through Time). It is the same process as the back-propagation in plain neural networks, except that every backward step uses the same parameters to calculate the gradients.</p>
+<p>At the step <span class="math inline">\(n\)</span>, the gradient is:</p>
+<p><span class="math display">\[
+\frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_n = \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \frac{\partial \mathbf{h}_n}{\partial \theta}
+\]</span></p>
+<p>At the step <span class="math inline">\(n-1\)</span>, the gradient is:</p>
+<p><span class="math display">\[
+\frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_{n-1} = \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \frac{\partial \mathbf{h}_n}{\partial \mathbf{h}_{n-1}} \frac{\partial \mathbf{h}_{n-1}}{\partial \theta}
+\]</span></p>
+<p>In the step <span class="math inline">\(n-2\)</span>, the gradient is:</p>
+<p><span class="math display">\[
+\frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_{n-2} = \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \frac{\partial \mathbf{h}_n}{\partial \mathbf{h}_{n-1}} \frac{\partial \mathbf{h}_{n-1}}{\partial \mathbf{h}_{n-2}} \frac{\partial \mathbf{h}_{n-2}}{\partial \theta}
+\]</span></p>
+<p>And so forth.</p>
+<p>We see the pattern clearly in the below diagram:</p>
+<p><img src="images/BPTT.png" class="img-fluid"></p>
+<p>The total gradient is a sum of all the temporal contributions:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \mathcal{E}}{\partial \theta} &amp;= \frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_n + \frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_{n-1} + \frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_{n-2} + \dots \\
+&amp;= \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \frac{\partial \mathbf{h}_n}{\partial \theta} + \\
+&amp;\quad\ \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \frac{\partial \mathbf{h}_n}{\partial \mathbf{h}_{n-1}} \frac{\partial \mathbf{h}_{n-1}}{\partial \theta} + \\
+&amp;\quad\ \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \frac{\partial \mathbf{h}_n}{\partial \mathbf{h}_{n-1}} \frac{\partial \mathbf{h}_{n-1}}{\partial \mathbf{h}_{n-2}} \frac{\partial \mathbf{h}_{n-2}}{\partial \theta} + \\
+&amp;\quad\ \dots
+\end{aligned}
+\]</span></p>
+<p>We can compactly express the above using the summation and product symbols:</p>
+<p><span class="math display">\[
+\frac{\partial \mathcal{E}}{\partial \theta} = \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \sum\limits_{k=1}^n \left(\left( \prod\limits_{i=k+1}^n \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} \right) \frac{\partial \mathbf{h}_k}{\partial \theta} \right)
+\]</span></p>
+<p>Note: when <span class="math inline">\(k=n\)</span>, we treat the value of the product (<span class="math inline">\(\prod\)</span>) notation as 1 since <span class="math inline">\(i = k+1 = n+1 &gt; n\)</span> means that there is nothing to multiply:</p>
+<p><span class="math display">\[
+\prod\limits_{i=n+1}^n \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} = 1
+\]</span></p>
+<p>Also, when calculating a temporal contribution at <span class="math inline">\(k\)</span>, we treat the hidden state at <span class="math inline">\(k-1\)</span> as constant. Otherwise, changing the parameters θ at <span class="math inline">\(k\)</span> would affect the whole sequence, which should not be the case.</p>
+<p>Now that we know how BPTT works, let’s look at how the vanishing and exploding gradients occur.</p>
+</section>
+<section id="vanishing-and-exploding-gradients" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="vanishing-and-exploding-gradients"><span class="header-section-number">2</span> Vanishing and Exploding Gradients</h2>
+<p>If the sequential data is long (having many steps), there are a lot of multiplications of the partial derivatives while calculating the gradients.</p>
+<p>For example, the gradient at the first step of a long sequential data is:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_1 &amp;= \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \left( \prod\limits_{i=2}^n \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} \right) \frac{\partial \mathbf{h}_1}{\partial \theta} \\
+&amp;= \frac{\partial \mathcal{E}}{\partial \mathbf{h}_n} \frac{\partial \mathbf{h}_{n}}{\partial \mathbf{h}_{n-1}} \frac{\partial \mathbf{h}_{n-1}}{\partial \mathbf{h}_{n-2}} \frac{\partial \mathbf{h}_{n-2}}{\partial \mathbf{h}_{n-3}} \dots \frac{\partial \mathbf{h}_{3}}{\partial \mathbf{h}_{2}} \frac{\partial \mathbf{h}_{2}}{\partial \mathbf{h}_{1}} \frac{\partial \mathbf{h}_{1}}{\partial \theta}
+\end{aligned}
+\]</span></p>
+<p>The intuition for vanishing gradients is as follows: if the magnitudes of multiplication by the partial derivatives are less than 1, the gradients will vanish when <span class="math inline">\(n\)</span> is large:</p>
+<p><span class="math display">\[
+\left\| \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} \right\| &lt; 1 \qquad\rightarrow\qquad \prod\limits_{i=2}^n \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} \quad\dots\quad \text{Vanish!}
+\]</span></p>
+<p>The intuition for exploding gradients is as follows: if the magnitudes of multiplication by the partial derivatives are greater than 1, the gradients will explode when <em>n</em> is large:</p>
+<p><span class="math display">\[
+\left\| \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} \right\| &gt; 1 \qquad\rightarrow\qquad \prod\limits_{i=2}^n \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} \quad\dots\quad \text{Explode!}
+\]</span></p>
+<p>To see how the above conditions happen, let’s look at the partial derivatives more closely by expanding the hidden state calculation (assuming the activation is <span class="math inline">\(tanh\)</span>) as follows:</p>
+<p><span class="math display">\[
+\mathbf{h}_i = f_\theta(\mathbf{h}_{i-1}, \mathbf{x}_i) = \tanh(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b})
+\]</span></p>
+<p>So, the gradient of a hidden state with respect to its immediate predecessor is:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} &amp;= \frac{\partial \tanh\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)}{\partial \mathbf{h}_{i-1}} \\
+&amp;= \text{diag}\Biggl( \tanh'\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)\Biggr) W_h
+\end{aligned}
+\]</span></p>
+<p>The above equation may not be obvious. The following explains the calculation details (You can skip it if it’s not interesting).</p>
+<hr>
+<p>We use the below substitution:</p>
+<p><span class="math display">\[
+\mathbf{z}_{i} = W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b}
+\]</span></p>
+<p>Now, the partial derivative is:</p>
+<p><span class="math display">\[
+\frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} = \frac{\partial \tanh(\mathbf{z}_i)}{\partial \mathbf{z}_i} \frac{\partial \mathbf{z}_i}{\partial \mathbf{h}_{i-1}}
+\]</span></p>
+<p>The second term becomes:</p>
+<p><span class="math display">\[
+\frac{\partial \mathbf{z}_i}{\partial \mathbf{h}_{i-1}} = W_h
+\]</span></p>
+<p>The first term is a bit more involved.</p>
+<p>Let’s assume the vector <span class="math inline">\(\mathbf{z}\)</span> has <span class="math inline">\(m\)</span> elements:</p>
+<p><span class="math display">\[
+\mathbf{z}_i = \begin{bmatrix}
+z_{i,1} \\
+z_{i,2} \\
+\vdots \\
+z_{i,m} \\
+\end{bmatrix}
+\]</span></p>
+<p>The hyperbolic tangent applies element-wise on the vector <span class="math inline">\(\mathbf{z}\)</span>:</p>
+<p><span class="math display">\[
+\tanh(\mathbf{z}_i) = \begin{bmatrix}
+\tanh(z_{i,1}) \\
+\tanh(z_{i,2}) \\
+\vdots \\
+\tanh(z_{i,m}) \\
+\end{bmatrix}
+\]</span></p>
+<p>Now we want to calculate the following:</p>
+<p><span class="math display">\[
+\frac{\partial \tanh{\mathbf{z}_i}}{\partial \mathbf{z}_i}
+\]</span></p>
+<p>This will be a Jacobian matrix in that we calculate all first-order partial derivatives of the vector-valued function <span class="math inline">\(\tanh(\mathbf{z})\)</span>. It is probably easier to just see what it looks like:</p>
+<p><span class="math display">\[
+\frac{\partial \tanh(\mathbf{z}_i)}{\partial \mathbf{z}_i} = \begin{bmatrix}
+\frac{\partial \tanh(z_{i,1})}{\partial z_{i,1}} &amp; \frac{\partial \tanh(z_{i,1})}{\partial z_{i,2}} &amp; \dots &amp; \frac{\partial \tanh(z_{i,1})}{\partial z_{i,m}} \\
+\frac{\partial \tanh(z_{i,2})}{\partial z_{i,1}} &amp; \frac{\partial \tanh(z_{i,2})}{\partial z_{i,2}} &amp; \dots &amp; \frac{\partial \tanh(z_{i,2})}{\partial z_{i,m}} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\frac{\partial \tanh(z_{i,m})}{\partial z_{i,1}} &amp; \frac{\partial \tanh(z_{i,m})}{\partial z_{i,2}} &amp; \dots &amp; \frac{\partial \tanh(z_{i,m})}{\partial z_{i,m}}
+\end{bmatrix}
+\]</span></p>
+<p>The first row contains all the first-order partial derivatives of the first element of <span class="math inline">\(\tanh(\mathbf{z})\)</span>. The second row contains all the first-order partial derivatives of the second element of <span class="math inline">\(\tanh(\mathbf{z})\)</span>. And so forth.</p>
+<p>The diagonal elements are all ordinary derivatives, whereas non-diagonal elements all are zeros:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \tanh(\mathbf{z}_i)}{\partial \mathbf{z}_i} &amp;= \begin{bmatrix}
+\frac{d(\tanh(z_{i,1}))}{d z_{i,1}} &amp; 0 &amp; \dots &amp; 0 \\
+0 &amp; \frac{d(\tanh(z_{i,2}))}{d z_{i,2}} &amp; \dots &amp; 0 \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+0 &amp; 0 &amp; \dots &amp; \frac{d(\tanh(z_{i,m}))}{d z_{i,m}}\\
+\end{bmatrix} \\\\
+&amp;= \text{diag}\Biggl( \begin{bmatrix}
+\frac{d(\tanh(z_{i,1}))}{d z_{i,1}} \\
+\frac{d(\tanh(z_{i,2}))}{d z_{i,2}} \\
+\vdots \\
+\frac{d(\tanh(z_{i,m}))}{d z_{i,m}} \\
+\end{bmatrix} \Biggr) \\\\
+&amp;= \text{diag}\left(\tanh'(\mathbf{z}_i)\right)
+\end{aligned}
+\]</span></p>
+<p>The dash in <span class="math inline">\(\tanh’\)</span> means the ordinary derivatives of <span class="math inline">\(\tanh\)</span> (applied element-wise).</p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} &amp;= \frac{\partial \tanh(\mathbf{z}_i)}{\partial \mathbf{z}_i} \frac{\partial \mathbf{z}_i}{\partial \mathbf{h}_{i-1}} \\
+&amp;= \text{diag} \Biggl( \tanh'(\mathbf{z}_i) \Biggr) W_h
+\end{aligned}
+\]</span></p>
+<p>Replacing the substitution <strong><em>z</em></strong> with the original definition:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} &amp;= \frac{\partial \tanh\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)}{\partial \mathbf{h}_{i-1}} \\
+&amp;= \text{diag}\Biggl( \tanh'\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)\Biggr) W_h
+\end{aligned}
+\]</span></p>
+<hr>
+<p>In the above partial derivatives, we have the derivative of the hyperbolic tangent, the magnitude of which is less than one except when the input is zero. So, it could contribute to the vanishing gradient problem.</p>
+<p>How about using a different activation like ReLU instead of <span class="math inline">\(\tanh\)</span>? As the derivative of ReLU is 1 for positive inputs, would it eliminate the vanishing gradient problem?</p>
+<p>Unfortunately, the derivative of an activation function is just one side of the story. The whole partial derivative also depends on the weights <span class="math inline">\(W_h\)</span>. If the weights are small, the gradients may still vanish. Or, if the weights are large, the gradients may explode. So, ReLU or any other activation function may not always help after all.</p>
+<p>We now know that the problem depends on both the activation function and the weights applied to the hidden state. But we don’t know precisely under what conditions the vanishing or exploding gradients occur.</p>
+<p>Let’s mathematically formalize the conditions for vanishing and exploding gradients. For any activation function <span class="math inline">\(a\)</span>, suppose the absolute values of <span class="math inline">\(a’\)</span> are bounded:</p>
+<p><span class="math display">\[
+\Biggl\| \text{diag} \Biggl( a'(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b}) \Biggr) \Biggr\| \le \gamma
+\]</span></p>
+<p>Note: for <span class="math inline">\(\tanh\)</span>, <span class="math inline">\(\gamma\)</span> is 1. For <span class="math inline">\(\text{sigmoid}\)</span>, <span class="math inline">\(\gamma\)</span> is <span class="math inline">\(\frac{1}{4}\)</span>. For ReLU, <span class="math inline">\(\gamma\)</span> is 1.</p>
+<p>Let’s also define the absolute value of the largest <a href="../../blog/2021/2021-08-31-matrix-decomposition-demystified/" target="_blank">eigenvalue</a> of the weight matrix <span class="math inline">\(W_h\)</span> as <span class="math inline">\(\lambda\)</span> to see the conditions for the vanishing and exploding gradients based on how <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\lambda\)</span> affect the following Jacobian matrix:</p>
+<p><span class="math display">\[
+\frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} = \text{diag}\Biggl( a'\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)\Biggr) W_h
+\]</span></p>
+<p>For the vanishing gradient problem, <em>the sufficient condition</em> is:</p>
+<p><span class="math display">\[
+\lambda \lt \frac{1}{\gamma}
+\]</span></p>
+<p>, because the norms of the matrices have the following inequality:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\forall i, \ \Biggl\| \frac{\partial \mathbf{h}_i}{\partial \mathbf{h}_{i-1}} \Biggr\| &amp;\le \Biggl\| \text{diag}\Biggl( a'\left(W_h \mathbf{h}_{i-1} + W_x \mathbf{x}_i + \mathbf{b} \right)\Biggr) \Biggr\| \Biggl\| W_h \Biggr\| \\
+&amp; \lt \gamma \lambda \\
+&amp; \lt \gamma \frac{1}{\gamma} \\
+&amp;= 1
+\end{aligned}
+\]</span></p>
+<p>Note: the norm of matrix A gives the largest singular value of A. For a real-valued square matrix A, ||A|| returns the largest eigenvalue of matrix A. If the eigenvalues of matrix A are all less than 1, multiplying a vector by matrix A will make the output magnitude smaller than the original vector.</p>
+<p>Similarly, for the exploding gradient problem, <em>the necessary condition</em> (not sufficient condition) is:</p>
+<p><span class="math display">\[
+\lambda \gt \frac{1}{\gamma}
+\]</span></p>
+<p>, because the bounding value of the partial derivatives becomes more than 1.</p>
+<p>As we can see, the problem is fundamental to the recurrent architecture of RNNs. It would be very challenging to eliminate the vanishing and exploding gradient problems.</p>
+<p>If so, what problem did LSTM mitigate, and how?</p>
+</section>
+<section id="long-short-term-memory" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="long-short-term-memory"><span class="header-section-number">3</span> Long Short-Term Memory</h2>
+<p>LSTM introduced a new state called cell state that works as a long-lasting memory for useful features. To calculate the cell state, LSTM first calculates an intermediate cell state:</p>
+<p><span class="math display">\[
+\tilde{\mathbf{c}}_i = \tanh(W_h^{(c)} \mathbf{h}_{i-1} + W_x^{(c)} \mathbf{x}_i + \mathbf{b}^{(c)})
+\]</span></p>
+<p>The superscript <span class="math inline">\(c\)</span> distinguishes between different weight matrices, which should make more sense soon.</p>
+<p>The basic RNN would use the intermediate cell state as the hidden state. On the contrary, LSTM may not take everything from the intermediate cell state and calculates the cell state as below:</p>
+<p><span class="math display">\[
+\mathbf{c}_i = \mathbf{f}_i \odot \mathbf{c}_{i-1} + \mathbf{i}_i \odot \tilde{\mathbf{c}}_i
+\]</span></p>
+<p>The circle dot means element-wise multiplication. We call <span class="math inline">\(\mathbf{f}\)</span> as the forget gate and <span class="math inline">\(\mathbf{i}\)</span> as the input gate. We compute the forget and input gates using sigmoid activation:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{f}_i &amp;= \sigma(W_h^{(f)} \mathbf{h}_{i-1} + W_x^{(f)} \mathbf{x}_i + \mathbf{b}^{f}) \\
+\mathbf{i}_i &amp;= \sigma(W_h^{(i)} \mathbf{h}_{i-1} + W_x^{(i)} \mathbf{x}_i + \mathbf{b}^{i})
+\end{aligned}
+\]</span></p>
+<p>Therefore, the element values in the forget and input gates are between 0 and 1 inclusive. So, the forget gate determines how much to keep from the previous cell state, and the input gate determines how much to take from the intermediate cell state.</p>
+<p><img src="images/LSTM-cell.png" class="img-fluid"></p>
+<p>In the above diagram, I omitted the lines from the previous hidden state and the current input data into the forget and input gates for simplicity.</p>
+<p>The usefulness of the forget gate is that it can reset some of the cell states. For example, the cell state may contain some details required for a while that it no longer needs. Without the forget gate, we have no way to erase unwanted information. As we are adding more information from the intermediate cell state to the cell state, it would be challenging to manage the information necessary in the cell state.</p>
+<p>So, we know how LSTM updates the cell state. It can store long-lasting dependencies and also reset whatever and whenever required.</p>
+<p>But what does it do with the cell state?</p>
+<p>The cell state does not replace the hidden state — instead, it acts as a memory, storing dependencies that may or may not last long. As such, the cell state contains relevant information for the current hidden state as well, which LSTM extracts like below:</p>
+<p><span class="math display">\[
+\mathbf{h}_i = \mathbf{o}_i \odot \tanh(\mathbf{c}_i)
+\]</span></p>
+<p>The output gate <span class="math inline">\(\mathbf{o}\)</span> controls how much to use from the activated current cell state, which LSTM learns from data:</p>
+<p><span class="math display">\[
+\mathbf{o}_i = \sigma( W_h^{(o)} \mathbf{h}_{i-1} + W_x^{(o)} \mathbf{x}_i + \mathbf{b}^{(o)})
+\]</span></p>
+<p>In this way, the network may keep crucial information in the cell state for a long time while selecting immediately required information for the current hidden state.</p>
+<p><img src="images/LSTM-cell-full.png" class="img-fluid"></p>
+<p>All the gates are neural networks with learnable parameters. So, LSTM learns what to forget/keep from the previous cell states and add from the intermediate cell state. The activated (<span class="math inline">\(\tanh\)</span>) cell state filters the output gate values. In other words, it knows what to use in the hidden state based on the cell state.</p>
+<p>So, the complete formulas are:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{f}_i &amp;= \sigma(W_h^{(f)} \mathbf{h}_{i-1} + W_x^{(f)} \mathbf{x}_i + \mathbf{b}^{f}) \\
+\mathbf{i}_i &amp;= \sigma(W_h^{(i)} \mathbf{h}_{i-1} + W_x^{(i)} \mathbf{x}_i + \mathbf{b}^{i})  \\
+\mathbf{o}_i &amp;= \sigma( W_h^{(o)} \mathbf{h}_{i-1} + W_x^{(o)} \mathbf{x}_i + \mathbf{b}^{(o)}) \\
+\tilde{\mathbf{c}}_i &amp;= \tanh(W_h^{(c)} \mathbf{h}_{i-1} + W_x^{(c)} \mathbf{x}_i + \mathbf{b}^{(c)}) \\
+\mathbf{c}_i &amp;= \mathbf{f}_i \odot \mathbf{c}_{i-1} + \mathbf{i}_i \odot \tilde{\mathbf{c}}_i \\
+\mathbf{h}_i &amp;= \mathbf{o}_i \odot \tanh(\mathbf{c}_i)
+\end{aligned}
+\]</span></p>
+<p>We call the whole thing an LSTM cell (or block). We can replace the basic RNN hidden state calculation with an LSTM cell to form a complete recurrent neural network. Some RNN patterns are explained in <a href="../../blog/2021/2021-09-20-recurrent-neural-networks/" target="_blank">the previous article</a>, where we can drop the LSTM cell in.</p>
+<p>Now that we understand how LSTM works, we want to examine BPTT to see how gradients flow through the cell states.</p>
+<p>Will the vanishing and exploding gradient problems go away?</p>
+</section>
+<section id="bptt-through-lstm-cells" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="bptt-through-lstm-cells"><span class="header-section-number">4</span> BPTT Through LSTM Cells</h2>
+<p>Let’s use the same architecture as previously discussed with the basic RNN. The network uses the last hidden state to predict an outcome, as shown below:</p>
+<img src="images/BPTT-LSTM.png" class="img-fluid">
+<figure class="wp-block-image size-full figure">
+<img alt="" class="wp-image-5903 figure-img" src="images/image-326.png">
+</figure>
+<p>We calculate the gradient at each step:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_{n\quad} &amp;= \frac{\partial \mathcal{E}}{\partial \mathbb{c}_n} \frac{{\partial \mathbb{c}_n}}{\partial \theta} \\
+\\
+\frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_{n-1} &amp;= \frac{\partial \mathcal{E}}{\partial \mathbb{c}_n} \frac{\partial \mathbb{c}_n}{{\partial \mathbb{c}_{n-1}}} \frac{{\partial \mathbb{c}_{n-1}}}{\partial \theta} \\
+\\
+\frac{\partial \mathcal{E}}{\partial \theta}\Biggr|_{n-2} &amp;= \frac{\partial \mathcal{E}}{\partial \mathbb{c}_n} \frac{\partial \mathbb{c}_n}{{\partial \mathbb{c}_{n-1}}} \frac{\partial \mathbb{c}_{n-1}}{{\partial \mathbb{c}_{n-2}}}\frac{{\partial \mathbb{c}_{n-2}}}{\partial \theta} \\
+\end{aligned}
+\]</span></p>
+<p>And so forth. We add all the temporal contributions to have the whole gradient:</p>
+<p><span class="math display">\[
+\frac{\partial \mathcal{E}}{\partial \theta} = \frac{\partial \mathcal{E}}{\partial \mathbf{c}_n} \sum\limits_{k=1}^n \Biggl( \left( \prod\limits_{i=k+1}^n \frac{\partial \mathbf{c}_i}{\partial \mathbf{c}_{i-1}} \right) \frac{\partial \mathbf{c}_k}{\partial \theta} \Biggr)
+\]</span></p>
+<p>So, the following Jacobian matrix determines if the gradient vanishes or explodes:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{\partial \mathbf{c}_i}{\partial \mathbf{c}_{i-1}} &amp;= \frac{\partial \mathbf{f}_i \odot \mathbf{c}_{i-1} + \mathbf{i}_i \odot \tilde{\mathbf{c}_i}}{\partial \mathbf{c}_{i-1}} \\
+&amp;= \text{diag}(\mathbf{f}_i) + \frac{\partial (\mathbf{i}_i \odot \tilde{\mathbf{c}_i})}{\partial \mathbf{c}_{i-1}}
+\end{aligned}
+\]</span></p>
+<p>Let’s look at the first term while ignoring the second term now. If the above Jacobian matrix depends only on the first term, how would it affect the vanishing and exploding gradient problems?</p>
+<p>The elements of the forget gate are between 0 and 1 inclusive. So, we may still have the vanishing gradient problem. However, it occurs slower than the basic RNN because it does not involve the recurrent weight matrix, which, in the case of the basic RNN, rapidly drives the derivative to zero for long sequential data.</p>
+<p>Moreover, the elements of the forget gate should have some values of approximately 1 to keep information forward. Overall, the gradients should be more resistant to vanishing gradients than the basic RNN.</p>
+<p>The first term alone should not trigger the exploding gradients as the forget gate values are no more than 1.</p>
+<p>However, the whole gradient could still explode because of the addition of the second term.</p>
+<p>In practice, we may forcibly clip the norm of gradients to mitigate exploding gradient problems, even though it adds one more hyper-parameter (the max norm) that we need to calibrate.</p>
+<p>For example, PyTorch has <a href="https://pytorch.org/docs/stable/generated/torch.nn.utils.clip_grad_norm_.html" target="_blank">torch.nn.utils.clip_grad_norm_</a>.</p>
+</section>
+<section id="references" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="references"><span class="header-section-number">5</span> References</h2>
+<ul>
+<li><a href="../../blog/2021/2021-09-20-recurrent-neural-networks/" target="_blank">Recurrent Neural Networks</a></li>
+<li><a href="https://ieeexplore.ieee.org/document/279181" target="_blank">Learning Long-Term Dependencies with Gradient Descent is Difficult</a><br>
+Yoshua Bengio, Patrice Simard, Paolo Frasconi</li>
+<li><a href="https://arxiv.org/abs/1211.5063" target="_blank">On the difficulty of training recurrent neural networks</a><br>
+Razvan Pascanu, Tomas Mikolov, Yoshua Bengio</li>
+<li><a href="https://d-nb.info/1082034037/34" target="_blank">Learning Sequence Representations</a><br>
+Justin Bayer</li>
+<li><a href="https://en.wikipedia.org/wiki/Matrix_norm" target="_blank">Matrix Norm</a><br>
+Wikipedia</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

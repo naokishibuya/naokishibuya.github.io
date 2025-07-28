@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2021-11-15">
+
+<title>Transformer’s Self-Attention – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#dot-product-and-word-embedding" id="toc-dot-product-and-word-embedding" class="nav-link active" data-scroll-target="#dot-product-and-word-embedding"><span class="header-section-number">1</span> Dot-Product And Word Embedding</a></li>
+  <li><a href="#scaled-dot-product-attention" id="toc-scaled-dot-product-attention" class="nav-link" data-scroll-target="#scaled-dot-product-attention"><span class="header-section-number">2</span> Scaled Dot-Product Attention</a></li>
+  <li><a href="#multi-head-attention" id="toc-multi-head-attention" class="nav-link" data-scroll-target="#multi-head-attention"><span class="header-section-number">3</span> Multi-Head Attention</a></li>
+  <li><a href="#self-attention" id="toc-self-attention" class="nav-link" data-scroll-target="#self-attention"><span class="header-section-number">4</span> Self-Attention</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Transformer’s Self-Attention</h1>
+<p class="subtitle lead">Why Is Attention All You Need?</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Transformer</div>
+    <div class="quarto-category">Machine Translation</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 15, 2021</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Transformer’s Self-Attention: Why Is Attention All You Need?"></p>
+<p>In 2017, Vaswani et al.&nbsp;published a paper titled <a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a> for the NeurIPS conference. <a href="../../blog/2021/2021-12-13-transformers-encoder-decoder/" target="_blank">The transformer architecture</a> does not use recurrence or convolution. It solely relies on attention mechanisms.</p>
+<p>In this article, we discuss the attention mechanisms in the transformer:</p>
+<ul>
+<li>Dot-Product And Word Embedding</li>
+<li>Scaled Dot-Product Attention</li>
+<li>Multi-Head Attention</li>
+<li>Self-Attention</li>
+</ul>
+<section id="dot-product-and-word-embedding" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="dot-product-and-word-embedding"><span class="header-section-number">1</span> Dot-Product And Word Embedding</h2>
+<p>The dot-product takes two equal-length vectors and returns a single number.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol{a} &amp;= [ a_1, a_2, \dots, a_n] \\
+\boldsymbol{b} &amp;= [ b_1, b_2, \dots, b_n] \\
+\\
+\boldsymbol{a} \cdot \boldsymbol{b} &amp; = [a_1 b_1 + a_2 b_2 + \dots + a_n b_n] \\
+&amp;= \sum\limits_{i=1}^n a_i b_i
+\end{aligned}
+\]</span></p>
+<p>We use the dot operator to express the dot-product operation. We also call it the inner product as we calculate element-wise multiplication (that is, “inner product”) and sum those products together.</p>
+<p>The geometric definition of the dot product is as follows:</p>
+<p><span class="math display">\[
+\boldsymbol{a} \cdot \boldsymbol{b} = \|\boldsymbol{a}\| \|\boldsymbol{b}\| \cos \theta
+\]</span></p>
+<p><span class="math inline">\(\|\boldsymbol{a}\|\)</span> is the magnitude of vector <span class="math inline">\(\boldsymbol{a}\)</span>, and <span class="math inline">\(\|\boldsymbol{b}\|\)</span> is the magnitude of vector <span class="math inline">\(\boldsymbol{a}\)</span>. <span class="math inline">\(\theta\)</span> is the angle between vector <span class="math inline">\(\boldsymbol{a}\)</span> and vector <span class="math inline">\(\boldsymbol{b}\)</span>.</p>
+<p><img src="images/dot-product.png" class="img-fluid"></p>
+<p>We can also project vector <span class="math inline">\(\boldsymbol{a}\)</span> onto vector <span class="math inline">\(\boldsymbol{b}\)</span> and visualize the product of <span class="math inline">\(\|\boldsymbol{a}\| cosθ\)</span> and <span class="math inline">\(\|\boldsymbol{b}\|\)</span>. The calculated value is the same either way.</p>
+<p>The dot-product <span class="math inline">\(\|\boldsymbol{a}\| \|\boldsymbol{b}\| \cos \theta\)</span> is at maximum when <span class="math inline">\(\theta\)</span> is 0 (<span class="math inline">\(\cos 0 = 1\)</span>), and at minimum when is <span class="math inline">\(\theta\)</span> is <span class="math inline">\(2\pi\)</span> (<span class="math inline">\(\cos 2\pi = -1\)</span>). In other words, the dot-product is bigger when two vectors have similar directions than otherwise.</p>
+<p>Before discussing dot-product attention, we should talk about word embeddings as it gives us some intuition on how dot-product attention works.</p>
+<p>Word embeddings use distributed representations of words (tokens), which is more efficient than one-hot vector representation. The word2vec and GloVe (Global Vectors for Word Representation) are well-known pre-trained word embeddings. Those word embedding vectors allow us to decompose a word into analogies.</p>
+<p>The following diagram shows how we can decompose king and queen using word embedding vectors.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/king-queen.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1810.04882" target="_blank">Towards Understanding Linear Word Analogies</a></figcaption>
+</figure>
+</div>
+<p>In other words, a word vector may contain multiple semantics. Hypothetically, we could query if a word vector has “royal” by projecting the vector with some matrix operation.</p>
+<p>The question is: can a language model automatically learn to query different meanings and functions of each word in a sentence?</p>
+<p>The transformer learns word embeddings from scratch, learns matrix weights for word vector projections, and calculates the dot-products for attention mechanisms. In the next section, we discuss how those vector mathematics work together.</p>
+</section>
+<section id="scaled-dot-product-attention" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="scaled-dot-product-attention"><span class="header-section-number">2</span> Scaled Dot-Product Attention</h2>
+<p>Say we have a model that translates an English sentence <span class="math inline">\(X\)</span> into a French sentence <span class="math inline">\(Y\)</span>. In the output sentence, the first-word vector would be a BOS (beginning-of-sentence) marker which is just another word vector (albeit fixed), and we call it vector <span class="math inline">\(\boldsymbol{y}_1\)</span>. The model needs to extract a context from the input sentence <span class="math inline">\(X\)</span> for the first-word vector <span class="math inline">\(\boldsymbol{y}_1\)</span> in the output sentence <span class="math inline">\(Y\)</span>.</p>
+<p>For simplicity, we express a word vector as a row vector with four dimensions.</p>
+<p><img src="images/vector-y_1.png" class="img-fluid"></p>
+<p>We use a 4x3 matrix <span class="math inline">\(W^Q\)</span> to project word vector <span class="math inline">\(\boldsymbol{y}_1\)</span>:</p>
+<p><img src="images/matrix-WQ.png" class="img-fluid"></p>
+<p>It’s a simple matrix multiplication on the word vector <span class="math inline">\(\boldsymbol{y}_1\)</span>.</p>
+<p><span class="math display">\[
+\boldsymbol{q}_1 = \boldsymbol{y}_1 W^Q
+\]</span></p>
+<p>As you can see, the dimension of <span class="math inline">\(\boldsymbol{q}_1\)</span> does not have to be the same as that of <span class="math inline">\(\boldsymbol{y}_1\)</span>.</p>
+<p><img src="images/vector-q_1.png" class="img-fluid"></p>
+<p>In this example, the dimension of the resulting vector became three.</p>
+<p>We also project word vectors in <span class="math inline">\(X\)</span> using another matrix <span class="math inline">\(W^K\)</span>. For example, we project word vector <span class="math inline">\(\boldsymbol{x}_1\)</span> in <span class="math inline">\(X\)</span> as follows:</p>
+<p><span class="math display">\[
+\boldsymbol{k}_1 = \boldsymbol{x}_1 W^K
+\]</span></p>
+<p>Again, the dimension of <span class="math inline">\(\boldsymbol{k}_1\)</span> does not have to be the same as the dimension of <span class="math inline">\(\boldsymbol{x}_1\)</span>.</p>
+<p><img src="images/vector-k_1.png" class="img-fluid"></p>
+<p>However, the dimension of <span class="math inline">\(\boldsymbol{k}_1\)</span> must be the same as the dimension of <span class="math inline">\(\boldsymbol{q}_1\)</span>. Only then can we apply the dot-product to them.</p>
+<p><span class="math display">\[
+\dim(\boldsymbol{q}_1) = \dim(\boldsymbol{k}_1)
+\]</span></p>
+<p>We apply the dot-product to see how strong these projected features (we call them query <span class="math inline">\(\boldsymbol{q}_1\)</span> and key <span class="math inline">\(\boldsymbol{k}_1\)</span>) relate to each other:</p>
+<p><span class="math display">\[
+s_{11} = \boldsymbol{q}_1 \cdot \boldsymbol{k}_1
+\]</span></p>
+<p>We can calculate the dot-product by transposing vector <span class="math inline">\(\boldsymbol{k}_1\)</span> and performing matrix multiplication:</p>
+<p><img src="images/dot-product-s_11.png" class="img-fluid"></p>
+<p>The result is a scalar value. Let’s call it “score”. As noted above, we also call vector <span class="math inline">\(\boldsymbol{q}_1\)</span> “query” and vector <span class="math inline">\(\boldsymbol{k}_1\)</span> “key”. In other words, we extract a query from vector <span class="math inline">\(\boldsymbol{y}_1\)</span>, extract a key from vector <span class="math inline">\(\boldsymbol{x}_1\)</span>, and check how well the query matches with the key by the score <span class="math inline">\(s_{11}\)</span>. So, we are finding out how two-word vectors relate in terms of extracted features (the query and the key).</p>
+<p>Since we are using a linear transformation, we can calculate scores between multiple word-vectors by a simple matrix operation.</p>
+<p>Sentence <span class="math inline">\(X\)</span> consists of <span class="math inline">\(n\)</span> word vectors (in reality, an input sentence has a pre-defined number of tokens, and unused word positions filled with a filler are effectively ignored):</p>
+<p><span class="math display">\[
+X = \begin{bmatrix}
+\boldsymbol{x}_1 \\
+\boldsymbol{x}_2 \\
+\vdots \\
+\boldsymbol{x}_n \\
+\end{bmatrix}
+\]</span></p>
+<p>We can apply the following matrix operation to extract keys from sentence <span class="math inline">\(X\)</span>:</p>
+<p><span class="math display">\[
+XW^K = \begin{bmatrix}
+\boldsymbol{x}_1 \\
+\boldsymbol{x}_2 \\
+\vdots \\
+\boldsymbol{x}_n \\
+\end{bmatrix} W^K = \begin{bmatrix}
+\boldsymbol{x}_1 W^K \\
+\boldsymbol{x}_2 W^K \\
+\vdots \\
+\boldsymbol{x}_n W^K \\
+\end{bmatrix} = \begin{bmatrix}
+\boldsymbol{k}_1 \\
+\boldsymbol{k}_2 \\
+\vdots \\
+\boldsymbol{k}_n \\
+\end{bmatrix} = K
+\]</span></p>
+<p>We can apply the dot-product between the query <span class="math inline">\(\boldsymbol{q}_1\)</span> and all of the keys in <span class="math inline">\(K\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol{q}_1 K^\top &amp;= \boldsymbol{q}_1 \begin{bmatrix}
+\boldsymbol{k}_1 \\
+\boldsymbol{k}_2 \\
+\vdots \\
+\boldsymbol{k}_n \\
+\end{bmatrix}^\top \\
+&amp;= \boldsymbol{q}_1 \begin{bmatrix}
+\boldsymbol{k}_1^\top &amp; \boldsymbol{k}_2^\top &amp; \dots &amp; \boldsymbol{k}_n^\top
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+\boldsymbol{q}_1 \boldsymbol{k}_1^\top &amp; \boldsymbol{q}_1 \boldsymbol{k}_2^\top &amp; \dots &amp; \boldsymbol{q}_1 \boldsymbol{k}_n^\top
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+s_{11} &amp; s_{12} &amp; \dots &amp; s_{1n}
+\end{bmatrix}
+\end{aligned}
+\]</span></p>
+<p>We now have a list of scores that tells us how the query <span class="math inline">\(\boldsymbol{q}_1\)</span> relates to each key in sentence <span class="math inline">\(X\)</span>. We can apply the softmax function to convert the scores into weights:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\\
+\text{softmax}(\boldsymbol{q}_1 K^\top) &amp;= \text{softmax}(\begin{bmatrix}
+s_{11} &amp; s_{12} &amp; \dots &amp; s_{1n}
+\end{bmatrix}) \\
+&amp;= \begin{bmatrix}
+w_{11} &amp; w_{12} &amp; \dots &amp; w_{1n}
+\end{bmatrix}
+\end{aligned}
+\]</span></p>
+<p>The weights indicate how much the model should pay attention to each word in sentence <span class="math inline">\(X\)</span> regarding the query <span class="math inline">\(\boldsymbol{q}_1\)</span>. So, let’s call the weights “attention weights”.</p>
+<p>We use the attention weights to extract a context from sentence <span class="math inline">\(X\)</span>, but we need to handle one more step. Since we are dealing with a specific query, we should also extract particular values from sentence <span class="math inline">\(X\)</span>. We use another matrix <span class="math inline">\(W^V\)</span> to project sentence <span class="math inline">\(X\)</span> to extract values.</p>
+<p><span class="math display">\[
+XW^V = \begin{bmatrix}
+\boldsymbol{x}_1 \\
+\boldsymbol{x}_2 \\
+\vdots \\
+\boldsymbol{x}_n
+\end{bmatrix} W^V = \begin{bmatrix}
+\boldsymbol{x}_1 W^V \\
+\boldsymbol{x}_2 W^V \\
+\vdots \\
+\boldsymbol{x}_n W^V
+\end{bmatrix} = \begin{bmatrix}
+\boldsymbol{v}_1 \\
+\boldsymbol{v}_2 \\
+\vdots \\
+\boldsymbol{v}_n
+\end{bmatrix} = V
+\]</span></p>
+<p>The dimension of vectors in <span class="math inline">\(V\)</span> may be different from the dimension of vectors in <span class="math inline">\(X\)</span>.</p>
+<p>We calculate the weighted sum of value vectors using the attention weights:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\\
+\text{softmax}(\boldsymbol{q}_1^\top K) V &amp;= \begin{bmatrix}
+w_{11} &amp; w_{12} &amp; \dots &amp; w_{1n}
+\end{bmatrix} \, V \\
+&amp;= \begin{bmatrix}
+w_{11} &amp; w_{12} &amp; \dots &amp; w_{1n}
+\end{bmatrix} \begin{bmatrix}
+\boldsymbol{v}_1 \\
+\boldsymbol{v}_2 \\
+\vdots \\
+\boldsymbol{v}_n
+\end{bmatrix} \\
+&amp;= \sum\limits_{i=1}^n w_{1i} \boldsymbol{v}_i
+\end{aligned}
+\]</span></p>
+<p>The weighted sum of value vectors represents a context from sentence <span class="math inline">\(X\)</span> regarding the query <span class="math inline">\(\boldsymbol{q}_1\)</span> from word vector <span class="math inline">\(\boldsymbol{y}_1\)</span>.</p>
+<p>We can extend the logic to multiple words <span class="math inline">\((\boldsymbol{y}_1, \boldsymbol{y}_2, \dots, \boldsymbol{y}_m)\)</span> in sentence <span class="math inline">\(Y\)</span> (in reality, an output sentence has a pre-defined number of tokens and unpredicted word positions are masked and won’t affect the attention mechanism):</p>
+<p><span class="math display">\[
+Y = \begin{bmatrix}
+\boldsymbol{y}_1 \\
+\boldsymbol{y}_2 \\
+\vdots \\
+\boldsymbol{y}_m
+\end{bmatrix}
+\]</span></p>
+<p>We represent all queries in a matrix:</p>
+<p><span class="math display">\[
+Q = \begin{bmatrix}
+\boldsymbol{q}_1 \\
+\boldsymbol{q}_2 \\
+\vdots \\
+\boldsymbol{q}_n \\
+\end{bmatrix} = \begin{bmatrix}
+\boldsymbol{y}_1 W^Q \\
+\boldsymbol{y}_2 W^Q \\
+\vdots \\
+\boldsymbol{y}_n W^Q
+\end{bmatrix} = \begin{bmatrix}
+\boldsymbol{y}_1 \\
+\boldsymbol{y}_2 \\
+\vdots \\
+\boldsymbol{y}_n \\
+\end{bmatrix} W^Q = YW^Q
+\]</span></p>
+<p>So, we can calculate the attention vectors for all tokens in sentence <span class="math inline">\(Y\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\\
+\text{Attention}(Q, K, V) &amp;= \text{softmax} \left( \dfrac{QK^\top}{\sqrt{d_k}} \right) V \\\\
+\text{where } Q = YW^Q, \, &amp;K = XW^K, V = XW^V
+\end{aligned}
+\]</span></p>
+<p>The scaling <span class="math inline">\(\frac{1}{\sqrt{d_k}}\)</span> deserves some explanation. <span class="math inline">\(d_k\)</span> is the dimension of query and key vectors. When <span class="math inline">\(d_k\)</span> is large, the dot-product tends to be large in magnitude.</p>
+<p>The paper explains the reason, assuming a scenario where the elements of the query and key vectors are independent random variables with mean 0 and variance 1. The dot-product of vectors <span class="math inline">\(\boldsymbol{q}\)</span> and <span class="math inline">\(\boldsymbol{k}\)</span> has mean 0 and variance <span class="math inline">\(d_k\)</span> due to <a href="https://en.wikipedia.org/wiki/Distribution_of_the_product_of_two_random_variables" target="_blank">the distribution of the product of two random variables</a>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\boldsymbol{q} \cdot \boldsymbol{k} &amp;= \sum\limits_{i=1}^{d_k} q_i k_i \\\\
+\mathbb{E}[\boldsymbol{q} \cdot \boldsymbol{k}] &amp;= \mathbb{E} \left[\sum\limits_{i=1}^{d_k} q_i k_i \right] \\
+&amp;= \sum\limits_{i=1}^{d_k} \mathbb{E}[q_i k_i] \\
+&amp;= \sum\limits_{i=1}^{d_k} \mathbb{E}[q_i] \mathbb{E}[k_i] \\
+&amp;= 0 \\\\
+\text{Var}(\boldsymbol{q}\cdot\boldsymbol{k}) &amp;= \text{Var} \left( \sum\limits_{i=1}^{d_k} q_i k_i \right) \\
+&amp;= \sum\limits_{i=1}^{d_k} \text{Var}(q_i k_i) \\
+&amp;= \sum\limits_{i=1}^{d_k} (\sigma^2_{q_i} + \mu^2_{q_i}) (\sigma^2_{k_i} + \mu^2_{k_i}) - \mu^2_{q_i} \mu^2_{k_i} \\
+&amp;= \sum\limits_{i=1}^{d_k} (1 + 0)(1 + 0) - 0 \cdot 0 \\
+&amp;= d_k
+\end{aligned}
+\]</span></p>
+<p>In short, more dimensions tend to produce larger scores, which is problematic because the softmax function uses the exponential function, pushing large values even larger.</p>
+<p>The following example Python script should clarify the reason:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> softmax(x):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp(x)<span class="op">/</span>np.exp(x).<span class="bu">sum</span>()</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>s1 <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">3.0</span>, <span class="fl">4.0</span>])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> s1 <span class="op">*</span> <span class="dv">10</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(f’s1: {softmax(s1)}’)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(f’s2: {softmax(s2)}’)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The output is as follows:</p>
+<pre><code>s1: [0.0320586 0.08714432 0.23688282 0.64391426]
+s2: [9.35719813e-14 2.06106005e-09 4.53978686e-05 9.99954600e-01]</code></pre>
+<p>The weights in <code>s2</code> except the last element are almost zero, which makes the gradients very small.</p>
+<p>Let me explain the reason why the gradients become small.</p>
+<p>Suppose the softmax probability of class <span class="math inline">\(i \in \{1, 2, \dots, N\}\)</span> be:</p>
+<p><span class="math display">\[
+p_i = \text{softmax}(z_i) = \frac{e^{z_i}}{\sum\limits^N_{k=1} e^{z_k}}
+\]</span></p>
+<p>Then, the partial derivatives of the softmax with respect to the variable <span class="math inline">\(z_j\)</span> are as follows:</p>
+<p><span class="math display">\[
+\frac{ \partial p_i }{\partial z_j } = p_i (\delta_{ij} \ – \ p_j), \quad \delta_{ij} =
+\begin{cases}
+    1 &amp; \text{if i=j} \\
+    0 &amp; \text{otherwise}
+\end{cases}
+\]</span></p>
+<p>So, it’s like <span class="math inline">\(p_i\)</span> and <span class="math inline">\(p_j\)</span> are close to 0 or 1. Therefore, any of the partial derivatives will be almost 0.</p>
+<p>As such, Vaswani et al.&nbsp;introduced the scaling factor, and they call the attention mechanism “scaled dot-product attention”.</p>
+</section>
+<section id="multi-head-attention" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="multi-head-attention"><span class="header-section-number">3</span> Multi-Head Attention</h2>
+<p>A word could have a different meaning or function depending on the context. So, we should use multiple queries per word rather than just one.</p>
+<p>In the paper, they use eight parallel attention calculations. They call each attention function “head”. In other words, they used eight heads (h=8).</p>
+<p>The base transformer uses 512-dimensional word vectors projected into eight vectors of 64 (=512/8) dimensions — yielding eight representation subspaces. The scaled product-dot attention processes each of the eight representations using a different set of projection matrices:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{head}_i &amp;= \text{Attention}(Q_i, K_i, V_i) \qquad (i = 1 \dots h) \\\\
+&amp;\quad \text{where } Q_i = YW_i^Q,\ K_i = XW_i^K,\ V_i = XW_i^V
+\end{aligned}
+\]</span></p>
+<p>Even though we have eight sets of matrix operations, we can perform them in parallel. So, it’s very fast.</p>
+<p>The next step of the multi-head attention is to concatenate all eight heads and apply one more matrix operation <span class="math inline">\(W^O\)</span>.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\\
+\text{MultiHead}(Y, X) = \text{Concat}(\text{head}_1, \dots, \text{head}_h) W^O
+\end{aligned}
+\]</span></p>
+<p>Note: I’m using a slightly different notation than the paper to keep similar usage of Q, K, and V from the scaled dot-product attention section.</p>
+<p>Since we use the same number of dimensions (=64) for value vectors, the concatenated vectors restore the original dimension (=64x8=512). But they could also use a different number of dimensions for value vectors because _W_O can adjust the final vector dimension.</p>
+<p>The transformer uses multi-head attention in multiple ways. One is for encoder-decoder (source-target) attention where Y and X are different language sentences. Another use of multi-head attention is for self-attention, where Y and X are the same sentences.</p>
+</section>
+<section id="self-attention" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="self-attention"><span class="header-section-number">4</span> Self-Attention</h2>
+<p>A word can have a different meaning or function depending on the word itself and the words around it.</p>
+<p>For example, in the below two sentences, the word “second” has different meanings:</p>
+<blockquote class="blockquote">
+<p>Give me a <strong>second</strong>, please.</p>
+I came <strong>second</strong> in the exam.
+</blockquote>
+<p>But there is only one-word embedding for the word “second”. However, the meaning of “second” depends on its context. So, we must treat the word “second” with its context.</p>
+<p>Let’s look at another example.</p>
+<blockquote class="blockquote">
+My dog chases after the thief.
+</blockquote>
+<p>The above sentence shows a functional relationship between “dog” and “chases”. We also see another relationship between “after” and “thief”.</p>
+<p>In summary, we need to extract word contexts and relationships within a sentence, where self-attention comes into play.</p>
+<p>With self-attention, all queries, keys, and values originate from the same sentence. So, we use multi-head attention like <code>MultiHead(X, X)</code> to extract contexts for each word in a sentence.</p>
+<p>Self-attention handles long-range dependencies well compared with RNN and CNN. For RNN, we have diminishing gradients that even LSTMs can not eliminate. CNN can only associate data within the kernel size. Self-attention has none of those issues. Moreover, self-attention operations can run parallel and much faster than sequential processing like RNN cells.</p>
+<p>Also, we can visually inspect self-attention, making it more interpretable. The paper has a few visualizations of the attention mechanism. For example, the following is a self-attention visualization for the word “making” in layer 5 of the encoder.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-3.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3 of <a href="https://arxiv.org/abs/1706.03762" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>There are eight different colors with various intensities, representing the eight attention heads.</p>
+<p>It is clear there is a strong relationship between “making” and “more difficult”.</p>
+<p>The below image shows the word “its” and the referred words in layer 5 of the encoder (isolating only attention head 5 and attention head 6).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-4-bottom.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4 (bottom) of <a href="https://arxiv.org/abs/1706.03762" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The word “its” has strong attention to “Law” and “application”.</p>
+<p>The below shows two heads separately (green and red). Each head seems to have learned to perform different tasks based on the structure of the sentence.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-5.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 5 of <a href="https://arxiv.org/abs/1706.03762" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="references" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="references"><span class="header-section-number">5</span> References</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a><br>
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin</li>
+<li><a href="http://nlp.seas.harvard.edu/2018/04/03/attention.html" target="_blank">The Annotated Transformer</a><br>
+Harvard NLP</li>
+<li><a href="http://jalammar.github.io/illustrated-transformer/" target="_blank">The Illustrated Transformer</a><br>
+Jay Alammar</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

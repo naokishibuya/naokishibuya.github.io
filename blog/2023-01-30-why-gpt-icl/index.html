@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-01-30">
+
+<title>Why Can GPT Learn In-Context? – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#meta-gradients" id="toc-meta-gradients" class="nav-link active" data-scroll-target="#meta-gradients"><span class="header-section-number">1</span> Meta-Gradients</a></li>
+  <li><a href="#in-context-learning-classification-formulation" id="toc-in-context-learning-classification-formulation" class="nav-link" data-scroll-target="#in-context-learning-classification-formulation"><span class="header-section-number">2</span> In-Context Learning Classification Formulation</a></li>
+  <li><a href="#gradient-descent-as-attention-layer" id="toc-gradient-descent-as-attention-layer" class="nav-link" data-scroll-target="#gradient-descent-as-attention-layer"><span class="header-section-number">3</span> Gradient Descent as Attention Layer</a></li>
+  <li><a href="#transformer-attention-as-meta-optimization" id="toc-transformer-attention-as-meta-optimization" class="nav-link" data-scroll-target="#transformer-attention-as-meta-optimization"><span class="header-section-number">4</span> Transformer Attention as Meta-Optimization</a></li>
+  <li><a href="#icl-vs.-fine-tuning-settings" id="toc-icl-vs.-fine-tuning-settings" class="nav-link" data-scroll-target="#icl-vs.-fine-tuning-settings"><span class="header-section-number">5</span> ICL vs.&nbsp;Fine-Tuning Settings</a></li>
+  <li><a href="#experiments" id="toc-experiments" class="nav-link" data-scroll-target="#experiments"><span class="header-section-number">6</span> Experiments</a></li>
+  <li><a href="#measuring-similarity-between-icl-and-fine-tuning" id="toc-measuring-similarity-between-icl-and-fine-tuning" class="nav-link" data-scroll-target="#measuring-similarity-between-icl-and-fine-tuning"><span class="header-section-number">7</span> Measuring Similarity between ICL and Fine-Tuning</a>
+  <ul class="collapse">
+  <li><a href="#recall-to-fine-tuning-predictions-rec2ftp" id="toc-recall-to-fine-tuning-predictions-rec2ftp" class="nav-link" data-scroll-target="#recall-to-fine-tuning-predictions-rec2ftp"><span class="header-section-number">7.1</span> Recall to Fine-tuning Predictions (Rec2FTP)</a></li>
+  <li><a href="#similarity-of-attention-output-updates-simaou" id="toc-similarity-of-attention-output-updates-simaou" class="nav-link" data-scroll-target="#similarity-of-attention-output-updates-simaou"><span class="header-section-number">7.2</span> Similarity of Attention Output Updates (SimAOU)</a></li>
+  <li><a href="#similarity-of-attention-map-simam" id="toc-similarity-of-attention-map-simam" class="nav-link" data-scroll-target="#similarity-of-attention-map-simam"><span class="header-section-number">7.3</span> Similarity of Attention Map (SimAM)</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"><span class="header-section-number">7.4</span> Results</a></li>
+  </ul></li>
+  <li><a href="#similarity-at-each-layer" id="toc-similarity-at-each-layer" class="nav-link" data-scroll-target="#similarity-at-each-layer"><span class="header-section-number">8</span> Similarity at Each Layer</a></li>
+  <li><a href="#optimization-algorithm-vs.-transformer-architecture" id="toc-optimization-algorithm-vs.-transformer-architecture" class="nav-link" data-scroll-target="#optimization-algorithm-vs.-transformer-architecture"><span class="header-section-number">9</span> Optimization Algorithm vs.&nbsp;Transformer Architecture</a>
+  <ul class="collapse">
+  <li><a href="#experiments-in-language-modeling" id="toc-experiments-in-language-modeling" class="nav-link" data-scroll-target="#experiments-in-language-modeling"><span class="header-section-number">9.1</span> Experiments in Language Modeling</a></li>
+  <li><a href="#experiments-on-in-context-learning" id="toc-experiments-on-in-context-learning" class="nav-link" data-scroll-target="#experiments-on-in-context-learning"><span class="header-section-number">9.2</span> Experiments on In-Context Learning</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">10</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Why Can GPT Learn In-Context?</h1>
+<p class="subtitle lead">Language Models Secretly Perform Gradient Descent as Meta-Optimizers</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Large Language Models</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 30, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Why Can GPT Learn In-Context?"></p>
+<p>GPT-3 has shown surprising <strong>In-Context Learning (ICL)</strong> ability, which <a href="https://arxiv.org/abs/2212.10559" target="_blank">Why Can GPT Learn In-Context? Language Models Secretly Perform Gradient Descent as Meta-Optimizers</a> explains as a kind of <strong>implicit fine-tuning</strong>.</p>
+<p>With ICL, GPT-3 can learn from a few demonstrations (input-label pairs) and predict the labels for unseen inputs. It can do so without additional parameter updates.</p>
+<p>But how does it do that?</p>
+<p>According to the paper, they hypothesize that:</p>
+<ul>
+<li>GPT first produces <strong>meta-gradients</strong> according to the demonstration examples.</li>
+<li>Then, it applies the meta-gradients to the original GPT to <strong>build an ICL model</strong>.</li>
+</ul>
+<p>So, let’s dive into the paper to see how GPT learns in-context.</p>
+<section id="meta-gradients" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="meta-gradients"><span class="header-section-number">1</span> Meta-Gradients</h2>
+<p>The paper explains that <strong>ICL</strong> and <strong>explicit fine-tuning</strong> are <u>both gradient descent</u>. The difference is that explicit fine-tuning uses <strong>gradients</strong> while ICL uses <strong>meta-gradients</strong>.</p>
+<p>The below figure shows the difference and the similarity.</p>
+<p>When we fine-tune a language model, we feed input-label pairs to the model to obtain a loss value. We then calculate the gradients of the loss by back-propagation. After that, we perform gradient descent to update the model parameters.</p>
+<p>The upper part of the below figure shows the fine-tuning process.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-1.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The lower part of the above figure shows the ICL process that uses meta-gradients instead of gradients.</p>
+<p>In ICL, we feed demonstration examples (input-label pairs) to the model, which calculates meta-gradients through forward computation. Then, it applies the meta-gradients to the original GPT to build an ICL model on the fly to answer the query in the last sentence.</p>
+<p>In both fine-tuning and ICL, we use gradient descent to update the model parameters. The difference is that ICL does not modify the original model parameters. Instead, it builds a new model on the fly based on the original model. As such, ICL works like a kind of implicit fine-tuning.</p>
+<p>But so far, we don’t exactly know what meta-gradients are. Also, what does it mean to build an ICL model through forward computation?</p>
+<p>The paper mathematically formulates what ICL is and then explains why ICL works like an implicit fine-tuning.</p>
+</section>
+<section id="in-context-learning-classification-formulation" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="in-context-learning-classification-formulation"><span class="header-section-number">2</span> In-Context Learning Classification Formulation</h2>
+<p>The paper focuses on ICL for classification with GPT models, which consists of stacked <em>L</em> identical Transformer decoder layers. Each decoder layer has an attention module and a feed-forward network.</p>
+<p>Given a query input text <em>x</em> and a candidate answer set <em>Y</em> = {y<sub>1</sub>, y<sub>2</sub>, …, y<sub>m</sub>}, the goal of the classification is to choose the correct answer <span class="math inline">\(\hat{y} \in Y\)</span> conditional on <span class="math inline">\(n\)</span> demonstration examples (the context) <span class="math inline">\(C = \{(x'_1, y'_1), (x'_2, y'_2), \cdots, (x'_n, y'_n)\}\)</span>.</p>
+<p><span class="math inline">\((x'_i, y'_i)\)</span> is a demonstration example (an input-label pair), where <span class="math inline">\(x'_i\)</span> is the input text, and <span class="math inline">\(y'_i\)</span> is the correct answer. The context <span class="math inline">\(C\)</span> <strong>does not</strong> include the correct answer for the query input text <span class="math inline">\(x\)</span>. As such, the query input text <span class="math inline">\(x\)</span> is <strong>out-of-context</strong> (not seen in the context).</p>
+<p>Let <span class="math inline">\(\mathcal{M}\)</span> be a GPT model, we compute the conditional probability of each answer <span class="math inline">\(y_i\)</span> as follows:</p>
+<p><span class="math display">\[
+P_\mathcal{M}(y_i \mid C, x)
+\]</span></p>
+<p>The final answer <span class="math inline">\(\hat{y}\)</span> is the one with the highest probability.</p>
+<p><span class="math display">\[
+\hat{y} = \arg \max_{y_i \in Y} P_\mathcal{M}(y_i \mid C, x)
+\]</span></p>
+<p>Also, let <span class="math inline">\(\mathcal{T}(\cdot)\)</span> be a function that takes an input text and a label to return a formatted example text for sentiment classification:</p>
+<p><span class="math display">\[
+\mathcal{T} = \text{Sentence: } x. \text{ Sentiment: } y.
+\]</span></p>
+<p>Therefore, a formatted input text <span class="math inline">\(\mathcal{I}\)</span> is as follows:</p>
+<p><span class="math display">\[
+\mathcal{I} = \mathcal{T}(x'_1, y'_1) \, \mathcal{T}(x'_2, y'_2) \, \cdots \, \mathcal{T}(x'_n, y'_n) \, \mathcal{T}(x, \_)
+\]</span></p>
+<p>The first <span class="math inline">\(n\)</span> input-label pairs are the context (demonstrations), and the last is the query.</p>
+<p>We feed <span class="math inline">\(\mathcal{I}\)</span> to the GPT model <span class="math inline">\(\mathcal{M}\)</span> to get the conditional probability of each answer candidate <span class="math inline">\(y_i\)</span>:</p>
+<p><span class="math display">\[
+\begin{align*}
+\text{logit}_j &amp;= \mathcal{M}(\mathcal{I}) \cdot \boldsymbol{e}_{y_j} \\
+P_\mathcal{M}(y_j \mid C, x) &amp;= \text{softmax}(\text{logit}_j)
+\end{align*}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\mathcal{M}(\mathcal{I})\)</span> is the output hidden state at the last token position.</li>
+<li><span class="math inline">\(\boldsymbol{e}_{y_j}\)</span> is the word embedding of an candidate answer <span class="math inline">\(y_j\)</span>.</li>
+<li><span class="math inline">\(\text{logit}_j\)</span> is the logit corresponding to the j-th candidate answer.</li>
+</ul>
+<p>So far, we’ve formally defined how ICL classification works.</p>
+<p>Next, let’s see how we can understand gradient descent as a linear attention process.</p>
+</section>
+<section id="gradient-descent-as-attention-layer" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="gradient-descent-as-attention-layer"><span class="header-section-number">3</span> Gradient Descent as Attention Layer</h2>
+<p>The paper compares a linear layer optimized by gradient descent with an attention layer.</p>
+<p>A linear layer optimized by gradient descent is as follows:</p>
+<p><span class="math display">\[
+\mathcal{F}(\boldsymbol{x}) = (W_0 + \Delta W) \boldsymbol{x}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\boldsymbol{x} \in \mathbb{R}^{d_\text{in}}\)</span> be the input</li>
+<li><span class="math inline">\(W_0 \in \mathbb{R}^{d_\text{out} \times d_\text{in}}\)</span> be the initial model parameters</li>
+<li><span class="math inline">\(\Delta W \in \mathbb{R}^{d_\text{out} \times d_\text{in}}\)</span> be the parameter update</li>
+</ul>
+<p>We compute <span class="math inline">\(\Delta W\)</span> by accumulating (summing) the outer products of the gradients <span class="math inline">\(\boldsymbol{g}_i \in \mathbb{R}^{d_\text{out}}\)</span> with respect to the output of the linear layer and the historic input representations <span class="math inline">\({\boldsymbol{x}'_i} \in \mathbb{R}^{d_\text{in}}\)</span>:</p>
+<p><span class="math display">\[
+\begin{align*}
+\Delta W &amp;= \sum\limits_{i} \boldsymbol{g}_i \otimes \boldsymbol{x}'_i \\
+&amp;= \sum\limits_{i} \boldsymbol{g}_i {\boldsymbol{x}'_i}^T
+\end{align*}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\boldsymbol{g}_i\)</span> is the gradient of the loss with respect to the output of the linear layer at the i-th input.</li>
+<li><span class="math inline">\(\boldsymbol{x}_i^\top\)</span> is the transpose of the i-th input.</li>
+</ul>
+<p>If it helps, you can think of a linear layer with two neurons and one historic input vector with three values as follows:</p>
+<p><span class="math display">\[
+\begin{align*}
+W_0 &amp;= \begin{bmatrix}
+  w_{11} &amp; w_{12} &amp; w_{13} \\
+  w_{21} &amp; w_{22} &amp; w_{23}
+\end{bmatrix} \\
+\boldsymbol{x} &amp;= \begin{bmatrix}
+  x_1 \\
+  x_2 \\
+  x_3
+\end{bmatrix}
+\end{align*}
+\]</span></p>
+<p>We feed-forward the input <span class="math inline">\(\boldsymbol{x}\)</span> to the linear layer, and get the output <span class="math inline">\(\boldsymbol{a}\)</span>:</p>
+<p><span class="math display">\[
+\begin{align*}
+\boldsymbol{a} &amp;= W_0 \boldsymbol{x} \\
+&amp;= \begin{bmatrix}
+  w_{11} &amp; w_{12} &amp; w_{13} \\
+  w_{21} &amp; w_{22} &amp; w_{23}
+\end{bmatrix} \begin{bmatrix}
+  x_1 \\
+  x_2 \\
+  x_3
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+  w_{11} x_1 + w_{12} x_2 + w_{13} x_3 \\
+  w_{21} x_1 + w_{22} x_2 + w_{23} x_3
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+  a_1 \\
+  a_2
+\end{bmatrix}
+\end{align*}
+\]</span></p>
+<p>Therefore, the gradient of the loss with respect to the initial weights <span class="math inline">\(\boldsymbol{W_0}\)</span> is as follows:</p>
+<p><span class="math display">\[
+\begin{align*}
+\frac{\partial \mathcal{L}}{\partial W_0} &amp;= \begin{bmatrix}
+\frac{\partial \mathcal{L}}{\partial w_{11}} &amp; \frac{\partial \mathcal{L}}{\partial w_{12}} &amp; \frac{\partial \mathcal{L}}{\partial w_{13}} \\
+\frac{\partial \mathcal{L}}{\partial w_{21}} &amp; \frac{\partial \mathcal{L}}{\partial w_{22}} &amp; \frac{\partial \mathcal{L}}{\partial w_{23}}
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+\frac{\partial \mathcal{L}}{\partial a_1} \frac{\partial a_1}{\partial w_{11}} &amp; \frac{\partial \mathcal{L}}{\partial a_1} \frac{\partial a_1}{\partial w_{12}} &amp; \frac{\partial \mathcal{L}}{\partial a_1} \frac{\partial a_1}{\partial w_{13}} \\
+\frac{\partial \mathcal{L}}{\partial a_2} \frac{\partial a_2}{\partial w_{21}} &amp; \frac{\partial \mathcal{L}}{\partial a_2} \frac{\partial a_2}{\partial w_{22}} &amp; \frac{\partial \mathcal{L}}{\partial a_2} \frac{\partial a_2}{\partial w_{23}}
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+\frac{\partial \mathcal{L}}{\partial a_1} x_1 &amp; \frac{\partial \mathcal{L}}{\partial a_1} x_2 &amp; \frac{\partial \mathcal{L}}{\partial a_1} x_3 \\
+\frac{\partial \mathcal{L}}{\partial a_2} x_1 &amp; \frac{\partial \mathcal{L}}{\partial a_2} x_2 &amp; \frac{\partial \mathcal{L}}{\partial a_2} x_3
+\end{bmatrix} \\
+&amp;= \begin{bmatrix}
+\frac{\partial \mathcal{L}}{\partial a_1} \\
+\frac{\partial \mathcal{L}}{\partial a_2}
+\end{bmatrix}
+\begin{bmatrix}
+x_1 &amp; x_2 &amp; x_3
+\end{bmatrix} \\
+&amp;= \boldsymbol{g} \, \boldsymbol{x}^\top \\
+&amp;= \boldsymbol{g} \otimes \boldsymbol{x}
+\end{align*}
+\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol{g}\)</span> is the gradient of the loss with respect to the output <span class="math inline">\(\boldsymbol{a}\)</span>.</p>
+<p>So, <span class="math inline">\(\Delta W\)</span> is an accumulation of the outer products of the gradients of the loss with respect to the outputs of the linear layer and the inputs to the linear layer.</p>
+<p>Therefore, we can transform the gradient descent update as follows:</p>
+<p><span class="math display">\[
+\begin{align*}
+\mathcal{F}(\boldsymbol{x}) &amp;= (W_0 + \Delta W) \boldsymbol{x} \\
+&amp;= W_0 \boldsymbol{x} + \Delta W \boldsymbol{x} \\
+&amp;= W_0 \boldsymbol{x} + \sum\limits_{i} \left(\boldsymbol{g}_i {\boldsymbol{x}'_i}^\top \right) \boldsymbol{x} \\
+&amp;= W_0 \boldsymbol{x} + \sum\limits_{i} \boldsymbol{g}_i \left( {\boldsymbol{x}'_i}^\top \boldsymbol{x} \right) \\
+&amp;= W_0 \boldsymbol{x} + \text{LinearAttention}(G, X', \boldsymbol{x})
+\end{align*}
+\]</span></p>
+<p><span class="math inline">\(\text{LinearAttention}(V, K, \boldsymbol{q})\)</span> is an attention layer (without softmax) with value <span class="math inline">\(V\)</span>, key <span class="math inline">\(K\)</span>, and query <span class="math inline">\(\boldsymbol{q}\)</span>.</p>
+<ul>
+<li>The historic output gradients <span class="math inline">\(G\)</span> are the values <span class="math inline">\(V\)</span>.</li>
+<li>The historic inputs <span class="math inline">\(X'\)</span> are the keys <span class="math inline">\(K\)</span>.</li>
+<li>The current input <span class="math inline">\(\boldsymbol{x}\)</span> is the query <span class="math inline">\(\boldsymbol{q}\)</span>.</li>
+</ul>
+<p>So, the gradient descent update on a linear layer is nothing but a linear attention operation, which takes more gradients from the demonstration inputs similar to the query input.</p>
+<p>We can do a similar analysis on the Transformer attention layer to see how it performs gradient descent.</p>
+</section>
+<section id="transformer-attention-as-meta-optimization" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="transformer-attention-as-meta-optimization"><span class="header-section-number">4</span> Transformer Attention as Meta-Optimization</h2>
+<p>Now, we’ll see how the Transformer attention mechanism performs meta-optimization.</p>
+<p>In the ICL setting (defined earlier), the result of an attention operation from the query token <span class="math inline">\(t\)</span> is as follows:</p>
+<p><span class="math display">\[
+\begin{align*}
+\mathcal{F}_{\text{ICL}}(\boldsymbol{q}) &amp;= \text{Attention}(V, K, \boldsymbol{q}) \\
+&amp;= W_V [ X'; X ] \, \text{softmax} \left( \frac{(W_K [ X'; X ])^\top \boldsymbol{q}}{\sqrt{d}} \right)
+\end{align*}
+\]</span></p>
+<p>The above is nothing but the standard attention mechanism with the following parameters:</p>
+<ul>
+<li><span class="math inline">\(W_V \in \mathbb{R}^{d' \times d}\)</span> is the value projection matrix</li>
+<li><span class="math inline">\(W_K \in \mathbb{R}^{d' \times d}\)</span> is the key projection matrix</li>
+<li><span class="math inline">\(W_Q \in \mathbb{R}^{d' \times d}\)</span> is the query projection matrix</li>
+</ul>
+<p>The inputs to the attention layer are:</p>
+<ul>
+<li><span class="math inline">\(X'\)</span> is the demonstration input matrix</li>
+<li><span class="math inline">\(X\)</span> is the input representations of query tokens before <span class="math inline">\(t\)</span></li>
+<li><span class="math inline">\(\boldsymbol{x} \in \mathbb{R}^{d}\)</span> be the input representation of a query token <span class="math inline">\(t\)</span></li>
+</ul>
+<p>The key, value, and query are as follows:</p>
+<ul>
+<li><span class="math inline">\([ X'; X ]\)</span> is the matrix concatenation of <span class="math inline">\(X'\)</span> and <span class="math inline">\(X\)</span></li>
+<li><span class="math inline">\(V = W_V [ X'; X ]\)</span> is the value matrix</li>
+<li><span class="math inline">\(K = W_K [ X'; X ]\)</span> is the key matrix</li>
+<li><span class="math inline">\(\boldsymbol{q} = W_Q \boldsymbol{x} \in \mathbb{R}^{d'}\)</span> be the attention query vector</li>
+</ul>
+<p>Note: <span class="math inline">\(\sqrt{d}\)</span> is the scaling factor.</p>
+<p>As per the paper, we relax the attention layer by removing the softmax and scaling factor for simplicity:</p>
+<p><span class="math display">\[
+\begin{align*}
+\mathcal{F}_{\text{ICL}}(\boldsymbol{q}) &amp;= Attention(V, K, \boldsymbol{q}) \\
+&amp;= W_V [ X'; X ] \, \text{softmax} \left( \frac{(W_K [ X'; X ])^\top \boldsymbol{q}}{\sqrt{d}} \right) \\
+&amp;\approx W_V [ X'; X ] \, (W_K [ X'; X ])^\top \boldsymbol{q} \\
+\\
+\therefore \tilde{\mathcal{F}}_{\text{ICL}}(\boldsymbol{q}) &amp;= W_V X' \, (W_K X')^\top \boldsymbol{q} + W_V X \, (W_K X)^\top \boldsymbol{q} \\
+&amp;= W_V X' \, (W_K X')^\top \boldsymbol{q} + W_{\text{ZSL}} \boldsymbol{q}
+\end{align*}
+\]</span></p>
+<p>The second term <span class="math inline">\(W_{\text{ZSL}} = W_V X \, (W_K X)^\top\)</span> is the zero-shot learning (ZSL) part where no demonstration data is available.</p>
+<p>We rewrite the above as follows:</p>
+<p><span class="math display">\[
+\begin{align*}
+\tilde{\mathcal{F}}_{\text{ICL}}(\boldsymbol{q}) &amp;= W_{\text{ZSL}} \boldsymbol{q} + W_V X' \, (W_K X')^\top \boldsymbol{q} \\
+&amp;= W_{\text{ZSL}} \boldsymbol{q} + \text{LinearAttention}(W_V X', W_K X', \boldsymbol{q}) \\
+&amp;= W_{\text{ZSL}} \boldsymbol{q} + \sum\limits_{i} W_V \boldsymbol{x}'_i \left( (W_K \boldsymbol{x}'_i)^\top \boldsymbol{q} \right) \\
+&amp;= W_{\text{ZSL}} \boldsymbol{q} + \sum\limits_{i} \left( W_V \boldsymbol{x}'_i (W_K \boldsymbol{x}'_i)^\top \right) \boldsymbol{q} \\
+&amp;= W_{\text{ZSL}} \boldsymbol{q} + \left( \sum\limits_{i} W_V \boldsymbol{x}'_i (W_K \boldsymbol{x}'_i)^\top \right) \boldsymbol{q} \\
+&amp;= W_{\text{ZSL}} \boldsymbol{q} + \Delta W_{\text{ICL}} \boldsymbol{q} \\
+&amp;= (W_{\text{ZSL}} + \Delta W_{\text{ICL}}) \boldsymbol{q}
+\end{align*}
+\]</span></p>
+<p>So, the linear attention mechanism creates the zero-shot learning parameters <span class="math inline">\(W_\text{ZSL}\)</span> given the query input <span class="math inline">\(X\)</span> and the updates to the parameters <span class="math inline">\(\Delta W_\text{ICL}\)</span> given the demonstration inputs <span class="math inline">\(X'\)</span>.</p>
+<p>If we think of <span class="math inline">\(W_\text{ZSL}\)</span> as the initial parameters of a language model created on the fly and <span class="math inline">\(\Delta W_\text{ICL}\)</span> as the fine-tuning updates calculated from the demonstration examples, then the above is nothing but a meta-optimization mechanism in which the meta-optimizer is the Transformer attention mechanism itself.</p>
+<p>In summary, ICL uses the original language model’s capability to learn from the context of the query input <span class="math inline">\(X\)</span> and the demonstration inputs <span class="math inline">\(X'\)</span>.</p>
+</section>
+<section id="icl-vs.-fine-tuning-settings" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="icl-vs.-fine-tuning-settings"><span class="header-section-number">5</span> ICL vs.&nbsp;Fine-Tuning Settings</h2>
+<p>So far, we understand how ICL works as a meta-optimization mechanism in theory.</p>
+<p>The paper also conducted experiments to compare the ICL’s meta-optimization with explicit optimization (fine-tuning) by designing a specific fine-tuning setting.</p>
+<p>When comparing the attention mechanism with fine-tuning, we treat the query input <span class="math inline">\(\boldsymbol{q}\)</span> as equivalent to the fine-tuning input <span class="math inline">\(\boldsymbol{x}\)</span>. As such, meta-optimization happens with the attention keys and values (but not with queries). As such, their fine-tuning counterpart only updates the key and value projection parameters.</p>
+<p>Therefore, in the linear attention form, the result of a fine-tuned attention head is as follows:</p>
+<p><span class="math display">\[
+\begin{align*}
+\mathcal{F}_{\text{FT}}(\boldsymbol{q}) &amp;= (W_V + \Delta W_V) X \, ((W_K + \Delta W_K) X)^\top \boldsymbol{q} \\
+&amp;= (W_V + \Delta W_V) X X^\top (W_K + \Delta W_K)^\top \boldsymbol{q} \\
+&amp;= (W_\text{ZSL} + \Delta W_\text{FT}) \boldsymbol{q}
+\end{align*}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\Delta W_V\)</span> is the parameter updates to the value projection matrix <span class="math inline">\(W_V\)</span></li>
+<li><span class="math inline">\(\Delta W_K\)</span> is the parameter updates to the key projection matrix <span class="math inline">\(W_K\)</span></li>
+<li><span class="math inline">\(W_\text{ZSL} = W_V X X^\top W_K^\top\)</span> is the zero-shot learning part<br>
+(i.e., the weights from the original language model)</li>
+<li><span class="math inline">\(\Delta W_\text{FT}\)</span> is the parameter updates to <span class="math inline">\(W_\text{ZSL}\)</span> by fine-tuning</li>
+</ul>
+<p>They add the following conditions to the fine-tuning to make the comparison with ICL fair:</p>
+<ul>
+<li>The training examples are the same as ICL’s demonstration examples</li>
+<li>They train each example for only one step in the same order as demonstrated for ICL</li>
+<li>They format each training example using the template for ICL: <span class="math inline">\(\mathcal{T}(x'_i, y'_i)\)</span></li>
+<li>They use the causal language modeling objective for fine-tuning</li>
+</ul>
+<p>Note: causal language modeling is the task of predicting the token following a sequence of tokens.</p>
+<p>Based on the above settings, ICL has many properties in common with fine-tuning:</p>
+<ul>
+<li>Both perform gradient descent (<span class="math inline">\(\Delta W_\text{FT}\)</span> and <span class="math inline">\(\Delta W_\text{ICL}\)</span>)</li>
+<li>Same training information (training examples = demonstration examples)</li>
+<li>Same causal order of training examples (only one epoch with the same order of training examples as demonstration examples)</li>
+<li>Both updates only the key and value projection matrices</li>
+</ul>
+<p>Given all these similarities, it is reasonable to expect that ICL and fine-tuning will perform similarly <strong>provided ICL indeed performs implicit fine-tuning</strong>.</p>
+<p>The paper’s experiments confirm this hypothesis.</p>
+</section>
+<section id="experiments" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="experiments"><span class="header-section-number">6</span> Experiments</h2>
+<p>They compared the performance of ICL and fine-tuning with the following tasks:</p>
+<ul>
+<li>Sentiment classification (SST-2, SST-5, MR, Subj)</li>
+<li>Topic classification (AGNews)</li>
+<li>Natural language inference (CB)</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-1.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Table 1 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>They used two GPT-like pre-trained language models with 1.3B and 2.7B parameters, respectively, released by <a href="https://github.com/facebookresearch/fairseq" target="_blank">fairseq</a>. They call them GPT 1.3B and GPT 2.7B for short.</p>
+<p>The prediction processes of ZSL and fine-tuning are the same as ICL without demonstration examples.</p>
+<ul>
+<li>For ICL,
+<ul>
+<li>The number of demonstration examples is 32.</li>
+<li>They adjusted the random seed for each task to ﬁnd a set of demonstration examples that achieves the best validation performance.</li>
+</ul></li>
+<li>For fine-tuning,
+<ul>
+<li>They used the same training examples as ICL, in the same order as demonstrated for ICL.</li>
+<li>Fine-tuning is only one epoch.</li>
+<li>They used an SGD optimizer and adjusted the learning rate to achieve the best validation performance.</li>
+</ul></li>
+</ul>
+<p>Below is the validation accuracy in ZSL, FT (fine-tuning), and ICL on six classification tasks.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-2.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Table 2 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Overall, both FT and ICL achieve much better performance than ZSL. In other words, FT and ICL make helpful optimizations to the original language model. Moreover, ICL performs better with few-short scenarios than FT, where only a few examples are available.</p>
+<p>So, the accuracy of ICL is comparable (or even better) to fine-tuning in this comparison, which is strong evidence that ICL performs implicit fine-tuning.</p>
+</section>
+<section id="measuring-similarity-between-icl-and-fine-tuning" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="measuring-similarity-between-icl-and-fine-tuning"><span class="header-section-number">7</span> Measuring Similarity between ICL and Fine-Tuning</h2>
+<p>They designed three metrics to measure the similarity between ICL and ﬁnetuning at three different levels:</p>
+<section id="recall-to-fine-tuning-predictions-rec2ftp" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="recall-to-fine-tuning-predictions-rec2ftp"><span class="header-section-number">7.1</span> Recall to Fine-tuning Predictions (Rec2FTP)</h3>
+<p>At the prediction level, Rec2FTP measures how much behavior of ﬁnetuning ICL can cover.</p>
+<p><span class="math display">\[
+\text{Rec2FTP} = \frac{N_{both}}{N_{FT}}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(N_{FT}\)</span>: the number of query examples that FT can predict correctly but ZSL cannot.</li>
+<li><span class="math inline">\(N_{both}\)</span>: the number that ICL can also predict correctly.</li>
+</ul>
+<p>A higher Rec2FTP score suggests that ICL covers more behavior of ﬁnetuning at the prediction level.</p>
+</section>
+<section id="similarity-of-attention-output-updates-simaou" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="similarity-of-attention-output-updates-simaou"><span class="header-section-number">7.2</span> Similarity of Attention Output Updates (SimAOU)</h3>
+<p>At the representation level, SimAOU measures how much ICL updates the attention output representation in the same direction as ﬁnetuning.</p>
+<p>Let <span class="math inline">\(\boldsymbol{h}_X^{(l)}\)</span> be the output representation of the last token at the <span class="math inline">\(l\)</span>-th attention layer in the <span class="math inline">\(X\)</span> setting, where <span class="math inline">\(X\)</span> is either ZSL, FT, or ICL.</p>
+<p>We can measure the direction of updates by ICL and FT in the following formula:</p>
+<p><span class="math display">\[
+\begin{align*}
+\boldsymbol{dh}_\text{ICL}^{(l)} &amp;= \boldsymbol{h}_\text{ICL}^{(l)} - \boldsymbol{h}_\text{ZSL}^{(l)} \\\\
+\boldsymbol{dh}_\text{FT}^{(l)} &amp;= \boldsymbol{h}_\text{FT}^{(l)} - \boldsymbol{h}_\text{ZSL}^{(l)}
+\end{align*}
+\]</span></p>
+<p>Then, we take the cosine similarity between these two updates:</p>
+<p><span class="math display">\[
+\text{SimAOU}^{(l)} = \frac{\boldsymbol{dh}_\text{ICL}^{(l)} \cdot \boldsymbol{dh}_\text{FT}^{(l)}}{\left\|\boldsymbol{dh}_\text{ICL}^{(l)}\right\|_2 \ \left\|\boldsymbol{dh}_\text{FT}^{(l)}\right\|_2}
+\]</span></p>
+<p>A higher SimAOU score suggests that ICL updates the attention output representation in the same direction as ﬁnetuning.</p>
+</section>
+<section id="similarity-of-attention-map-simam" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="similarity-of-attention-map-simam"><span class="header-section-number">7.3</span> Similarity of Attention Map (SimAM)</h3>
+<p>At the attention behavior level, SimAM measures the similarity between the attention maps of ICL and ﬁnetuning.</p>
+<p>Let <span class="math inline">\(\boldsymbol{m}_X^{(l, h)}\)</span> be the attention weights of the last token (before softmax) of the <span class="math inline">\(l\)</span>-th attention layer at the <span class="math inline">\(h\)</span>-th attention head in the <span class="math inline">\(X\)</span> setting, where <span class="math inline">\(X\)</span> is either ZSL, FT, or ICL.</p>
+<p>For ICL, they only monitor the attention weights to the query input tokens since FT has no demonstration tokens (every training example is a separate query input).</p>
+<p>Then, they take the cosine similarity between these two attention weights: <span class="math inline">\(\boldsymbol{m}_X^{(l, h)}\)</span> and <span class="math inline">\(\boldsymbol{m}_\text{FT}^{(l, h)}\)</span> across the attention heads. The average of all attention heads is the SimAM score at each layer.</p>
+</section>
+<section id="results" class="level3" data-number="7.4">
+<h3 data-number="7.4" class="anchored" data-anchor-id="results"><span class="header-section-number">7.4</span> Results</h3>
+<p>Below are the results of the three similarity metrics on six classification tasks.</p>
+<p>The Rec2FTP results show that ICL can mostly cover correct predictions by fine-tuning.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-3.png" class="img-fluid figure-img"></p>
+<figcaption>Table 3 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The SimAOU and SimAM scores are the average of all examples and layers. There are two baselines:</p>
+<ul>
+<li><strong>Random SimAOU</strong> is a baseline metric that measures the similarity between the attention output updates of ICL and randomly generated updates.</li>
+<li><strong>ZSL SimAM</strong> is a baseline metric that measures the similarity between the attention weights of ICL and ZSL.</li>
+</ul>
+<p>Compared with the baseline metrics, ICL behaves more similarly to fine-tuning at the representation and attention behavior levels.</p>
+<p>Overall, ICL exhibits similar behavior on all tasks with fine-tuning.</p>
+</section>
+</section>
+<section id="similarity-at-each-layer" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="similarity-at-each-layer"><span class="header-section-number">8</span> Similarity at Each Layer</h2>
+<p>Below are the SimAOU and SimAM scores at each layer. They drew box plots based on randomly sampled 50 validation examples from each dataset.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-3.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>They observed that:</p>
+<ul>
+<li>Both SimAOU and SimAM fluctuate at lower layers</li>
+<li>SimAOU and SimAM increase toward higher layers</li>
+</ul>
+<p>The above phenomenon suggests that ICL’s meta-optimization has forward-accumulated effects. As such, ICL behaves more similarly to fine-tuning at higher layers.</p>
+</section>
+<section id="optimization-algorithm-vs.-transformer-architecture" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="optimization-algorithm-vs.-transformer-architecture"><span class="header-section-number">9</span> Optimization Algorithm vs.&nbsp;Transformer Architecture</h2>
+<p>ICL performs implicit fine-tuning. Then, can we utilize momentum to improve the performance of ICL as we can for SGD optimization of fine-tuning?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-5.2.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Figure 5.2 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>They apply Exponential Moving Average (EMA) to the attention values to build momentum-based attention:</p>
+<p><span class="math display">\[
+\begin{align*}
+\text{MoAttn}(V, K, \boldsymbol{q}_t) &amp;= \text{Attn}(V, K, \boldsymbol{q}_t) + \text{EMA}(V) \\
+&amp;= V \text{softmax}\left(\frac{K^\top \boldsymbol{q}_t}{\sqrt{d_k}}\right) + \sum\limits_{i=1}^{t-1} \eta^{t-i} \boldsymbol{v}_i,
+\end{align*}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\eta\)</span> is the momentum coefficient (hyperparameter).</li>
+<li><span class="math inline">\(\boldsymbol{v}_i\)</span> is the <span class="math inline">\(i\)</span>-th attention value vector.</li>
+</ul>
+<section id="experiments-in-language-modeling" class="level3" data-number="9.1">
+<h3 data-number="9.1" class="anchored" data-anchor-id="experiments-in-language-modeling"><span class="header-section-number">9.1</span> Experiments in Language Modeling</h3>
+<p>They trained two GPT models with 350M parameters from scratch. One is the vanilla Transformer, and the other is the momentum-based Transformer.</p>
+<p>The below shows the <a href="https://huggingface.co/docs/transformers/perplexity" target="_blank">perplexity</a> (lower is better) of the two models with three validation sets with input lengths of 256, 512, and 1024, respectively.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-4.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Table 4 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The momentum-based Transformer outperforms the vanilla Transformer on all validation sets.</p>
+</section>
+<section id="experiments-on-in-context-learning" class="level3" data-number="9.2">
+<h3 data-number="9.2" class="anchored" data-anchor-id="experiments-on-in-context-learning"><span class="header-section-number">9.2</span> Experiments on In-Context Learning</h3>
+<p>They also evaluated the performance of the momentum-based Transformer on the in-context learning tasks. For the six datasets, they use 32 examples as demonstrations. The momentum-based transformer outperforms the vanilla Transformer on all datasets.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-5.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Table 5 of <a href="https://arxiv.org/abs/2212.10559" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>In conclusion, the momentum-based Transformer outperforms the vanilla Transformer in language modeling and in-context learning, proving that introducing momentum into attention is an effective strategy.</p>
+</section>
+</section>
+<section id="references" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="references"><span class="header-section-number">10</span> References</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2212.10559" target="_blank">Why Can GPT Learn In-Context? Language Models Secretly Perform Gradient Descent as Meta-Optimizers</a><br>
+Damai Dai, Yutao Sun, Li Dong, Yaru Hao, Zhifang Sui, Furu Wei</li>
+<li><a href="../../blog/2023/2023-01-04-gpt-3-in-context-few-shot-learner-2020/" target="_blank">GPT-3: In-Context Few-Shot Learner (2020)</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-08-23">
+<meta name="keywords" content="Generative Model, Variational Inference, Auto Encoder, Bayes Theorem, ELBO, Neural Networks, PyTorch">
+<meta name="description" content="VAEs offer a unique blend of deep learning and probabilistic modeling, enabling efficient data compression and effective data generation.">
+
+<title>VAE: Variational Auto-Encoder (2013) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-big-question" id="toc-the-big-question" class="nav-link active" data-scroll-target="#the-big-question"><span class="header-section-number">1</span> The Big Question</a>
+  <ul class="collapse">
+  <li><a href="#directed-probabilistic-models-the-big-picture" id="toc-directed-probabilistic-models-the-big-picture" class="nav-link" data-scroll-target="#directed-probabilistic-models-the-big-picture"><span class="header-section-number">1.1</span> Directed Probabilistic Models: The Big Picture</a></li>
+  <li><a href="#continuous-latent-variables-hidden-features" id="toc-continuous-latent-variables-hidden-features" class="nav-link" data-scroll-target="#continuous-latent-variables-hidden-features"><span class="header-section-number">1.2</span> Continuous Latent Variables: Hidden Features</a></li>
+  <li><a href="#intractable-posterior-distributions-a-tough-challenge" id="toc-intractable-posterior-distributions-a-tough-challenge" class="nav-link" data-scroll-target="#intractable-posterior-distributions-a-tough-challenge"><span class="header-section-number">1.3</span> Intractable Posterior Distributions: A Tough Challenge</a></li>
+  <li><a href="#efficient-inference-variational-inference" id="toc-efficient-inference-variational-inference" class="nav-link" data-scroll-target="#efficient-inference-variational-inference"><span class="header-section-number">1.4</span> Efficient Inference: Variational Inference</a></li>
+  <li><a href="#efficient-learning-deep-learning" id="toc-efficient-learning-deep-learning" class="nav-link" data-scroll-target="#efficient-learning-deep-learning"><span class="header-section-number">1.5</span> Efficient Learning: Deep Learning</a></li>
+  </ul></li>
+  <li><a href="#solving-the-problem-the-inner-workings-of-vaes" id="toc-solving-the-problem-the-inner-workings-of-vaes" class="nav-link" data-scroll-target="#solving-the-problem-the-inner-workings-of-vaes"><span class="header-section-number">2</span> Solving the Problem: The Inner Workings of VAEs</a>
+  <ul class="collapse">
+  <li><a href="#evidence-lower-bound-elbo-deriving-from-kl-divergence" id="toc-evidence-lower-bound-elbo-deriving-from-kl-divergence" class="nav-link" data-scroll-target="#evidence-lower-bound-elbo-deriving-from-kl-divergence"><span class="header-section-number">2.1</span> Evidence Lower Bound (ELBO): Deriving from KL Divergence</a></li>
+  <li><a href="#the-encoder-from-images-to-distributions-in-latent-space" id="toc-the-encoder-from-images-to-distributions-in-latent-space" class="nav-link" data-scroll-target="#the-encoder-from-images-to-distributions-in-latent-space"><span class="header-section-number">2.2</span> The Encoder: From Images to Distributions in Latent Space</a></li>
+  <li><a href="#the-reparameterization-trick-enabling-gradient-flow-in-vaes" id="toc-the-reparameterization-trick-enabling-gradient-flow-in-vaes" class="nav-link" data-scroll-target="#the-reparameterization-trick-enabling-gradient-flow-in-vaes"><span class="header-section-number">2.3</span> The Reparameterization Trick: Enabling Gradient Flow in VAEs</a></li>
+  <li><a href="#the-decoder-reconstructing-images-from-latent-representations" id="toc-the-decoder-reconstructing-images-from-latent-representations" class="nav-link" data-scroll-target="#the-decoder-reconstructing-images-from-latent-representations"><span class="header-section-number">2.4</span> The Decoder: Reconstructing Images from Latent Representations</a></li>
+  </ul></li>
+  <li><a href="#training-a-simple-vae-the-concrete-example" id="toc-training-a-simple-vae-the-concrete-example" class="nav-link" data-scroll-target="#training-a-simple-vae-the-concrete-example"><span class="header-section-number">3</span> Training a Simple VAE: The Concrete Example</a>
+  <ul class="collapse">
+  <li><a href="#encoder-implementation" id="toc-encoder-implementation" class="nav-link" data-scroll-target="#encoder-implementation"><span class="header-section-number">3.1</span> Encoder Implementation</a></li>
+  <li><a href="#decoder-implementation" id="toc-decoder-implementation" class="nav-link" data-scroll-target="#decoder-implementation"><span class="header-section-number">3.2</span> Decoder Implementation</a></li>
+  <li><a href="#vae-for-simultaneous-training" id="toc-vae-for-simultaneous-training" class="nav-link" data-scroll-target="#vae-for-simultaneous-training"><span class="header-section-number">3.3</span> VAE for Simultaneous Training</a></li>
+  <li><a href="#the-loss-function" id="toc-the-loss-function" class="nav-link" data-scroll-target="#the-loss-function"><span class="header-section-number">3.4</span> The Loss Function</a></li>
+  <li><a href="#training-loop-of-vae" id="toc-training-loop-of-vae" class="nav-link" data-scroll-target="#training-loop-of-vae"><span class="header-section-number">3.5</span> Training Loop of VAE</a></li>
+  <li><a href="#generating-random-new-images" id="toc-generating-random-new-images" class="nav-link" data-scroll-target="#generating-random-new-images"><span class="header-section-number">3.6</span> Generating Random New Images</a></li>
+  <li><a href="#exploring-the-2d-latent-space" id="toc-exploring-the-2d-latent-space" class="nav-link" data-scroll-target="#exploring-the-2d-latent-space"><span class="header-section-number">3.7</span> Exploring the 2D Latent Space</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">VAE: Variational Auto-Encoder (2013)</h1>
+<p class="subtitle lead">Understanding the Auto-Encoding Variational Bayes Paper</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Generative Models</div>
+    <div class="quarto-category">Information Theory</div>
+    <div class="quarto-category">Bayesian Inference</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    VAEs offer a unique blend of deep learning and probabilistic modeling, enabling efficient data compression and effective data generation.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 23, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Generative Model, Variational Inference, Auto Encoder, Bayes Theorem, ELBO, Neural Networks, PyTorch</p>
+  </div>
+</div>
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="VAE: Variational Auto-Encoder (2013)"></p>
+<p>Ever stumbled upon the <a href="https://arxiv.org/abs/1312.6114" target="_blank">Auto-Encoding Variational Bayes</a> paper and felt lost amid mathematical equations and concepts like Auto-Encoder, Bayesian Theorem, Variational Inference, and Deep Learning? Understanding this groundbreaking work is a challenge but a rewarding journey that unveils new perspectives in machine learning. Variational Auto-Encoders, at the core of this paper, are powerful tools that replicate input data and generate new outputs. If these concepts intrigue you and you want to uncover the insights behind the AEVB paper, this article is for you.</p>
+<p>Variational Auto-Encoders, commonly known as VAEs, are powerful tools in machine learning. Unlike traditional Auto-Encoder models that primarily replicate input data, VAEs can generate new outputs. They achieve this by identifying and learning hidden features from training datasets and using them as a blueprint to generate new data.</p>
+<p>Diederik P Kingma and Max Welling from the University of Amsterdam significantly advanced this field with their Auto-Encoding Variational Bayes paper. This pioneering work introduced AEVB, a novel approach to training generative models. AEVB’s name symbolizes two crucial functions:</p>
+<ul>
+<li>‘AE’ for compressing and reconstructing data</li>
+<li>‘VB’ for approximating complex data distributions by optimizing towards simpler ones.</li>
+</ul>
+<p>Using the AEVB framework, we derive VAEs, generative models capable of creating content like images. Imagine training a VAE on the MNIST dataset of handwritten digits, and it then generates new digit images not in the dataset. It’s like an artist drawing new numbers after studying examples. Later in this article, I’ll show you how to train a VAE using PyTorch.</p>
+<p>While AEVB applies to various data types, this article centers on images for clarity and demonstration. In this article, the word ‘VAE’ refers to both the AEVB framework and the specific neural network design suitable for generating images. I won’t delve into other data types or non-deep-learning approaches, keeping our focus sharp.</p>
+<p>Now, let’s uncover the inner workings of VAEs, starting with the big question.</p>
+<section id="the-big-question" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-big-question"><span class="header-section-number">1</span> The Big Question</h2>
+<p>The paper <a href="https://arxiv.org/abs/1312.6114" target="_blank">Auto-Encoding Variational Bayes</a> introduced Variational Auto-Encoder (VAE), starting with a question:</p>
+<blockquote class="blockquote">
+<p>How can we perform efﬁcient inference and learning in directed probabilistic models, in the presence of continuous latent variables with intractable posterior distributions, and large datasets? <cite><a href="https://arxiv.org/abs/1312.6114" target="_blank">Auto-Encoding Variational Bayes</a></cite></p>
+</blockquote>
+<p>This question encapsulates the central challenge that VAEs aim to address. It may seem complex at first glance. However, understanding it unlocks the core mechanics of how VAEs function. Let’s break it down and examine it piece by piece.</p>
+<section id="directed-probabilistic-models-the-big-picture" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="directed-probabilistic-models-the-big-picture"><span class="header-section-number">1.1</span> Directed Probabilistic Models: The Big Picture</h3>
+<p>Directed probabilistic models, commonly known as Bayesian networks, utilize a directed acyclic graph (DAG) to illustrate the relationships and dependencies among various random variables.</p>
+<p>Consider the simple DAG below, which depicts the dependencies between random variables A, B, and C:</p>
+<p><img src="images/vae-a-b-c.png" class="img-fluid"></p>
+<p>In this graph, the nodes symbolize random variables, while the edges (arrows) indicate conditional dependencies. An edge from node A to node B signifies that random variable B depends on random variable A. This relationship is <strong>directed</strong> because it follows a specific direction, from A to B, and not vice versa. The term <strong>probabilistic</strong> in the context of these models alludes to their foundation in probability theory, with the arrows in the graph representing the conditional dependencies between these variables.</p>
+<p>Let’s transition from this basic diagram to a more intricate Variational Auto-Encoders (VAEs) structure.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1312.6114" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>This figure presents two interconnected DAGs: the encoder and the decoder.</p>
+<p>The encoder flow (delineated by the dotted line) demonstrates the compression of an input image x into a latent representation z within the feature space. The symbol ϕ represents the encoder’s parameters.</p>
+<p><img src="images/vae-x-encoder-z.png" class="img-fluid"></p>
+<p>The decoder flow (indicated by the solid line) illustrates the reconstruction process, transforming the latent representation z into an image resembling the original input x. Here, θ denotes the decoder’s parameters.</p>
+<p><img src="images/vae-z-decoder-x-dash.png" class="img-fluid"></p>
+<p>The encoder and decoder are probabilistic, and their probability distributions exhibit conditional dependencies, as the two flows have a connection via the latent representation z.</p>
+<p><img src="images/vae-x-encoder-z-decoder-x-dash.png" class="img-fluid"></p>
+<p>The encoder is responsible for modeling the conditional probability distribution P(z|x), as it takes an input image x and produces a latent representation z. The decoder is responsible for modeling the conditional probability distribution P(x|z), as it takes latent variables z and reconstructs an image x’ close to the input image x.</p>
+<p>With a clear understanding of directed probabilistic models and the roles of the encoder and decoder, we’re ready to delve deeper into the intricacies of the encoder and decoder and explore the challenges and solutions that VAEs introduce in probabilistic modeling.</p>
+</section>
+<section id="continuous-latent-variables-hidden-features" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="continuous-latent-variables-hidden-features"><span class="header-section-number">1.2</span> Continuous Latent Variables: Hidden Features</h3>
+<p>In the context of VAEs, the variable z captures the underlying latent features of the input data. While individual aspects of an image, such as specific colors or shapes, might be directly discernible, the latent features delve deeper, representing higher-level abstractions inferred from the raw data. These abstracted features, often hidden within the pixels but consistent across many images, capture common characteristics across diverse inputs. The encoder distills the input image x into this abstract representation, transcending immediate pixel values to capture the content’s essence.</p>
+<p>The latent space stands out because of two key features:</p>
+<p><strong>Compactness</strong>: The latent space of VAEs is typically of lower dimensionality than the original data. This compact representation ensures the VAE focuses on the most salient and generalizable features. By reducing dimensionality, the model abstracts away from granular, pixel-by-pixel details, centering its attention on the overarching essence of the content.</p>
+<p><strong>Continuity</strong>: The latent variables z are continuous, enabling smooth and coherent transitions within the latent space. This continuity ensures that even minute perturbations in the latent variables can be mapped to meaningful variations in the generated output, allowing VAEs to represent a broad spectrum of features. As the decoder leverages these continuous latent variables, it crafts images that resonate with the original’s style and content without being mere replicas.</p>
+<p>Together, these characteristics of the latent space empower VAEs to generate diverse and novel samples while retaining the fundamental attributes of the training data.</p>
+<p>Suppose we can determine the distribution of these latent variables and sample from the latent space. In that case, we can use the decoder to generate new images that mirror the style and ambiance of the training dataset without the need for the input image or encoder. Ultimately, that is what we want. We want to use the decoder as an image generator.</p>
+<p>However, a significant challenge persists: accurately determining the distribution of the latent variables, z, is not merely complex—it’s intractable.</p>
+</section>
+<section id="intractable-posterior-distributions-a-tough-challenge" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="intractable-posterior-distributions-a-tough-challenge"><span class="header-section-number">1.3</span> Intractable Posterior Distributions: A Tough Challenge</h3>
+<p>Recall the encoder DAG from our earlier discussion:</p>
+<p><img src="images/vae-x-encoder-z.png" class="img-fluid"></p>
+<p>The encoder’s task is to capture the essence of the input image x and represent it in the latent space by modeling the conditional probability P(z∣x), known as the posterior distribution. The posterior represents the probability of our latent variables z given observed data x.</p>
+<p>However, accurately determining this distribution is rather complex due to the intricate relationships between the data and latent variables. This complexity makes the posterior <strong>intractable</strong>.</p>
+<p>According to Bayes’ theorem, we can compute the posterior distribution P(z|x) as follows:</p>
+<p><span class="math display">\[
+P(z|x) = \frac{P(x|z) P(z)}{P(x)}
+\]</span></p>
+<p>Let’s look at the right-hand side of the equation.</p>
+<p>The decoder models the likelihood P(x∣z), the probability of observing an image x given the latent variables z.</p>
+<p>The prior distribution P(z) captures our beliefs or assumptions about the latent variables z before observing any image x. In Bayesian inference, we refer to it as the prior belief. While we might typically assume it to be a simple distribution, such as a Gaussian, the choice of prior can be multifaceted:</p>
+<ul>
+<li><strong>Informative priors</strong> reflect known information or beliefs about a parameter.</li>
+<li><strong>Non-informative or flat priors</strong> are used when there’s a lack of prior knowledge, assigning equal weight to all parameter values.</li>
+<li><strong>Conjugate priors</strong> are chosen for mathematical convenience, ensuring the posterior distribution retains the same form as the prior.</li>
+</ul>
+<p>These priors encapsulate our initial assumptions before any data observation and can influence the results of Bayesian inference.</p>
+<p>In the context of VAEs, our choice of the prior (often a standard normal distribution) is motivated by computational convenience and the desire to impose specific structures on the latent space. While this choice aligns with the Bayesian principle of incorporating prior beliefs, in the case of VAEs, it’s more about “<strong>what we want it to be</strong>” for the model efficiency and desired properties rather than strictly about “<strong>what we believe it to be</strong>”.</p>
+<p>In short, we want the distribution of latent variables as the standard normal distribution because it makes our model simple and easy to sample from.</p>
+<p>Returning to Bayes’ theorem formula, the denominator P(x) represents the marginal likelihood or the evidence. It quantifies the likelihood of observing the image data x without conditioning on any specific value of z. To determine it, we must calculate the probability density (or mass) of image x for every conceivable value of z, then integrate (or sum) across all these values.</p>
+<p>Mathematically, we can represent the evidence P(x) as:</p>
+<p><span class="math display">\[
+P(x) = \int P(x|z) P(z) dz
+\]</span></p>
+<p>If we could precisely compute P(x), we would use the posterior distribution P(z|x) to sample the latent features. However, the intertwined complexities of high-dimensional data, model structures, and the need for integration across the latent space render the direct computation of P(x) practically impossible, even though it’s central to our Bayesian framework. This inherent challenge in assessing P(x) makes the posterior P(z|x) intractable.</p>
+<p>Now, recall the big question says:</p>
+<blockquote class="blockquote">
+<p>in the presence of continuous latent variables with intractable posterior distributions</p>
+</blockquote>
+<p>It says the posterior distribution P(z|x) is intractable. We now know why. It’s because directly computing the evidence P(x) is practically impossible.</p>
+<p>The intractability of the posterior distribution presents a significant challenge, but it’s not insurmountable. Researchers have devised clever techniques to address this issue, enabling efficient inference and learning in VAEs. As we progress, we’ll uncover the strategies that have made VAEs practical and powerful.</p>
+</section>
+<section id="efficient-inference-variational-inference" class="level3" data-number="1.4">
+<h3 data-number="1.4" class="anchored" data-anchor-id="efficient-inference-variational-inference"><span class="header-section-number">1.4</span> Efficient Inference: Variational Inference</h3>
+<p>Given the challenges of intractable posterior distributions of latent variables z, how do VAEs perform efficient inference and learning? The answer lies in a technique called <strong>variational inference</strong>.</p>
+<p>Variational inference (VI) is a method used to approximate complex, often intractable, posterior distributions with simpler, more tractable ones. The core idea revolves around two main steps:</p>
+<ul>
+<li><strong>Choose an Approximating Distribution</strong>: Select a family of distributions, typically simpler than the true posterior, to act as an approximation. These distributions have parameters that we can adjust to make the approximation better.</li>
+<li><strong>Optimize to Minimize the Difference</strong>: Adjust the parameters of the approximating distribution based on observed data to make it as close as possible to the true posterior. The measure of “closeness” is usually the Kullback-Leibler (KL) divergence (more on in the next section).</li>
+</ul>
+<p>You might wonder why simpler distributions can approximate a more intricate one effectively.</p>
+<p>While the true posterior might be complex and intractable across its entire domain, the beauty of VI lies in its locality. Instead of attempting a global approximation that fits the entire distribution, VI hones in on regions relevant to the observed data. By focusing on these local regions, VI can leverage simpler distributions to approximate the complex behavior of the true posterior where it matters most. This selective approach is why a seemingly simpler distribution can approximate a more intricate one, and it’s very effective.</p>
+<p>Here is an analogy that might further clarify the locality of variational inference.</p>
+<p>Imagine we’re trying to understand the shape of a complex mountain range with peaks, valleys, and intricate terrains. If we tried a global approximation, we’d attempt to fit a single smooth curve to capture the entire range. That would be challenging, computationally intense, and might miss many details.</p>
+<p>Think of another approach: Instead of mapping the whole range, focus on small sections. We fit curves to these local areas, capturing their details accurately. Over time, we aim to approximate the entire range more accurately by piecing together our understanding of many such sections. This strategy of focusing on specific areas or regions, then stitching them together for a broader understanding, mirrors the principle of local approximation in VI.</p>
+<p>Now, with this VI approach in mind, let’s ponder on the next challenge: How can we fine-tune the parameters of our approximating function for each local area such that, when combined, they provide a close match to the global true posterior?</p>
+</section>
+<section id="efficient-learning-deep-learning" class="level3" data-number="1.5">
+<h3 data-number="1.5" class="anchored" data-anchor-id="efficient-learning-deep-learning"><span class="header-section-number">1.5</span> Efficient Learning: Deep Learning</h3>
+<p>Let’s denote our approximating posterior distribution as Q<sub>ϕ</sub>(z∣x). Here, ϕ represents the parameters that we can adjust to fit Q<sub>ϕ</sub>(z∣x) to the true posterior P(z|x). The main challenge is determining how to adjust these parameters efficiently.</p>
+<p>As a reminder, we’re working in high-dimensional spaces and need an approach that can dynamically adjust Q<sub>ϕ</sub>(z∣x) based on the input data x. Can you think of a way to learn those parameters in the presence of large datasets?</p>
+<p>If that reminds you of neural networks, you’re thinking along the same lines as the researchers in the paper. In VAEs, we use neural networks as an efficient way to parameterize and optimize our approximating distributions. Specifically, given an image x, the neural network outputs the parameters (like the mean and variance) that define the distribution Q<sub>ϕ</sub>(z∣x), from which we can sample the latent variable z.</p>
+<p>Neural networks can handle high-dimensional spaces and large datasets using techniques like stochastic gradient descent. By defining a loss function, we can adjust the parameters ϕ of our network, efficiently making Q<sub>ϕ</sub>(z∣x) a better approximation of P(z∣x).</p>
+<p>But how can we define a loss function to achieve efficient learning?</p>
+<p>That is where the <a href="../../blog/2018/2018-11-06-kl-divergence-demystified/" target="_blank">Kullback-Leibler (KL) divergence</a> comes into play, which measures how one probability distribution differs from another. As we want to make our Q<sub>ϕ</sub>(z∣x) closer to the true posterior P(z∣x), we should aim to minimize the KL divergence between the two distributions, which we can include in our loss function as a regularization term.</p>
+<p>The immediate question is: if P(z∣x) is intractable, how can we compute the KL divergence between P(z|x) and Q<sub>ϕ</sub>(z∣x)? The answer is that we don’t compute the KL divergence directly. Instead, we maximize the <strong>Evidence Lower Bound</strong> (ELBO) derived from the KL divergence. By maximizing the ELBO, we implicitly minimize the KL divergence between the approximating distribution Q<sub>ϕ</sub>(z∣x) and the true posterior P(z|x), even though we don’t compute this divergence directly. We’ll discuss the details of the mathematics later on.</p>
+<p>So, we covered all the ingredients to understand the big question. In simple terms, the question from the VAE paper asks:</p>
+<p>“How can we design a model that quickly understands hidden patterns from vast amounts of data, especially when it’s tricky to predict these patterns, and then use this knowledge to recreate or generate new data?”</p>
+<p>The solution involves designing a deep learning model that learns the posterior distribution of latent variables z from training images x and then uses these features to reconstruct or generate new images. Researchers combined clever techniques with mathematical insights to develop what we now call Variational Auto-Encoders (VAEs).</p>
+<p>Let’s dive deeper into the inner workings of VAEs.</p>
+</section>
+</section>
+<section id="solving-the-problem-the-inner-workings-of-vaes" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="solving-the-problem-the-inner-workings-of-vaes"><span class="header-section-number">2</span> Solving the Problem: The Inner Workings of VAEs</h2>
+<section id="evidence-lower-bound-elbo-deriving-from-kl-divergence" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="evidence-lower-bound-elbo-deriving-from-kl-divergence"><span class="header-section-number">2.1</span> Evidence Lower Bound (ELBO): Deriving from KL Divergence</h3>
+<p>In Variational Auto-Encoders (VAEs), the Evidence Lower Bound (ELBO) plays a pivotal role. It’s a surrogate objective function to optimize our model even when the actual posterior distribution is intractable. Let’s unpack its derivation from the KL divergence.</p>
+<p>The Kullback-Leibler (KL) divergence between the approximating posterior Q<sub>ϕ</sub>(z∣x) and the true posterior P(z|x) is given by:</p>
+<p><span class="math display">\[
+D_{KL}(Q_\phi(z|x) || P(z|x)) = \mathbb{E}_{Q_\phi(z|x)}[\log Q_\phi(z|x) - \log P(z|x)]
+\]</span></p>
+<p>When considering the KL divergence, it’s crucial to understand the order of its arguments. It’s because the KL divergence is not symmetric, and the order of its arguments plays a significant role. The above KL divergence formula measures the divergence of the true posterior P(z∣x) from our approximating distribution Q<sub>ϕ</sub>(z∣x), not vice versa. As such, we use Q<sub>ϕ</sub>(z∣x) for the expectation calculation, which is under our control. If we instead used the KL divergence D<sub>KL</sub>(P(z|x)||Q<sub>ϕ</sub>(z∣x)), we would need to use the true posterior P(z∣x), intractable due to its complexity, for expectation calculation, which would make the KL divergence intractable.</p>
+<p>So, we calculate the KL divergence based on Q<sub>ϕ</sub>(z∣x), but the formula still has the intractable P(z|x). How can we circumvent it? Let’s see what we can do.</p>
+<p>Expanding P(z|x) using Bayes’ theorem:</p>
+<p><span class="math display">\[
+P(z|x) = \frac{P(x|z) P(z)}{P(x)}
+\]</span></p>
+<p>Substituting this into the KL divergence:</p>
+<p><span class="math display">\[
+\small{
+\begin{aligned}
+D_{KL}(Q_\phi(z|x) || P(z|x)) &amp;= \mathbb{E}_{Q_\phi(z|x)}\biggl[\log Q_\phi(z|x) - \log P(z|x)\biggr] \\\\
+&amp;= \mathbb{E}_{Q_\phi(z|x)}\left[\log Q_\phi(z|x) - \log \frac{P(x|z) P(z)}{P(x)}\right] \\\\
+&amp;= \mathbb{E}_{Q_\phi(z|x)}\biggl[\log Q_\phi(z|x) - \log P(x|z) - \log P(z) + \log P(x)\biggr] \\\\
+&amp;= D_{KL}(Q_\phi(z|x) || P(z)) - \mathbb{E}_{Q_\phi(z|x)}[\log P(x|z)] + \log P(x)
+\end{aligned}
+}
+\]</span></p>
+<p>Rearranging terms:</p>
+<p><span class="math display">\[
+\small{
+\mathbb{E}_{Q_\phi(z|x)}[\log P(x|z)] - D_{KL}(Q_\phi(z|x) || P(z)) = \log P(x) - D_{KL}(Q_\phi(z|x) || P(z|x))
+}
+\]</span></p>
+<p>The left-hand side is what we refer to as the Evidence Lower Bound (ELBO). Therefore, we can define the ELBO as:</p>
+<p><span class="math display">\[
+\text{ELBO} = \mathbb{E}_{Q_\phi(z|x)}[\log P(x|z)] - D_{KL}(Q_\phi(z|x) || P(z))
+\]</span></p>
+<p>In VAEs, we use the decoder to approximate the generation process of P(x∣z), and we have control over the prior P(z). Given this, we use the notation P<sub>θ</sub> to represent these parameterized distributions. Specifically, P<sub>θ</sub>(x∣z) represents the probability distribution of observing the image x given the latent variables z as modeled by the decoder, and P<sub>θ</sub>(z) represents our chosen prior distribution for the latent variables.</p>
+<p><span class="math display">\[
+\text{ELBO} = \mathbb{E}_{Q_\phi(z|x)}[\log P_\theta(x|z)] - D_{KL}(Q_\phi(z|x) || P_\theta(z))
+\]</span></p>
+<p>The ELBO formula does not include the intractable true posterior P(z|x), and we can use them to serve the following dual purposes:</p>
+<ul>
+<li><p><strong>Maximizing Data Likelihood</strong>: The term E<sub>Q<sub>ϕ</sub>(z∣x)</sub>[log P<sub>θ</sub>(x|z)] represents the expected log-likelihood of the image data x given the encoder-encoded latent variables z. By maximizing this term, we aim to ensure that the reconstructed data (from the decoder) is as close as possible to the original image data x.</p></li>
+<li><p><strong>Regularizing the Latent Space</strong>: The term D<sub>KL</sub>(Q<sub>ϕ</sub>(z∣x)∣∣P<sub>θ</sub>(z)) acts as a regularizer. It ensures that the distribution of the latent variables z, as modeled by the encoder, doesn’t deviate too much from the prior distribution of our choice (more on this later). This term encourages the latent space to maintain a desired structure, allowing us to sample z to generate new images.</p></li>
+</ul>
+<p>By maximizing the ELBO, we achieve these two objectives: we ensure that our VAE reconstructs the data accurately while maintaining a structured latent space.</p>
+<p>We can also define ELBO like this:</p>
+<p><span class="math display">\[
+\text{ELBO} = \log P(x) - D_{KL}(Q_\phi(z|x) || P(z|x))
+\]</span></p>
+<p>While this representation of the ELBO may look different from the previously discussed one, it is an equivalent definition using different terms based on the earlier derivation of the ELBO formula.</p>
+<p>This version of ELBO includes the intractable true posterior P(z|x). However, it tells us that maximizing ELBO means maximizing the evidence P(x) and minimizing the KL divergence between the approximating posterior Q<sub>ϕ</sub>(z∣x) and the true posterior P(z|x), which is why maximizing ELBO ensures our approximating posterior becomes closer to the intractable true posterior P(z|x), without ever calculating it.</p>
+<p>Moreover, the ELBO provides a lower bound on the log evidence as any KL divergence is non-negative:</p>
+<p><span class="math display">\[
+\log P(x) \ge \text{ELBO}
+\]</span></p>
+<p>The ELBO becomes equal to the log evidence only when the Q<sub>ϕ</sub>(z∣x) and P(z|x) are the same.</p>
+<p>Note: The original VAE paper uses the notation P<sub>θ</sub>(x) and P<sub>θ</sub>(z∣x) to denote the evidence and the true posterior. However, for clarity in our discussion, we’ll use the notation P(x) and P(z∣x) without any parameter subscript. That is because these distributions are intractable, and I want to differentiate between idealized mathematical relationships and the neural network-based approximations in VAEs. As such, I’ve reserved θ for the decoder’s generative process to maintain this distinction and reduce potential confusion.</p>
+<p>Having derived the ELBO, we now face the challenge of optimizing it. Let’s discuss that in the following sections.</p>
+</section>
+<section id="the-encoder-from-images-to-distributions-in-latent-space" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="the-encoder-from-images-to-distributions-in-latent-space"><span class="header-section-number">2.2</span> The Encoder: From Images to Distributions in Latent Space</h3>
+<p>Unlike traditional Auto-Encoders, which directly map an input to a point in the latent space, VAEs map an input to a distribution in the latent space. This probabilistic approach recognizes the inherent uncertainty when representing complex data, like images, in a lower-dimensional latent space.</p>
+<p>The encoder in a VAE, often implemented as a convolutional neural network (CNN), processes an input image and estimates the distribution of the latent variables that correspond to that image. More specifically, for each input image x, the encoder predicts the mean and variance of the latent variables z, locally approximating the posterior distribution for that image.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/vae-x-encoder-mu-sigma.png" class="img-fluid figure-img"></p>
+<figcaption>Image To Encoder To Latent Variable Parameters</figcaption>
+</figure>
+</div>
+<p>So, the encoder processes an input image x and estimates the distribution parameters of the latent variables z. You might wonder: are these estimates constrained at all? Indeed, they are. The encoder’s predictions are guided and regulated. In the VAE, the KL divergence term within the ELBO acts as a regularizer—it quantifies the divergence between the encoder’s predicted distribution Q<sub>ϕ</sub>(z|x) and a predetermined prior distribution P<sub>θ</sub>(z). This arrangement ensures that the latent space is well-structured and not scattered randomly.</p>
+<p>We assume that each latent variable in P<sub>θ</sub>(z) follows a standard normal distribution, as this choice simplifies the KL divergence term in the ELBO and often results in a well-behaved latent space. It’s worth noting that this choice is not a restriction of VAEs, but instead by design. The prior could be another distribution, depending on the problem context or the specific design decisions.</p>
+<p>Let’s think of 1D latent space to keep the discussion simple.</p>
+<p><span class="math display">\[
+P_\theta(z) = \mathcal{N}(z; 0, 1)
+\]</span></p>
+<p>Here, <em>N</em> represents the Normal (or Gaussian) distribution.</p>
+<p>For Q<sub>ϕ</sub>(z∣x), we have:</p>
+<p><span class="math display">\[
+Q_\phi(z|x) = \mathcal{N}(z; \mu_\phi(x), \sigma^2_\phi(x))
+\]</span></p>
+<p>Here, μ<sub>ϕ</sub>(x) and σ<sup>2</sup><sub>ϕ</sub>(x) indicate that we get a different Gaussian distribution for each input x. In other words, based on x, the encoder predicts a mean μ and variance σ<sup>2</sup> for latent variable z. In this way, the encoder provides the local approximation.</p>
+<p>Given large datasets, the objective is to minimize the KL divergence between Q<sub>ϕ</sub>(z∣x) and P<sub>θ</sub>(z) across many images. It ensures that, in the aggregate, the distributions Q<sub>ϕ</sub>(z∣x) across various inputs will converge to approximate the prior P<sub>θ</sub>(z), which we design as the standard normal distribution.</p>
+<p>In the training phase, the encoder’s task is to predict the parameters of Q<sub>ϕ</sub>(z∣x) for each image. The KL divergence then serves as a regularization term in the loss function, guiding the encoder’s predictions toward our desired prior distribution.</p>
+<p>I hope you can see a progression: from the high-level goal (minimizing KL divergence across many images) to the mechanism (the encoder predicts parameters) to the method (using KL divergence as regularization).</p>
+<p>As we design the approximating posterior Q<sub>ϕ</sub>(z∣x) and the prior P<sub>θ</sub>(z) as Gaussian distributions, we can derive the KL divergence between these distributions by the following derivation:</p>
+<p><span class="math display">\[
+\small{
+  \begin{aligned}
+  D_{KL}(Q_\phi(z|x) \| P_\theta(z)) &amp;= \int Q_\phi(z|x) \log \left( \frac{Q_\phi(z|x)}{P_\theta(z)} \right) dz \\\\
+  &amp;= \int Q_\phi(z|x) \biggl[\ \log Q_\phi(z|x) - \log P_\theta(z) \ \biggr] dz \\\\
+  &amp;= \int Q_\phi(z|x) \biggl[\ \log \frac{1}{\sqrt{2\pi\sigma^2_\phi(x)}} \exp \left( - \frac{(z - \mu_\phi(x))^2}{2\sigma^2_\phi(x)} \right) \\
+  &amp;\qquad\qquad\qquad - \log \frac{1}{\sqrt{2\pi}} \exp \left( - \frac{z^2}{2} \right) \ \biggr] \\\\
+  &amp;= \int Q_\phi(z|x) \biggl[\ -\frac{1}{2} \log (2\pi\sigma^2_\phi(x)) - \frac{(z - \mu_\phi(x))^2}{2\sigma^2_\phi(x)} \\
+  &amp;\qquad\qquad\qquad  - \left( -\frac{1}{2} \log 2\pi - \frac{z^2}{2} \right) \ \biggr] \\\\
+  &amp;= \frac{1}{2} \int Q_\phi(z|x) \biggl[ -\log \sigma^2_\phi(x) - \frac{(z - \mu_\phi(x))^2}{\sigma^2_\phi(x)} + z^2 \biggr] \\\\
+  &amp;= \frac{1}{2} \biggl( -\log \sigma^2_\phi(x) - 1 + \mu^2_\phi(x) + \sigma^2_\phi(x) \biggr)
+  \end{aligned}
+}
+\]</span></p>
+<p>In the last step, I used the relationship: E[z<sup>2</sup>] = μ<sup>2</sup> + σ<sup>2</sup>.</p>
+<p>For a VAE with J independent latent variables, we sum this value from all dimensions:</p>
+<p><span class="math display">\[
+D_{KL}(Q_\phi(z|x) \| P_\theta(z)) = \frac{1}{2} \sum_{j=1}^{J} \biggl( -\log \sigma^2_{\phi_j}(x) - 1 + \mu^2_{\phi_j}(x) + \sigma^2_{\phi_j}(x) \biggr)
+\]</span></p>
+<p>This equation measures how much the encoder’s predictions deviate from the standard normal prior. Minimizing this KL divergence during training encourages the encoder’s predicted distributions to closely align with the standard normal distribution, facilitating a structured latent space. By estimating the latent distribution for each image across large datasets, the VAE aligns its representations with the designed latent structure.</p>
+<p>More intuitively, we use the KL divergence to force the distribution of latent variables to be standard normal so that we can sample latent variables from the standard normal distribution. As such, it is included in the loss function to improve the similarity between the distribution of latent variables and the standard normal distribution. In this setup, the prior distribution is less as our initial guess and more as a desired shape or structure for our latent space.</p>
+<p>So, what do VAEs do with the estimated latent distribution parameters during training?</p>
+<p>VAEs employ a unique strategy in their latent space. Instead of learning a fixed representation for each image, they understand a range of possible representations by sampling different points around the mean. This sampling process is fundamental to the VAE’s generative capabilities.</p>
+<p>During the encoding phase, the VAE estimates the latent variable distribution for an image. However, the broader goal isn’t just to represent existing images. We want to use this latent space to generate new ones. If the VAE only relied on the mean value, it might limit the diversity of the latent space and hinder the generation of varied images. Sampling from the estimated latent distributions ensures a well-populated and continuous latent space, reinforcing the VAE’s strength as a generative model.</p>
+<p>However, there’s a hitch. The sampling operation is inherently non-differentiable, which poses a challenge for backpropagation. Thankfully, the reparameterization trick (the topic of the next section) addresses it, allowing gradients to flow through this non-differentiable step.</p>
+<p>In essence, by nudging the encoder’s outputs to fit a predefined distribution, VAEs sculpt a structured latent space, paving the way for robust sampling and the generation of diverse data points.</p>
+<p>In essence, by nudging the encoder’s outputs to fit a predefined distribution, VAEs sculpt a structured latent space, paving the way for robust sampling to generate diverse images.</p>
+</section>
+<section id="the-reparameterization-trick-enabling-gradient-flow-in-vaes" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="the-reparameterization-trick-enabling-gradient-flow-in-vaes"><span class="header-section-number">2.3</span> The Reparameterization Trick: Enabling Gradient Flow in VAEs</h3>
+<p>In our discussion so far, we’ve looked at the VAE through the lens of a Directed Acyclic Graph (DAG) that captures the probabilistic dependencies between variables. This perspective is crucial for understanding the generative process and the relationships between the encoder, latent variables, and decoder.</p>
+<p><img src="images/vae-x-encoder-z-decoder-x-dash.png" class="img-fluid"></p>
+<p>However, when training the VAE, we must shift our viewpoint slightly.</p>
+<p>Training a VAE, like any deep learning model, involves optimizing a loss function using gradient-based methods. That requires us to compute gradients of the loss with respect to the model’s parameters. In this context, we should consider the VAE as a computational graph where nodes represent operations and edges represent the flows of data and gradients. So, we need to think about both ways, in feed-forward and back-propagation steps.</p>
+<p>As mentioned earlier, a challenge arises when we sample latent variables. Sampling is a stochastic operation and is inherently non-differentiable. That means that we can’t directly compute gradients through the sampling step, which poses a problem for backpropagation, the primary algorithm used to train deep neural networks.</p>
+<p>Enter the <strong>reparameterization trick</strong>.</p>
+<p>The reparameterization trick is a clever workaround that allows us to bypass the non-differentiability of the sampling step. Instead of sampling from the distribution predicted by the encoder, we sample from a standard normal distribution and then shift and scale the sample using the mean and variance predicted by the encoder.</p>
+<p><span class="math display">\[
+z = \mu + \sigma \odot \epsilon
+\]</span></p>
+<p>Here, ⊙ denotes element-wise multiplication. This reparameterization allows us to separate the stochasticity from the parameters we want to optimize. The randomness is now in ϵ, which doesn’t depend on μ or σ, allowing gradients to flow through μ and σ during backpropagation.</p>
+<p>In summary, the reparameterization trick transforms the optimization problem into one in which the randomness is external to the computational graph, enabling gradient-based optimization methods to work. It is a vital aspect of VAEs, allowing them to learn efficiently using standard deep learning frameworks and optimization techniques.</p>
+<p>Now that we’ve discussed the encoder’s role and the ingenious reparameterization trick, our next focus is the decoder. This component of the VAE architecture takes the sampled latent variables and reconstructs the input data, playing a vital role in the VAE’s generative capabilities.</p>
+</section>
+<section id="the-decoder-reconstructing-images-from-latent-representations" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="the-decoder-reconstructing-images-from-latent-representations"><span class="header-section-number">2.4</span> The Decoder: Reconstructing Images from Latent Representations</h3>
+<p>The decoder in a VAE is responsible for translating the latent variables back into the original data space. In the context of images, this means taking the sampled latent variables and producing an image x’ that closely resembles the original input x.</p>
+<p><img src="images/vae-z-decoder-x-dash.png" class="img-fluid"></p>
+<p>At its core, the decoder is a neural network designed to do the opposite of what the encoder does. In more straightforward terms, it transforms the condensed latent vector into a complete image.</p>
+<p>The process typically begins with a fully connected layer that takes the latent vector z as input and produces a tensor of suitable shape. This tensor then goes through a set of upsampling layers. For example, these upsampling layers may consist of <a href="../../blog/2017/2017-11-14-up-sampling-with-transposed-convolution/" target="_blank">transposed convolution</a> layers that progressively enlarge the tensor’s spatial dimensions until they match the desired image size.</p>
+<p>In essence, the decoder’s main aim is to create an image x′ that closely resembles the original image x. To achieve this, it focuses on maximizing the likelihood P<sub>θ</sub>(x|z) of the observed data x given the latent variables z. The greater this likelihood, the more proficient the decoder becomes at reconstructing the original data from the latent space.</p>
+<p>Considering that P<sub>θ</sub>(x|z) follows a Gaussian distribution with a mean x’ (the decoder’s output) and a fixed variance σ<sup>2</sup>, we can represent the likelihood of the entire image as the product of likelihoods of individual pixels:</p>
+<p><span class="math display">\[
+P_\theta(x|z) = \prod_{i=1}^D P_\theta(x_i|z)
+\]</span></p>
+<p>where <em>D</em> is the number of pixels in one image.</p>
+<p>The Gaussian likelihood represents the likelihood of the original data x, given this average reconstruction x′ and the assumed constant variance σ<sup>2</sup>. This variance reflects the inherent uncertainty or noise in the process of reconstruction.</p>
+<p>By taking the logarithm of both sides, we have:</p>
+<p><span class="math display">\[
+\log P_\theta(x|z) = \sum_{i=1}^D \log P_\theta(x_i|z)
+\]</span></p>
+<p>Expanding the log-likelihood for each pixel based on our Gaussian assumption:</p>
+<p><span class="math display">\[
+\log P_\theta(x_i|z) = - \frac{1}{2\sigma^2} (x_i - x'_i)^2 + \text{const}
+\]</span></p>
+<p>Summing up the log-likelihoods for all pixels, we get:</p>
+<p><span class="math display">\[
+\log P_\theta(x|z) = -\frac{1}{2\sigma^2} \sum_{i=1}^D (x_i - x'_i)^2 + D \times \text{const}
+\]</span></p>
+<p>When maximizing this log-likelihood with respect to x′ (or equivalently, minimizing the negative log-likelihood), the resulting optimization objective is directly proportional to the squared difference between x and x’. Given that σ<sup>2</sup> is fixed, this scaling factor doesn’t alter the optimization’s direction. As “D x const” includes terms that don’t depend on x and x’, we can ignore them in the optimization process.</p>
+<p>So, the key aspect within the log-likelihood is the squared difference (x<sub>i</sub> - x’<sub>i</sub>)<sup>2</sup> for every pixel. When we add up these squared differences for all pixels, we obtain the Sum of Squared Errors (SSE) between the original and reconstructed images:</p>
+<p><span class="math display">\[
+\text{SSE}(x, x') = \sum\limits_{i=1}^D (x_i - x'_i)^2
+\]</span></p>
+<p>where <em>D</em> is the total number of pixels in one image, and x<sub>i</sub> and x’<sub>i</sub> are the pixel values at the i-th position in the original and reconstructed images, respectively. This SSE quantifies the total squared differences between corresponding pixels in the two images, measuring the reconstruction quality. A lower SSE indicates that the reconstructed image x’ is closer to the original image x.</p>
+<p>Thus, the SSE can serve as a reconstruction loss for the VAE, directly emerging from our Gaussian likelihood assumption.</p>
+<p>During the training process with image data, the last layer of the decoder commonly employs a sigmoid activation function to ensure that the output pixel values lie in the range [0, 1], matching the normalized pixel values of the original images. If the images are normalized in the range [-1, 1], we can use tanh instead. Irrespective of the activation function, the reconstructed image x’ is then compared to the original input x to compute the reconstruction loss, guiding the training process to improve the decoder’s performance over time.</p>
+<p>The reconstruction loss also relates to the first term in the ELBO:</p>
+<p><span class="math display">\[
+\text{ELBO} = \mathbb{E}_{Q_\phi(z|x)}[\log P_\theta(x|z)] - D_{KL}(Q_\phi(z|x) || P_\theta(z))
+\]</span></p>
+<p>The first term represents the expected log-likelihood of the image data x given the latent variable z, predicted by Q<sub>ϕ</sub>(z|x). This term captures how well the decoder reconstructs the original data from the latent representation. We aim to maximize this term during training by minimizing the SSE loss.</p>
+<p>We’ve already discussed that the second term measures how well the encoder approximates the prior distribution of the latent variables z. So, we’ve covered the inner workings of VAEs. I hope you can see what’s going on behind the below diagram while training a VAE:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1312.6114" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Let’s dive into a basic training scenario using PyTorch to solidify our grasp of our discussed concepts.</p>
+</section>
+</section>
+<section id="training-a-simple-vae-the-concrete-example" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="training-a-simple-vae-the-concrete-example"><span class="header-section-number">3</span> Training a Simple VAE: The Concrete Example</h2>
+<p>Let’s go through a simple architecture for the encoder and decoder tailored for the MNIST dataset, consisting of grayscale images of size 28 x 28. We’ll start with the encoder and decoder classes.</p>
+<section id="encoder-implementation" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="encoder-implementation"><span class="header-section-number">3.1</span> Encoder Implementation</h3>
+<p>The encoder’s primary role is to capture the essential characteristics of the input data and compress it into a lower-dimensional latent space. Given an image, the encoder outputs two vectors: a mean and a log variance. These vectors define a Gaussian distribution in the latent space from which we can sample latent vectors.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Encoder(nn.Module):</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, latent_dim: <span class="bu">int</span>):</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Feature extraction</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.feature_extractor <span class="op">=</span> nn.Sequential(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">1</span>, <span class="dv">32</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(<span class="dv">2</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">32</span>, <span class="dv">64</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(<span class="dv">2</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            nn.Flatten(),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Estimate mean and log variance</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc1 <span class="op">=</span> nn.Linear(<span class="dv">64</span><span class="op">*</span><span class="dv">7</span><span class="op">*</span><span class="dv">7</span>, <span class="dv">400</span>)  <span class="co"># 7x7 feature maps</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc2_mean <span class="op">=</span> nn.Linear(<span class="dv">400</span>, latent_dim)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc2_logvar <span class="op">=</span> nn.Linear(<span class="dv">400</span>, latent_dim)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> (torch.Tensor, torch.Tensor):</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Feature extraction</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.feature_extractor(x)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Estimate mean and log variance</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> F.relu(<span class="va">self</span>.fc1(x))</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        mean <span class="op">=</span> <span class="va">self</span>.fc2_mean(x)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        logvar <span class="op">=</span> <span class="va">self</span>.fc2_logvar(x)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> mean, logvar</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Our encoder starts with a series of convolutional layers. These layers help in extracting hierarchical features from the input images. The architecture consists of two convolutional layers with ReLU activations. As we move through these layers, the spatial dimensions of the feature maps reduce due to the stride of 2, while the depth (number of channels) increases, capturing more complex features.</p>
+<p>After convolution operations, the feature maps are flattened and passed through fully connected layers. These layers produce the mean and log variance vectors. We use log variance (instead of the variance) because it’s more numerically stable and can represent both small and large values unboundedly.</p>
+</section>
+<section id="decoder-implementation" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="decoder-implementation"><span class="header-section-number">3.2</span> Decoder Implementation</h3>
+<p>The decoder takes the role of a generative network. Given a point in the latent space (either sampled or directly provided), the decoder’s job is to reconstruct the original data (in this context, an image) from this point.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Decoder(nn.Module):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, latent_dim: <span class="bu">int</span>):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Transform latent variables to a suitable shape for later upsampling</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc <span class="op">=</span> nn.Sequential(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(latent_dim, <span class="dv">64</span><span class="op">*</span><span class="dv">7</span><span class="op">*</span><span class="dv">7</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Upsampling with transposed convolutions</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder <span class="op">=</span> nn.Sequential(</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            nn.ConvTranspose2d(<span class="dv">64</span>, <span class="dv">32</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">2</span>, padding<span class="op">=</span><span class="dv">1</span>, output_padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>            nn.ConvTranspose2d(<span class="dv">32</span>, <span class="dv">1</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">2</span>, padding<span class="op">=</span><span class="dv">1</span>, output_padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            nn.Sigmoid(),  <span class="co"># Ensuring output is in [0,1]</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, z: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Transform latent variables to a suitable shape</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> <span class="va">self</span>.fc(z)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reshape z to (batch_size, 64, 7, 7)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> z.view(z.size(<span class="dv">0</span>), <span class="dv">64</span>, <span class="dv">7</span>, <span class="dv">7</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Upsampling for reconstruction</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        x_recon <span class="op">=</span> <span class="va">self</span>.decoder(z)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x_recon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Before upsampling, the decoder has a fully connected layer that takes the latent vector as input and expands it into a tensor that matches the dimensions needed for the transposed convolutional layers. This tensor serves as the starting point for the upsampling process.</p>
+<p>The decoder uses transposed convolution (sometimes called deconvolution) operations to perform the upsampling. These layers work inverse to the convolutional layers, gradually increasing the spatial dimensions while reducing the depth. The final transposed convolution layer uses a sigmoid activation to ensure that the pixel values of the reconstructed image are in the range [0, 1], matching the normalized pixel values of the input.</p>
+<p>Through these operations, the decoder learns to map any point in the latent space back to a valid image, effectively learning the inverse transformation of the encoder.</p>
+</section>
+<section id="vae-for-simultaneous-training" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="vae-for-simultaneous-training"><span class="header-section-number">3.3</span> VAE for Simultaneous Training</h3>
+<p>We can combine the Encoder and Decoder classes to build a VAE class for simultaneously training both the Encoder and Decoder.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VAE(nn.Module):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, latent_dim: <span class="bu">int</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Instantiate the Encoder and Decoder</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.encoder <span class="op">=</span> Encoder(latent_dim)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder <span class="op">=</span> Decoder(latent_dim)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> reparameterize(<span class="va">self</span>, mu: torch.Tensor, logvar: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Reparameterization trick to sample from the latent space."""</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        std <span class="op">=</span> torch.exp(<span class="fl">0.5</span> <span class="op">*</span> logvar)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        eps <span class="op">=</span> torch.randn_like(std)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> mu <span class="op">+</span> eps <span class="op">*</span> std</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> <span class="bu">tuple</span>:</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pass the input through the encoder</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        mu, logvar <span class="op">=</span> <span class="va">self</span>.encoder(x)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reparameterization step</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> <span class="va">self</span>.reparameterize(mu, logvar)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pass the latent vector through the decoder</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        x_reconstructed <span class="op">=</span> <span class="va">self</span>.decoder(z)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x_reconstructed, mu, logvar</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The forward implementation first encodes the input into the latent space, samples from this space using the reparameterization trick, then decodes the sample back into the data space.</p>
+</section>
+<section id="the-loss-function" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="the-loss-function"><span class="header-section-number">3.4</span> The Loss Function</h3>
+<p>During training, we’ll use the reconstruction loss (from the difference between the input and x_reconstructed) and the KL divergence (using mu and logvar) to compute the VAE’s loss function.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> loss_function(recon_x, x, mu, logvar):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute the VAE loss."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reconstruction (SSE) loss: explicitly summing over all dimensions</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    recon_loss <span class="op">=</span> F.mse_loss(recon_x, x, reduction<span class="op">=</span><span class="st">'sum'</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># KL divergence loss (regularization term)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    kld_loss <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> torch.<span class="bu">sum</span>(<span class="dv">1</span> <span class="op">+</span> logvar <span class="op">-</span> mu.<span class="bu">pow</span>(<span class="dv">2</span>) <span class="op">-</span> logvar.exp())</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Average per image</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    batch_size <span class="op">=</span> x.size(<span class="dv">0</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (recon_loss <span class="op">+</span> kld_loss)<span class="op">/</span>batch_size</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><strong>Reconstruction Loss</strong> measures how well the decoder has reconstructed the original input. Using the mse_loss function with reduction=‘sum’ calculates the sum of the squared differences between the original and reconstructed images.</li>
+<li><strong>KL Divergence Loss</strong> act as a regularization term, ensuring that the latent space conforms to a standard normal distribution, aiding in generating new samples.</li>
+</ul>
+<p>The model’s goal during training is to minimize this combined loss, simultaneously improving its reconstruction ability and shaping the learned latent space into the standard normal distributions so that we can sample from it to generate new images.</p>
+</section>
+<section id="training-loop-of-vae" class="level3" data-number="3.5">
+<h3 data-number="3.5" class="anchored" data-anchor-id="training-loop-of-vae"><span class="header-section-number">3.5</span> Training Loop of VAE</h3>
+<p>Below is the main function that runs the training loop of VAE:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main():</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set device</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.cuda.is_available():</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="st">'cuda'</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> torch.backends.mps.is_available():</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="st">'mps'</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="st">'cpu'</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using </span><span class="sc">{}</span><span class="st"> device'</span>.<span class="bu">format</span>(device))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(device)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load data</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    transform <span class="op">=</span> transforms.ToTensor()</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    train_dataset <span class="op">=</span> datasets.MNIST(</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        root<span class="op">=</span><span class="st">'./data'</span>, </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        train<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        transform<span class="op">=</span>transform,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        download<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span><span class="dv">32</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize the VAE and optimizer</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> VAE(latent_dim<span class="op">=</span><span class="dv">2</span>).to(device)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Optimizer</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> optim.AdamW(model.parameters(), lr<span class="op">=</span><span class="fl">1.0e-3</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Train for multiple epochs</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        train_loss <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Training loop</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> batch_idx, (data, _) <span class="kw">in</span> <span class="bu">enumerate</span>(train_loader):</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>            <span class="co"># We only use images not labels</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> data.to(device)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Forward pass</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>            recon_batch, mu, logvar <span class="op">=</span> model(data)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Backward pass</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> loss_function(recon_batch, data, mu, logvar)        </span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Accumulate the loss for logging</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>            train_loss <span class="op">+=</span> loss.item()</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> batch_idx <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">'Train Epoch: </span><span class="sc">{}</span><span class="st"> [</span><span class="sc">{:5d}</span><span class="st">/</span><span class="sc">{:5d}</span><span class="st"> (</span><span class="sc">{:2.0f}</span><span class="st">%)] Loss: </span><span class="sc">{:8.4f}</span><span class="st">'</span>.<span class="bu">format</span>(</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>                    epoch, batch_idx <span class="op">*</span> <span class="bu">len</span>(data), <span class="bu">len</span>(train_loader.dataset),</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>                    <span class="fl">100.</span> <span class="op">*</span> batch_idx <span class="op">/</span> <span class="bu">len</span>(train_loader),</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>                    loss.item() <span class="op">/</span> <span class="bu">len</span>(data)))</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>        average_loss <span class="op">=</span> train_loss <span class="op">/</span> <span class="bu">len</span>(train_loader.dataset)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">'Epoch: </span><span class="sc">{}</span><span class="st"> Average loss: </span><span class="sc">{:.4f}</span><span class="st">'</span>.<span class="bu">format</span>(epoch, average_loss))</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Save the model</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    model_path <span class="op">=</span> <span class="st">'./vae_model.pth'</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    torch.save(model.state_dict(), model_path)</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">'__main__'</span>:</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    main()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Overall, the training loop is a straightforward implementation. However, it’s worth highlighting that I’m specifying the number of latent dimensions as 2 when initializing the VAE object. This choice isn’t arbitrary; it illustrates the VAE’s ability to compress data compactly using just two dimensions. It demonstrates the model’s efficiency and lets us visualize the image generation process in a 2D space later, making the complex process more tangible and understandable.</p>
+<p>To run the training, follow the below instruction to create a Python environment:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> vae_test</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> vae_test</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> venv venv</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> venv/bin/activate</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">--upgrade</span> pip</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install torch torchvision matplotlib</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The versions of the above dependencies at the time of writing is as follows:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">matplotlib</span><span class="op">=</span>=3.7.2</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">torch</span><span class="op">=</span>=2.0.1</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">torchvision</span><span class="op">=</span>=0.15.2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Save all the class definitions, the loss function, and the training loop in train.py, and run it to execute the training:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> train.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>After the training, we can generate new images.</p>
+</section>
+<section id="generating-random-new-images" class="level3" data-number="3.6">
+<h3 data-number="3.6" class="anchored" data-anchor-id="generating-random-new-images"><span class="header-section-number">3.6</span> Generating Random New Images</h3>
+<p>The below code generates random new images using the trained VAE model.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.utils <span class="im">import</span> make_grid</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming VAE is defined in the train.py</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> train <span class="im">import</span> VAE</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Create a new VAE instance and load the saved weights</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>latent_dim <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> VAE(latent_dim)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>model.load_state_dict(torch.load(<span class="st">'./vae_model.pth'</span>))</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Sample from the latent space (the standard normal) and generate images</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>num_samples <span class="op">=</span> <span class="dv">49</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> torch.randn(num_samples, latent_dim)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    images <span class="op">=</span> model.decoder(z)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Visualize the generated images in a grid</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> make_grid(images, nrow<span class="op">=</span><span class="dv">7</span>, padding<span class="op">=</span><span class="dv">1</span>, pad_value<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> grid.permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>)</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>plt.imshow(grid)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Randomly Generated Images'</span>)</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It loads the trained model and samples two values from the standard normal distributions to generate each new image.</p>
+<p>Save the above code in generate_new_images.py, and run it to generate sample images:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> generate_new_images.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output from the script:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/generate_new_images.png" class="img-fluid figure-img"></p>
+<figcaption>Randomly Generated Images after Training</figcaption>
+</figure>
+</div>
+<p>Given only two dimensions in the latent space, the VAE can generate MNIST-like images. Although some of the images are unclear, it clearly shows the ability of the VAE to generate new random images by sampling from the compressed latent space.</p>
+</section>
+<section id="exploring-the-2d-latent-space" class="level3" data-number="3.7">
+<h3 data-number="3.7" class="anchored" data-anchor-id="exploring-the-2d-latent-space"><span class="header-section-number">3.7</span> Exploring the 2D Latent Space</h3>
+<p>Now, let’s explore the latent space, scanning through a 2D grid of values in the latent space and observing how generated images change.</p>
+<p>Below is the Python code that achieves this exploration.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.utils <span class="im">import</span> make_grid</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming VAE is defined in the train.py</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> train <span class="im">import</span> VAE</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Create a new VAE instance and load the saved weights</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>latent_dim <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> VAE(latent_dim)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>model.load_state_dict(torch.load(<span class="st">'./vae_model.pth'</span>))</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Generate a 2D grid of values in the latent space and generate images</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>steps <span class="op">=</span> <span class="dv">14</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>latent_values <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>, steps)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>grid_z <span class="op">=</span> torch.tensor([[z1, z2] <span class="cf">for</span> z1 <span class="kw">in</span> latent_values <span class="cf">for</span> z2 <span class="kw">in</span> latent_values])</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    images <span class="op">=</span> model.decoder(grid_z)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Visualize the generated images in a 7x7 grid</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> make_grid(images, nrow<span class="op">=</span>steps, padding<span class="op">=</span><span class="dv">1</span>, pad_value<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> grid.permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>)</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>plt.imshow(grid)</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">'off'</span>)</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'2D Latent Space Exploration'</span>)</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Save the above code in explore_latent_space.py, and run it to generate sample images:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> explore_latent_space.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the output from the script:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/explore_latent_space.png" class="img-fluid figure-img"></p>
+<figcaption>Image Transformation Across 2D Latent Space</figcaption>
+</figure>
+</div>
+<p>The grid visually demonstrates how adjusting values within the 2D latent space leads to smooth transformations in the generated images. As you move across the grid, you can observe how small changes in the latent values create gradual variations in the images.</p>
+<p>This continuous relationship between the latent space and the generated images is a powerful feature of VAEs. Feel free to modify the code and explore how different dimensions in the latent space correspond to various aspects of the data.</p>
+<p>Having said that, I have a word of caution: using values far from the mean of the latent distribution (e.g., large positive or negative values) might lead to less clear reconstructions.</p>
+<p>While the latent space follows a standard normal distribution and is technically unbounded, the model primarily learns from the range of values that are frequent under this distribution, concentrated around the mean. Values far from the mean might not be well-represented in the model’s training, leading to less accurate reconstructions.</p>
+<p>Knowing the effective range of latent variables is crucial when employing VAEs as practical image-generation tools, such as image augmentation, to control the quality of the generated images and fully leverage the model’s capabilities.</p>
+<p>Enjoy the exploration!</p>
+</section>
+</section>
+<section id="references" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="references"><span class="header-section-number">4</span> References</h2>
+<ul>
+<li><a href="../../blog/2018/2018-11-06-kl-divergence-demystified/" target="_blank">KL Divergence Demystified</a></li>
+<li><a href="https://arxiv.org/abs/1312.6114" target="_blank">Auto-Encoding Variational Bayes</a><br>
+Diederik P Kingma, Max Welling</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

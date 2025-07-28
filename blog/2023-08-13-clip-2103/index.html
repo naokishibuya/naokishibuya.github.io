@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-08-13">
+
+<title>CLIP: Learning Transferable Visual Models From Natural Language Supervision (2021) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#teaching-computers-to-recognize-objects" id="toc-teaching-computers-to-recognize-objects" class="nav-link active" data-scroll-target="#teaching-computers-to-recognize-objects"><span class="header-section-number">1</span> Teaching Computers to Recognize Objects</a>
+  <ul class="collapse">
+  <li><a href="#the-traditional-approach" id="toc-the-traditional-approach" class="nav-link" data-scroll-target="#the-traditional-approach"><span class="header-section-number">1.1</span> The Traditional Approach</a></li>
+  <li><a href="#a-new-approach" id="toc-a-new-approach" class="nav-link" data-scroll-target="#a-new-approach"><span class="header-section-number">1.2</span> A New Approach</a></li>
+  <li><a href="#zero-shot-learning-with-language-supervision" id="toc-zero-shot-learning-with-language-supervision" class="nav-link" data-scroll-target="#zero-shot-learning-with-language-supervision"><span class="header-section-number">1.3</span> Zero-Shot Learning with Language Supervision</a></li>
+  </ul></li>
+  <li><a href="#the-structure-of-clip" id="toc-the-structure-of-clip" class="nav-link" data-scroll-target="#the-structure-of-clip"><span class="header-section-number">2</span> The Structure of CLIP</a>
+  <ul class="collapse">
+  <li><a href="#overall-approach" id="toc-overall-approach" class="nav-link" data-scroll-target="#overall-approach"><span class="header-section-number">2.1</span> Overall Approach</a></li>
+  <li><a href="#contrastive-language-image-pre-training" id="toc-contrastive-language-image-pre-training" class="nav-link" data-scroll-target="#contrastive-language-image-pre-training"><span class="header-section-number">2.2</span> Contrastive Language Image Pre-training</a></li>
+  <li><a href="#loss-calculation" id="toc-loss-calculation" class="nav-link" data-scroll-target="#loss-calculation"><span class="header-section-number">2.3</span> Loss Calculation</a></li>
+  <li><a href="#zero-shot-classifier-testing" id="toc-zero-shot-classifier-testing" class="nav-link" data-scroll-target="#zero-shot-classifier-testing"><span class="header-section-number">2.4</span> Zero-shot Classifier Testing</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">3</span> Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">CLIP: Learning Transferable Visual Models From Natural Language Supervision (2021)</h1>
+<p class="subtitle lead">Bridging the Gap Between Vision and Language - A Look at OpenAI’s CLIP Model</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Language Models</div>
+    <div class="quarto-category">Vision Transformer</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 13, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="CLIP: Learning Transferable Visual Models From Natural Language Supervision"></p>
+<p>Deep learning vision models traditionally relied on vast collections of labeled images, each tailored to recognize objects in a specific category or class. OpenAI’s approach, using images and natural language, offers an alternative that doesn’t necessitate such tailored examples. They developed a CLIP model that can recognize objects without needing individual training sets for each new object. Moreover, generative models like OpenAI’s DALLE-E and Stability AI’s Stable Diffusion integrate CLIP to encode input texts for text-to-image generation. It showcases the power of combining natural language processing with computer vision.</p>
+<p>This article will examine how CLIP works and what it brings to computer vision.</p>
+<section id="teaching-computers-to-recognize-objects" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="teaching-computers-to-recognize-objects"><span class="header-section-number">1</span> Teaching Computers to Recognize Objects</h2>
+<section id="the-traditional-approach" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="the-traditional-approach"><span class="header-section-number">1.1</span> The Traditional Approach</h3>
+<p>Traditionally, when we teach computers to recognize things like cats, dogs, horses, or other objects, we give them a massive collection of images with labels specifying what’s in each image. This method works well for those specified items, but what happens when we want the computer to recognize something new? It can become quite a challenge!</p>
+<p>Imagine you’re learning to identify different types of fruit, and all you have are images of apples, bananas, and oranges. If someone suddenly shows you a pineapple, you might be stumped! The same thing happens with computer vision models. They won’t be able to recognize a zebra if we train them only on cats, dogs, and horses.</p>
+</section>
+<section id="a-new-approach" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="a-new-approach"><span class="header-section-number">1.2</span> A New Approach</h3>
+<p>In the old way of doing things, if we wanted the computer to recognize a zebra, we’d have to collect many images of zebras and tell our vision model, “These are zebras.” That takes a lot of time and effort. Even worse, we need that for every new object we want our model to recognize.</p>
+<p>Researchers at OpenAI came up with an alternative approach.</p>
+<p>What if we give a vision model images and texts describing those images? This way, the computer can start understanding what things look like and how we talk about them. This new method uses a massive collection of images and sentences from the internet. The computer’s job is to match the correct sentence with the right images. Once the computer learns this matching game, it can recognize new things without additional images and labels.</p>
+<p>In other words, it obtains <strong>zero-shot learning</strong> capability.</p>
+</section>
+<section id="zero-shot-learning-with-language-supervision" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="zero-shot-learning-with-language-supervision"><span class="header-section-number">1.3</span> Zero-Shot Learning with Language Supervision</h3>
+<p>Zero-shot learning means a model can infer or classify objects or concepts it has never explicitly seen during training. It can generalize from the knowledge it has gained, identifying new objects or situations without direct prior experience.</p>
+<p>OpenAI researchers pre-trained a neural network called <strong>CLIP</strong> (<strong>C</strong>ontrastive <strong>L</strong>anguage-<strong>I</strong>mage <strong>P</strong>re-training) on datasets of (image, text) pairs. The objective is to predict which caption goes with which image so that the model learns image representations. The approach uses natural language supervision instead of human-annotated labels, enabling the model to generalize to many tasks without fine-tuning.</p>
+<p>So, how did OpenAI train the CLIP model to have zero-shot capabilities using natural language as supervision?</p>
+</section>
+</section>
+<section id="the-structure-of-clip" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="the-structure-of-clip"><span class="header-section-number">2</span> The Structure of CLIP</h2>
+<section id="overall-approach" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="overall-approach"><span class="header-section-number">2.1</span> Overall Approach</h3>
+<p>The real innovation of OpenAI’s CLIP model lies in its structure, which seamlessly integrates both images and texts into a common understanding. It does this by utilizing three key components:</p>
+<ul>
+<li>Image Encoder</li>
+<li>Text Encoder</li>
+<li>Shared Embedding Space</li>
+</ul>
+<p>OpenAI’s CLIP model simultaneously trains an image encoder and a text encoder to accurately predict the correct pairings of (image, text) within a shared embedding space, bridging the gap between visual understanding and natural language comprehension.</p>
+<p>The figure below explains the overall approach of CLIP:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1-1.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 (1) of <a href="https://arxiv.org/abs/2103.00020" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>As you can see in the figure, there are N images and N texts to match in the training batch. CLIP predicts which of the N x N possible (image, text) parings within the batch occurred.</p>
+<p>For the image encoder, they experimented with modified versions of ResNet-50 or Vision Transformer. They experimented with a modified version of the Transformer architecture for the text encoder.</p>
+<p>A shared embedding space for image and text is crucial because it allows the model to understand and relate visual information with natural language descriptions.</p>
+</section>
+<section id="contrastive-language-image-pre-training" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="contrastive-language-image-pre-training"><span class="header-section-number">2.2</span> Contrastive Language Image Pre-training</h3>
+<p>By mapping both images and texts into the same mathematical space, CLIP can perform two critical tasks:</p>
+<ul>
+<li>maximize the cosine similarity of the image and text embeddings of the N real pairs in the batch</li>
+<li>minimize the cosine similarity of the embeddings of the N(N - 1) incorrect pairings</li>
+</ul>
+<p>We refer to learning the above two objectives as contrastive learning since it emphasizes understanding the differences (or contrasts) between things. By maximizing the similarity between correct image-text pairs and minimizing the similarity between incorrect ones, the model learns to associate specific visual features with corresponding descriptive language.</p>
+<p>That shared understanding enables it to generalize and perform zero-shot learning, provided it can understand the texts and match them with corresponding images (and vice versa).</p>
+<p>They used 400 million (image, text) pairs from the internet and trained a neural network to predict which caption goes with which image. This large and diverse dataset allowed the model to learn from many examples, building a comprehensive understanding of visual and textual information.</p>
+<p>The resulting model performs well on various downstream tasks, showcasing the power of the CLIP model in handling complex recognition challenges without needing individual training sets for each new object.”</p>
+</section>
+<section id="loss-calculation" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="loss-calculation"><span class="header-section-number">2.3</span> Loss Calculation</h3>
+<p>Below is the pseudo-code of the CLIP’s core logic:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># image_encoder - ResNet or Vision Transformer</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># text_encoder - CBOW or Text Transformer</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># I[n, h, w, c] - minibatch of aligned images</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># T[n, l] - minibatch of aligned texts</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># W_i[d_i, d_e] - learned proj of image to embed</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># W_t[d_t, d_e] - learned proj of text to embed</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># t - learned temperature parameter</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># extract feature representations of each modality</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>I_f <span class="op">=</span> image_encoder(I) <span class="co">#[n, d_i]</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>T_f <span class="op">=</span> text_encoder(T)  <span class="co">#[n, d_t]</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># joint multimodal embedding [n, d_e]</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>I_e <span class="op">=</span> l2_normalize(np.dot(I_f, W_i), axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>T_e <span class="op">=</span> l2_normalize(np.dot(T_f, W_t), axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># scaled pairwise cosine similarities [n, n]</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>logits <span class="op">=</span> np.dot(I_e, T_e.T) <span class="op">*</span> np.exp(t)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># symmetric loss function</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> np.arange(n)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>loss_i <span class="op">=</span> cross_entropy_loss(logits, labels, axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>loss_t <span class="op">=</span> cross_entropy_loss(logits, labels, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> (loss_i <span class="op">+</span> loss_t)<span class="op">/</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The comments at the top describe the various components involved:</p>
+<ul>
+<li><code>I</code>: A batch of images.</li>
+<li><code>T</code>: A batch of aligned texts.</li>
+<li><code>W_i</code>: A learned projection matrix to transform image features into a shared embedding space.</li>
+<li><code>W_t</code>: A learned projection matrix to transform text features into the same shared embedding space.</li>
+<li><code>t</code>: A learned temperature parameter that scales the similarities in the embedding space.</li>
+</ul>
+<p>CLIP feeds images and texts to respective encoders to generate numerical feature vectors:</p>
+<ul>
+<li><code>I_f = image_encoder(I)</code>: A batch of image features.</li>
+<li><code>T_f = text_encoder(T)</code>: A batch of text features.</li>
+</ul>
+<p>CLIP projects these features into a shared embedding space:</p>
+<ul>
+<li><code>I_e = l2_normalize(np.dot(I_f, W_i), axis=1)</code>: Image embeddings in the shared embedding space.</li>
+<li><code>T_e = l2_normalize(np.dot(T_f, W_t), axis=1)</code>: Text embeddings in the shared embedding space.</li>
+</ul>
+<p>CLIP computes the cosine similarities between the image and text embeddings:</p>
+<ul>
+<li><code>logits = np.dot(I_e, T_e.T) * np.exp(t)</code>: Pairwise similarities between all images and texts in the batch.</li>
+</ul>
+<p><code>np.exp(t)</code> deserves some explanation. Let’s put <code>T = np.exp(t)</code> and call it a temperature parameter. <code>T</code> scales the logits and affects the results of the softmax operation.</p>
+<ul>
+<li>If <code>t</code> is positive, <code>T &gt; 1</code>. The resulting probability distribution by <code>softmax(logits)</code> will be softer (more uniform).</li>
+<li>If <code>t</code> is negative, <code>T &lt; 1</code>. The resulting probability distribution by <code>softmax(logits)</code> will be sharper (more peaked).</li>
+<li>If <code>t</code> is zero, <code>T = 1</code>. The logits are not scaled.</li>
+</ul>
+<p>The exponential of <code>t</code> is used because <code>t</code> is a learnable parameter that is unbounded (can be any value without any limits) while the temperature must be non-negative. This formulation gives the learning algorithm more flexibility to find an optimal value for the temperature parameter during training.</p>
+<p>If the temperature needs to be high (i.e., the probability distribution should be softer), the learned value of <code>t</code> can be positive. If the temperature needs to be low (i.e., the probability distribution should be sharper), the learned value of <code>t</code> can be negative. The temperature parameter is adaptable to the needs of the specific model and data without having to set it manually.</p>
+<p>CLIP calculates the loss to minimize the differences between the correct pairings and maximize the differences between incorrect pairings:</p>
+<ul>
+<li><code>labels = np.arange(n)</code>: Creates the true labels for the batch.</li>
+<li><code>loss_i = cross_entropy_loss(logits, labels, axis=0)</code>: Loss for the image alignment.</li>
+<li><code>loss_t = cross_entropy_loss(logits, labels, axis=1)</code>: Loss for the text alignment.</li>
+<li><code>loss = (loss_i + loss_t)/2</code>: The final symmetric loss function averages the loss over both modalities.</li>
+</ul>
+<p>So, minimizing the cross-entropy losses ensures maximizing the similarity of real pairs (as we maximize the logits for them) and minimizing the similarity of incorrect pairings (as we minimize the logits for them). It’s the essence of contrastive learning in the CLIP model.</p>
+<p>In summary, CLIP takes a batch of images and texts, encodes them, projects them into a shared embedding space, and then minimizes the dual loss to understand the correlations between images and texts. CLIP uses this understanding to perform tasks like zero-shot learning, where the model can recognize new objects based on the relationships it has learned.</p>
+</section>
+<section id="zero-shot-classifier-testing" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="zero-shot-classifier-testing"><span class="header-section-number">2.4</span> Zero-shot Classifier Testing</h3>
+<p>After pre-training, the OpenAI researchers created a zero-shot classifier by embedding the label descriptions from the test dataset, as demonstrated in the following image:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 (2) and (3) of <a href="https://arxiv.org/abs/2103.00020" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>So, in the zero-shot classification setup, the labels of the target dataset (i.e., the classes you want to classify the images into) are expressed in natural language. They use the text encoder of CLIP to embed these descriptions into the shared embedding space. Also, the image encoder of CLIP embeds the images from the test dataset into the shared embedding space. The model measures each test image’s similarity to the target classes’ embedded descriptions by computing the cosine similarity between the image’s embedding and the embeddings of the text descriptions.</p>
+<p>This approach has the advantage of not needing to fine-tune the model for specific classification tasks. Since it can understand the relationships between images and texts, it can generalize to new tasks without requiring task-specific training data. It allows the model to recognize new objects as long as it can understand the text descriptions and match them with corresponding images, and vice versa. CLIP selects the predicted class for each image by the similarity between the text and the image in the shared embedding space.</p>
+<p>OpenAI benchmarked the zero-shot transfer performance of CLIP on over 30 existing datasets, finding the model competitive with prior task-specific supervised models.</p>
+<p>The below figure shows that a 63 million parameter transformer language model, which already uses twice the compute of its ResNet-50 image encoder, learns to recognize ImageNet classes three times slower than a much simpler baseline that predicts a bag-of-words encoding of the same text.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of <a href="https://arxiv.org/abs/2103.00020" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The below figure shows that zero-shot CLIP is more robust to distribution shift than ResNet 101.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-13-right.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 13 (right) of <a href="https://arxiv.org/abs/2103.00020" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Zero-shot CLIP performs well on ImageNet and other datasets, while ResNet 101 only performs on par with ImageNet and much worse on other datasets. Therefore, the zero-shot capabilities of CLIP provide a significant advantage over traditional models like ResNet 101. While ResNet 101 may perform well on specific tasks such as ImageNet classification, its performance may degrade on other datasets or tasks that it was not explicitly trained for. In contrast, CLIP’s zero-shot learning ability allows it to generalize across various tasks and datasets without needing specific training for each one.</p>
+<p>The comparison between zero-shot CLIP and ResNet 101 highlights the importance of models that can adapt and perform across various domains without requiring task-specific training, opening new possibilities in AI research and applications.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">3</span> Conclusion</h2>
+<p>The OpenAI’s CLIP model represents an advancement in computer vision, enabling more adaptable object recognition through zero-shot learning.</p>
+<p>This generalization capability makes CLIP a more versatile and robust model, suitable for a wide range of applications beyond just image classification. Integrating CLIP in models like DALL-E and Stable Diffusion for text-to-image synthesis is a testament to its flexibility and potential in bridging the gap between language and vision.</p>
+</section>
+<section id="references" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="references"><span class="header-section-number">4</span> References</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2103.00020" target="_blank">Learning Transferable Visual Models From Natural Language Supervision</a><br>
+Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, Ilya Sutskever<br>
+OpenAI<br>
+<a href="https://github.com/OpenAI/CLIP" target="_blank">GitHub</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkSelectors = [
+        'a.nav-link',
+        'a.quarto-grid-link',
+        '.quarto-category a',
+        // Add more selectors here as needed
+    ];
+
+    function openLinksInNewTab() {
+        linkSelectors.forEach(selector => {
+            const links = document.querySelectorAll(selector);
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+            });
+        });
+    }
+    openLinksInNewTab();
+
+    // Start observing the entire document body and its descendants
+    const observer = new MutationObserver(openLinksInNewTab);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
