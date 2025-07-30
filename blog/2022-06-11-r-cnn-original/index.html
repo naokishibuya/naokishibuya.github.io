@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-06-11">
+
+<title>R-CNN: Region-based Convolutional Neural Network – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#ross-girshick" id="toc-ross-girshick" class="nav-link active" data-scroll-target="#ross-girshick"><span class="header-section-number">1</span> Ross Girshick</a></li>
+  <li><a href="#r-cnn-at-a-glance" id="toc-r-cnn-at-a-glance" class="nav-link" data-scroll-target="#r-cnn-at-a-glance"><span class="header-section-number">2</span> R-CNN at a Glance</a></li>
+  <li><a href="#input-image" id="toc-input-image" class="nav-link" data-scroll-target="#input-image"><span class="header-section-number">3</span> Input Image</a></li>
+  <li><a href="#region-proposals" id="toc-region-proposals" class="nav-link" data-scroll-target="#region-proposals"><span class="header-section-number">4</span> Region Proposals</a></li>
+  <li><a href="#cnn-feature-extraction" id="toc-cnn-feature-extraction" class="nav-link" data-scroll-target="#cnn-feature-extraction"><span class="header-section-number">5</span> CNN Feature Extraction</a></li>
+  <li><a href="#svm-classification" id="toc-svm-classification" class="nav-link" data-scroll-target="#svm-classification"><span class="header-section-number">6</span> SVM Classification</a></li>
+  <li><a href="#nms-non-maximum-suppression" id="toc-nms-non-maximum-suppression" class="nav-link" data-scroll-target="#nms-non-maximum-suppression"><span class="header-section-number">7</span> NMS (Non-Maximum Suppression)</a></li>
+  <li><a href="#good-results-with-complex-pipeline" id="toc-good-results-with-complex-pipeline" class="nav-link" data-scroll-target="#good-results-with-complex-pipeline"><span class="header-section-number">8</span> Good Results with Complex Pipeline</a></li>
+  <li><a href="#comparison-with-overfeat-by-yann-lecun" id="toc-comparison-with-overfeat-by-yann-lecun" class="nav-link" data-scroll-target="#comparison-with-overfeat-by-yann-lecun"><span class="header-section-number">9</span> Comparison with OverFeat by Yann Lecun</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">10</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">R-CNN: Region-based Convolutional Neural Network</h1>
+<p class="subtitle lead">Extracting Features + SVM Classifier</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="R-CNN"></p>
+<p>R-CNN (Region-based Convolutional Neural Network) was an epoch-making model in 2013 which successfully combined CNN with classical computer vision techniques for object detection and broke the previous record. R-CNN is now an old model, but it’s essential to have knowledge of the origin in studying the subsequent development in object detection.</p>
+<p>If you are new to object detection, please refer to <a href="../../blog/2022-05-23-object-detection-vs-image-classification/" target="_blank">this article</a> that explains the difference between image classification and object detection. Otherwise, let’s get started with an overview of R-CNN.</p>
+<section id="ross-girshick" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="ross-girshick"><span class="header-section-number">1</span> Ross Girshick</h2>
+<p><a href="https://www.rossgirshick.info/" target="_blank">Ross Girshick</a>, the central figure behind R-CNN, was a postdoc at the University of California, Berkeley, at the time. Then, he worked for Microsoft for a while and now belongs to Facebook (Meta) AI Research (FAIR).</p>
+<p>Note: Yann LeCun <a href="https://twitter.com/ylecun/status/1532423599428186113" target="_blank">tweeted</a> that FAIR now stands for <strong>Fundamental</strong> AI Research.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/RossGirshick.jpg" class="img-fluid figure-img" style="width:25.0%"></p>
+<figcaption>Source: <a href="https://www.rossgirshick.info/" target="_blank">Ross Girshick</a></figcaption>
+</figure>
+</div>
+<p>In addition to R-CNN, Ross Girshick researched and developed <strong>Fast R-CNN</strong> and <strong>Faster R-CNN</strong>. He was involved in developing <strong>YOLO</strong> (first version only) with Joseph Redmon. He co-authored the paper for <strong>Mask R-CNN</strong> with Kaiming He (famous for <strong>Kaiming Weight Initialization</strong>, or <strong>He Weight Initialization</strong>). Later, he also participated in the Faster R-CNN project at Microsoft (and later moved to FAIR).</p>
+<p>Ross Girshick integrated convolutional neural networks (feature extraction) with existing computer vision techniques in object detection and achieved significant performance improvements over previous models.</p>
+</section>
+<section id="r-cnn-at-a-glance" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="r-cnn-at-a-glance"><span class="header-section-number">2</span> R-CNN at a Glance</h2>
+<p>R-CNN performs object detection according to the steps shown in the figure below.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1311.2524" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<ol type="1">
+<li>Input Image</li>
+<li>Region Proposals</li>
+<li>CNN Feature Extraction</li>
+<li>SVM Classification</li>
+</ol>
+<p>Finally, the post-processing performs <a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">NMS</a> (Non-Maximum Suppression).</p>
+<p>Let’s take a look at each step.</p>
+</section>
+<section id="input-image" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="input-image"><span class="header-section-number">3</span> Input Image</h2>
+<p>Below is an example of images from PASCAL VOC (object detection dataset).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/PASCAL-VOC-bicycle_03.jpeg" class="img-fluid figure-img"></p>
+<figcaption><a href="https://paperswithcode.com/dataset/pascal-voc" target="_blank">PASCAL VOC</a></figcaption>
+</figure>
+</div>
+<p>As an aside, the PASCAL VOC site is often inaccessible. Or maybe the server just happened to be down. In any case, I wasn’t able to open the site from time to time. If you want to get the PASCAL VOC dataset, you can use <a href="https://pjreddie.com/projects/pascal-voc-dataset-mirror/" target="_blank">this mirror</a> by Joseph Redmon, the developer of YOLO. According to him, the server of PASCAL VOC is often down, so he prepared a mirror. I believe researchers use <a href="https://cocodataset.org/#home" target="_blank">COCO</a> more than PASCAL VOC, so it may no longer be such an issue.</p>
+<hr>
+<p>Prior to the appearance of R-CNN, the object detection results with PASCAL VOC were sluggish. Then, in 2014, R-CNN made an impressive 30% (relative) improvement over the previous best.</p>
+<p>There was a historical background there. In 2012, <a href="https://papers.nips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf" target="_blank">AlexNet</a> won <a href="https://image-net.org/challenges/LSVRC/" target="_blank">ILSVRC</a> (The ImageNet Large Scale Visual Recognition Challenge) in image classification, achieving great success. Ross Girshick incorporated AlexNet into R-CNN and proved that deep learning is highly effective in object detection. In other words, CNN trained on images from ImageNet can work well as a feature extractor on images from PASCAL VOC.</p>
+<p>So, deep learning worked great with object detection, but Ross Girshick didn’t directly use it on input images.</p>
+<p>Many object detection models (before R-CNN) used various computer vision techniques. He combined CNN with classical methods instead of using deep learning end-to-end. For example, he used <strong>Selective Search</strong> to select interest regions.</p>
+<p>Let’s briefly look at it next.</p>
+</section>
+<section id="region-proposals" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="region-proposals"><span class="header-section-number">4</span> Region Proposals</h2>
+<p>The region proposal step selects about 2000 areas (bounding boxes) in the image where objects are likely to be. They chose the <strong>Selective Search</strong> method because it is easy to compare the performance with the previous research that uses the same method.</p>
+<blockquote class="blockquote">
+While R-CNN is agnostic to the particular region proposal method, we use selective search to enable a controlled comparison with prior detection work (e.g., [39, 41]).<cite>Source: <a href="http://www.huppelen.nl/publications/selectiveSearchDraft.pdf" target="_blank">paper</a></cite>
+</blockquote>
+<p>R-CNN is agnostic to region proposal methods because the region proposal step and the subsequent CNN feature extraction step are independent. It first selects regions and then applies CNN feature extraction to each region.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/SelectiveSearch-figure-2a.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Figure 2(a) of <a href="http://www.huppelen.nl/publications/selectiveSearchDraft.pdf" target="_blank">Selective Search for Object Recognition</a></figcaption>
+</figure>
+</div>
+<p>Since selected rectangle areas have various sizes, all areas are warped (resized) to a fixed size of 227 x 227 pixels. It ensures that the bounding box dimensions are constant and that the features extracted by the CNN layers all result in the exact dimensions.</p>
+</section>
+<section id="cnn-feature-extraction" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="cnn-feature-extraction"><span class="header-section-number">5</span> CNN Feature Extraction</h2>
+<p>As mentioned earlier, R-CNN uses CNN layers from AlexNet to extract features from selected and warped regions in images. At that time, AlexNet was a good choice since it topped the ILSVRC (ImageNet Large Scale Visual Recognition Challenge) in 2012, which became a famous model that triggered the rekindling of deep learning research fever. It was far behind second place and below in the competition. Since AlexNet, it has become mainstream to use deep learning for image classification. So, it was a matter of time before someone attempted to use it for object detection.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/AlexNet-figure-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of <a href="https://papers.nips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf" target="_blank">AlexNet</a></figcaption>
+</figure>
+</div>
+<p>R-CNN uses five convolutional layers and two fully connected layers in AlexNet to extract features from each area (227 x 227 pixels) into a 4096-dimensional vector. It then uses the features to classify the images in each area. It is transfer learning, where the final part is SVM (<a href="https://en.wikipedia.org/wiki/Support-vector_machine" target="_blank">support vector machine</a>) that makes the judgment for image classification. SVM was a widely used method, and they followed the same approach for the last classification step.</p>
+</section>
+<section id="svm-classification" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="svm-classification"><span class="header-section-number">6</span> SVM Classification</h2>
+<p>The image below outlines the process, including the part that employs SVM, which takes in extracted features to calculate a score for each class.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/RCNN-CVPR14.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption>Source: <a href="https://jhui.github.io/2017/03/15/Fast-R-CNN-and-Faster-R-CNN/" target="_blank">Jonathan Hui</a></figcaption>
+</figure>
+</div>
+<p>There is one SVM for each class. For example, one that identifies only dogs, one that identifies only cats, and so on. If you look at the rightmost part of the figure below, it will be easier to imagine how that works.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1311.2524" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Since one SVM can only judge the authenticity of one class, it has one SVM model per class. That sounds very slow, but it’s not that bad. Because they used a linear SVM kernel that uses a dot product between an SVM model’s weights and an input feature vector, they can use one SVM weight matrix of 4096 x N, where N is the number of classes.</p>
+<p>Moreover, they can batch all input features from 2000 regions into an input feature matrix of 2000 x 4096. So, R-CNN can calculate scores with a matrix-matrix product between all the SVM models’ weights and the batched input features in one shot. It is similar to a fully connected layer in modern deep learning.</p>
+<p>With the steps up to this point, R-CNN completes image classification for each selected area. Next, object detection requires post-processing.</p>
+</section>
+<section id="nms-non-maximum-suppression" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="nms-non-maximum-suppression"><span class="header-section-number">7</span> NMS (Non-Maximum Suppression)</h2>
+<p>NMS, which is post-processing, is a well-known computer vision method and is not unique to R-CNN. Simply put, it is a way to eliminate overlapping predictions to leave the most probable bounding box. For example, the below figure shows overlapping bounding boxes for an object (“dog” in this case).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/NMS-bounding-boxes.png" class="img-fluid figure-img" style="width:25.0%"></p>
+<figcaption>NMS: bounding boxes</figcaption>
+</figure>
+</div>
+<p>NMS removes overlapping bounding boxes using the score (confidence) calculated by SVM models. It eliminates the predictions with lower scores and leaves the most confident prediction.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/NMS-confidence-scores.png" class="img-fluid figure-img" style="width:30.0%"></p>
+<figcaption>NMS: confidence scores</figcaption>
+</figure>
+</div>
+<p>Effectively, it will leave one prediction per object (depending on the accuracy of bounding box prediction and confidence score).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/NMS-filtering.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>NMS: filtering</figcaption>
+</figure>
+</div>
+<p>For more details, I’ve written <a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">an article</a> that explains it in detail here, but here is a short overview of NMS.</p>
+</section>
+<section id="good-results-with-complex-pipeline" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="good-results-with-complex-pipeline"><span class="header-section-number">8</span> Good Results with Complex Pipeline</h2>
+<p>R-CNN achieved a significant performance (<a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP</a>) improvement compared to previous models. However, from today’s point of view, it is undeniable that the model uses hybrid mechanisms. As a result, it was slow. It was much slower than the R-CNN successors and YOLO that appeared later.</p>
+<p>In addition, it is laborious and time-consuming to train each part of the model separately. If you’ve read this far, you’ll likely come up with various ways to improve it. That is because we are looking from the future standpoint. On the other hand, the researchers at that time were working hard to improve the methods from the past. We can see various trials and efforts in the R-CNN paper.</p>
+<p>For example, the model has an additional bounding box regression step to adjust the position and size of each area selected by Selective Search:</p>
+<blockquote class="blockquote">
+After scoring each selective search proposal with a class-speciﬁc detection SVM, we predict a new bounding box for the detection using a class-speciﬁc bounding-box regressor.<cite>Source: <a href="https://arxiv.org/abs/1311.2524" target="_blank">paper</a></cite>
+</blockquote>
+<p>So, R-CNN uses Selective Search to generate bounding boxes, performs CNN feature extraction on them, executes linear SVM classification, and then regresses bounding boxes for the predicted classes, adding one more step in the entire pipeline. As a result, the model becomes more complex and slower. It was much slower than the previous state-of-the-art (SOTA) in object detection.</p>
+</section>
+<section id="comparison-with-overfeat-by-yann-lecun" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="comparison-with-overfeat-by-yann-lecun"><span class="header-section-number">9</span> Comparison with OverFeat by Yann Lecun</h2>
+<p><a href="https://arxiv.org/abs/1312.6229" target="_blank">OverFeat</a> (Yann LeCun et al.) was the previous SOTA object detector that also used CNN. R-CNN beat OverFeat in terms of mAP. The below mAP results are with ILSVRC (ImageNet) 2013 detection test set.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-3-left.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3 of <a href="https://arxiv.org/abs/1311.2524" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Note: R-CNN BB means R-CNN with Bounding Box regression.</p>
+<p>However, it was nine times slower than OverFeat. So, what’s the difference between OverFeat and R-CNN? Ross Girshick says OverFeat is a particular case of R-CNN:</p>
+<blockquote class="blockquote">
+If one were to replace selective search region proposals with a multi-scale pyramid of regular square regions and change the per-class bounding-box regressors to a single bounding-box regressor, then the systems would be very similar (modulo some potentially signiﬁcant differences in how they are trained: CNN detection ﬁne-tuning, using SVMs, etc.). <cite>Source: <a href="https://arxiv.org/abs/1311.2524" target="_blank">paper</a></cite>
+</blockquote>
+<p>So, OverFeat is more straightforward and faster than R-CNN.</p>
+<p>In other words, R-CNN is more complex due to selective search that can predict bounding boxes of any size and bounding box regressors specialized for each class. In return, it is better in terms of mAP.</p>
+<p>Their next objective was to increase accuracy and speed, and they needed to make radical improvements to simplify the overall pipeline.</p>
+<p>As history shows, Ross Girshick et al.&nbsp;did precisely that to evolve R-CNN into Fast R-CNN and further improve it into Faster R-CNN.</p>
+</section>
+<section id="references" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="references"><span class="header-section-number">10</span> References</h2>
+<ul>
+<li><a href="../../blog/2022-06-21-fast-r-cnn-213/" target="_blank">Fast R-CNN: Understanding why it’s 213 Times Faster than R-CNN and More Accurate</a></li>
+<li><a href="../../blog/2022-05-23-object-detection-vs-image-classification/" target="_blank">Object Detection vs Image Classification</a></li>
+<li><a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">Non-Maximum Suppression (NMS)</a></li>
+<li><a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mean Average Precision (mAP)</a></li>
+<li><a href="https://arxiv.org/abs/1311.2524" target="_blank">Rich feature hierarchies for accurate object detection and semantic segmentation</a><br>
+<a href="https://www.rossgirshick.info" target="_blank">Ross Girshick</a></li>
+<li><a href="http://vision.stanford.edu/teaching/cs231b_spring1415/slides/ssearch_schuyler.pdf" target="_blank">Selective Search for Object Recognition (slides)</a><br>
+<a href="http://disi.unitn.it/~uijlings/MyHomepage/index.php#page=projects1" target="_blank">J.R.R. Uijlings</a></li>
+<li><a href="https://jhui.github.io/2017/03/15/Fast-R-CNN-and-Faster-R-CNN/" target="_blank">Fast R-CNN and Faster R-CNN</a><br>
+<a href="https://jhui.github.io/about/" target="_blank">Jonathan Hui</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

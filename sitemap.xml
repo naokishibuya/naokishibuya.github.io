@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-01-17-transformers-coding-details/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.754Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2022-07-26-yolo-version-1/index.html</loc>
+    <lastmod>2025-07-30T05:04:03.107Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2023-05-07-llama-2023-02/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.753Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2017-02-09-raspberry-pi-3-for-the-first-time/index.html</loc>
+    <lastmod>2025-07-30T04:59:08.536Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-10-18-mask-r-cnn-faster-r-cnn-mask-branch-2017/index.html</loc>
+    <lastmod>2025-07-30T05:06:57.003Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2023-01-30-why-gpt-icl/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.752Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2021-07-20-bayes-theorem-demystified/index.html</loc>
+    <lastmod>2025-07-30T04:53:27.966Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-07-31-ssd-single-shot-multibox-detector/index.html</loc>
+    <lastmod>2025-07-30T05:04:33.118Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/index.html</loc>
@@ -17,20 +33,40 @@
     <lastmod>2025-07-28T12:53:20.751Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-11-04-swin-transformer-2021/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2022-05-27-object-detection-mean-average-precision/index.html</loc>
+    <lastmod>2025-07-30T05:00:57.374Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2017-11-15-having-fun-with-deep-convolutional-gans/index.html</loc>
+    <lastmod>2025-07-30T04:59:02.763Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-11-27-longformer-2020/index.html</loc>
     <lastmod>2025-07-28T12:53:20.749Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-10-20-bleu-bi-lingual-evaluation-understudy/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2017-02-15-introduction-to-udacity-self-driving-car-simulator/index.html</loc>
+    <lastmod>2025-07-30T04:54:53.905Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2017-10-26-do-filters-dream-of-convolutional-cats/index.html</loc>
+    <lastmod>2025-07-30T04:54:53.947Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2020-10-04-constrained-optimization-demystified/index.html</loc>
     <lastmod>2025-07-28T12:53:20.748Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2018-10-28-cross-entropy-demystified/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.747Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2019-08-05-raspberry-pi-3-for-the-second-time/index.html</loc>
+    <lastmod>2025-07-30T04:59:01.480Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/index.html</loc>
     <lastmod>2025-07-28T12:53:20.746Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2021-10-12-word-embedding-lookup/index.html</loc>
+    <lastmod>2025-07-30T04:58:58.258Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2020-10-18-calculus-of-variations-demystified/index.html</loc>
@@ -41,23 +77,35 @@
     <lastmod>2025-07-28T12:53:20.743Z</lastmod>
   </url>
   <url>
+    <loc>https://naokishibuya.github.io/blog/2022-05-24-object-detection-intersection-over-union/index.html</loc>
+    <lastmod>2025-07-30T05:00:23.322Z</lastmod>
+  </url>
+  <url>
     <loc>https://naokishibuya.github.io/blog/2018-11-06-kl-divergence-demystified/index.html</loc>
     <lastmod>2025-07-28T12:53:20.741Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2017-01-28-sudoku-solver-by-peter-norvig/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.738Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2023-08-23-vae-2013/index.html</loc>
+    <lastmod>2025-07-30T05:22:50.074Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-08-15-vanishing-gradient-problem/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2022-07-11-faster-r-cnn-rpn/index.html</loc>
+    <lastmod>2025-07-30T05:03:19.213Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2021-09-13-temporal-convolutional-networks/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.737Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-01-31-transformers-evaluation-details/index.html</loc>
     <lastmod>2025-07-28T12:53:20.736Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2023-04-23-glu-gated-linear-unit-2016-lm-with-gcns/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2022-11-02-vit-vision-transformer-image-classifier-2020/index.html</loc>
     <lastmod>2025-07-28T12:53:20.735Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-09-20-recurrent-neural-networks/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/index.html</loc>
     <lastmod>2025-07-28T12:53:20.734Z</lastmod>
   </url>
   <url>
@@ -65,32 +113,48 @@
     <lastmod>2025-07-28T12:53:20.733Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2023-08-13-clip-2103/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2017-11-14-up-sampling-with-transposed-convolution/index.html</loc>
     <lastmod>2025-07-28T12:53:20.732Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-10-22-retinanet-focal-loss/index.html</loc>
+    <lastmod>2025-07-30T05:07:33.125Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2022-12-26-gpt-generative-pre-training-transformer-2018/index.html</loc>
     <lastmod>2025-07-28T12:53:20.731Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-12-30-gpt-2-2019/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2022-01-27-transformers-training-details/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.730Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2023-02-19-toolformer-2023/index.html</loc>
     <lastmod>2025-07-28T12:53:20.729Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-09-29-neural-machine-translation-with-attention-mechanism/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.728Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2022-06-21-fast-r-cnn-213/index.html</loc>
+    <lastmod>2025-07-30T05:02:35.157Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-05-01-pix2pix-cgan/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.727Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2022-06-01-object-detection-non-maximum-suppression/index.html</loc>
+    <lastmod>2025-07-30T05:01:31.564Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-10-31-transformers-positional-encoding/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2021-09-26-long-short-term-memory/index.html</loc>
     <lastmod>2025-07-28T12:53:20.726Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2017-03-01-pipelines-mind-maps-and-convolutional-neural-networks/index.html</loc>
+    <lastmod>2025-07-30T04:54:53.931Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2023-04-30-swiglu-2020/index.html</loc>
     <lastmod>2025-07-28T12:53:20.724Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2021-08-29-gradient-descent-optimizers/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.723Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2021-10-17-beam-search-for-machine-translation/index.html</loc>
@@ -98,63 +162,91 @@
   </url>
   <url>
     <loc>https://naokishibuya.github.io/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.722Z</lastmod>
+    <lastmod>2025-07-30T05:28:51.179Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-08-29-gradient-descent-optimizers/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.723Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2017-11-01-transforming-a-cat-into-an-art-by-convolutional-layers/index.html</loc>
+    <lastmod>2025-07-30T04:59:05.310Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-10-30-detr-object-detection-with-transformers-2020/index.html</loc>
+    <lastmod>2025-07-30T04:44:52.809Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2022-01-23-transformers-data-loader/index.html</loc>
     <lastmod>2025-07-28T12:53:20.725Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-09-26-long-short-term-memory/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2021-10-31-transformers-positional-encoding/index.html</loc>
     <lastmod>2025-07-28T12:53:20.726Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-05-01-pix2pix-cgan/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.727Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2021-08-31-matrix-decomposition-demystified/index.html</loc>
     <lastmod>2025-07-28T12:53:20.728Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2023-02-19-toolformer-2023/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2021-09-29-neural-machine-translation-with-attention-mechanism/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.728Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-12-30-gpt-2-2019/index.html</loc>
     <lastmod>2025-07-28T12:53:20.729Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-01-27-transformers-training-details/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.730Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2022-05-23-object-detection-vs-image-classification/index.html</loc>
+    <lastmod>2025-07-30T05:00:10.812Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2023-01-04-gpt-3-in-context-few-shot-learner-2020/index.html</loc>
     <lastmod>2025-07-28T12:53:20.731Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2017-11-14-up-sampling-with-transposed-convolution/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2023-08-13-clip-2103/index.html</loc>
     <lastmod>2025-07-28T12:53:20.732Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-02-07-bert-bidirectional-encoder-representation-from-transformers/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2017-11-01-how-to-reduce-image-noises-by-autoencoder/index.html</loc>
+    <lastmod>2025-07-30T04:59:06.710Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-09-08-fcn-2014/index.html</loc>
+    <lastmod>2025-07-30T05:06:13.936Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2021-09-20-recurrent-neural-networks/index.html</loc>
     <lastmod>2025-07-28T12:53:20.734Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-11-02-vit-vision-transformer-image-classifier-2020/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2023-04-23-glu-gated-linear-unit-2016-lm-with-gcns/index.html</loc>
     <lastmod>2025-07-28T12:53:20.735Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-01-31-transformers-evaluation-details/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2021-08-15-vanishing-gradient-problem/index.html</loc>
     <lastmod>2025-07-28T12:53:20.736Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2021-09-13-temporal-convolutional-networks/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.737Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2022-06-11-r-cnn-original/index.html</loc>
+    <lastmod>2025-07-30T05:02:04.074Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2023-08-23-vae-2013/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.740Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2017-01-28-sudoku-solver-by-peter-norvig/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.738Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-05-10-yolov5-transfer-learning-dogs-cats/index.html</loc>
+    <lastmod>2025-07-30T04:59:31.067Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2020-10-25-normal-distribution-demystified/index.html</loc>
     <lastmod>2025-07-28T12:53:20.742Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2017-11-03-understanding-generative-adversarial-networks/index.html</loc>
+    <lastmod>2025-07-30T04:59:04.154Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2021-11-15-transformers-self-attention/index.html</loc>
@@ -165,15 +257,31 @@
     <lastmod>2025-07-28T12:53:20.745Z</lastmod>
   </url>
   <url>
+    <loc>https://naokishibuya.github.io/blog/2021-07-27-monty-hall-problem-revisited/index.html</loc>
+    <lastmod>2025-07-30T04:58:49.517Z</lastmod>
+  </url>
+  <url>
     <loc>https://naokishibuya.github.io/blog/2023-04-12-adaptive-softmax-2016/index.html</loc>
     <lastmod>2025-07-28T12:53:20.746Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2020-10-04-constrained-optimization-demystified/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2018-10-28-cross-entropy-demystified/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.747Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2021-10-20-bleu-bi-lingual-evaluation-understudy/index.html</loc>
     <lastmod>2025-07-28T12:53:20.748Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2022-11-27-longformer-2020/index.html</loc>
+    <loc>https://naokishibuya.github.io/blog/2022-08-21-fpn-2016/index.html</loc>
+    <lastmod>2025-07-30T05:05:46.835Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2017-02-04-finding-lane-lines-on-the-road/index.html</loc>
+    <lastmod>2025-07-30T04:54:53.830Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-11-04-swin-transformer-2021/index.html</loc>
     <lastmod>2025-07-28T12:53:20.749Z</lastmod>
   </url>
   <url>
@@ -181,15 +289,35 @@
     <lastmod>2025-07-28T12:53:20.750Z</lastmod>
   </url>
   <url>
+    <loc>https://naokishibuya.github.io/blog/2022-05-08-yolov5-pytorch/index.html</loc>
+    <lastmod>2025-07-30T04:59:24.463Z</lastmod>
+  </url>
+  <url>
     <loc>https://naokishibuya.github.io/blog/2022-02-21-roberta-robustly-optimized-bert-apporach/index.html</loc>
     <lastmod>2025-07-28T12:53:20.751Z</lastmod>
   </url>
   <url>
-    <loc>https://naokishibuya.github.io/blog/2023-01-30-why-gpt-icl/index.html</loc>
-    <lastmod>2025-07-28T12:53:20.752Z</lastmod>
+    <loc>https://naokishibuya.github.io/blog/2022-10-24-yolov3-2018/index.html</loc>
+    <lastmod>2025-07-30T05:08:13.571Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-09-04-semantic-segmentation-with-deeplab-v3/index.html</loc>
+    <lastmod>2025-07-30T05:05:56.651Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-08-10-yolo-v2-yolo9000/index.html</loc>
+    <lastmod>2025-07-30T05:05:20.093Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2023-05-07-llama-2023-02/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.753Z</lastmod>
   </url>
   <url>
     <loc>https://naokishibuya.github.io/blog/2022-05-04-cyclegan-cycle-consistent-gan/index.html</loc>
     <lastmod>2025-07-28T12:53:20.753Z</lastmod>
+  </url>
+  <url>
+    <loc>https://naokishibuya.github.io/blog/2022-01-17-transformers-coding-details/index.html</loc>
+    <lastmod>2025-07-28T12:53:20.754Z</lastmod>
   </url>
 </urlset>

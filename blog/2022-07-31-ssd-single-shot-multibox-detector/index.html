@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-07-31">
+
+<title>SSD: Single Shot MultiBox Detector – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">1</span> Background</a>
+  <ul class="collapse">
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation"><span class="header-section-number">1.1</span> Motivation</a></li>
+  <li><a href="#ssd-vs.-yolo-v1-vs.-faster-r-cnn" id="toc-ssd-vs.-yolo-v1-vs.-faster-r-cnn" class="nav-link" data-scroll-target="#ssd-vs.-yolo-v1-vs.-faster-r-cnn"><span class="header-section-number">1.2</span> SSD vs.&nbsp;YOLO v1 vs.&nbsp;Faster R-CNN</a></li>
+  </ul></li>
+  <li><a href="#ssd-architecture" id="toc-ssd-architecture" class="nav-link" data-scroll-target="#ssd-architecture"><span class="header-section-number">2</span> SSD Architecture</a>
+  <ul class="collapse">
+  <li><a href="#vgg16-backbone" id="toc-vgg16-backbone" class="nav-link" data-scroll-target="#vgg16-backbone"><span class="header-section-number">2.1</span> VGG16 Backbone</a></li>
+  <li><a href="#more-bounding-boxes" id="toc-more-bounding-boxes" class="nav-link" data-scroll-target="#more-bounding-boxes"><span class="header-section-number">2.2</span> More Bounding Boxes</a></li>
+  <li><a href="#single-scale-feature-maps" id="toc-single-scale-feature-maps" class="nav-link" data-scroll-target="#single-scale-feature-maps"><span class="header-section-number">2.3</span> Single-scale Feature Maps</a></li>
+  <li><a href="#multi-scale-feature-maps" id="toc-multi-scale-feature-maps" class="nav-link" data-scroll-target="#multi-scale-feature-maps"><span class="header-section-number">2.4</span> Multi-scale Feature Maps</a></li>
+  <li><a href="#anchor-boxes" id="toc-anchor-boxes" class="nav-link" data-scroll-target="#anchor-boxes"><span class="header-section-number">2.5</span> Anchor Boxes</a></li>
+  <li><a href="#fully-convolutional-detectors" id="toc-fully-convolutional-detectors" class="nav-link" data-scroll-target="#fully-convolutional-detectors"><span class="header-section-number">2.6</span> Fully Convolutional Detectors</a></li>
+  <li><a href="#class-probabilities-per-bounding-box" id="toc-class-probabilities-per-bounding-box" class="nav-link" data-scroll-target="#class-probabilities-per-bounding-box"><span class="header-section-number">2.7</span> Class Probabilities per Bounding Box</a></li>
+  </ul></li>
+  <li><a href="#ssd-and-yolo-v2" id="toc-ssd-and-yolo-v2" class="nav-link" data-scroll-target="#ssd-and-yolo-v2"><span class="header-section-number">3</span> SSD and YOLO v2</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">SSD: Single Shot MultiBox Detector</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 31, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="SSD: Single Shot MultiBox Detector"></p>
+<p>In 2015, Wei Liu et al.&nbsp;published a paper called <a href="https://arxiv.org/abs/1512.02325" target="_blank">SSD: Single Shot MultiBox Detector</a>. SSD is faster than YOLO v1 (the first version) and more accurate than Faster R-CNN. This article explains what made SSD so good.</p>
+<section id="background" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="background"><span class="header-section-number">1</span> Background</h2>
+<section id="motivation" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="motivation"><span class="header-section-number">1.1</span> Motivation</h3>
+<p>The first author, <a href="https://www.linkedin.com/in/lwbiosoft/" target="_blank">Wei Liu</a>, was a North Carolina University student at Chapel Hill when they published the paper. Later, he joined <a href="https://www.nuro.ai/" target="_blank">Nuro</a> and eventually became the head of machine learning research there. The second author, <a href="https://www.linkedin.com/in/dragomiranguelov/" target="_blank">Dragomir Anguelov</a>, was a senior staff engineer at Google and became a senior director of perception in <a href="https://zoox.com/" target="_blank">Zoox</a> at the time of the paper. Later, he joined <a href="https://waymo.com/" target="_blank">Waymo</a> and became the head of research. Interestingly, the founders of Nuro were ex-Waymo engineers. Those were the days when self-driving-related companies flooded.</p>
+<p>It’s not hard to imagine they were interested in building a fast and accurate perception system for autonomous vehicles. The paper talks about region-based detectors being too slow for real-time applications:</p>
+<blockquote class="blockquote">
+While accurate, these approaches have been too computationally intensive for embedded systems and, even with high-end hardware, too slow for real-time applications.<cite>Source: <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></cite>
+</blockquote>
+<p>At that time, the most accurate detector was Faster R-CNN. YOLO v1 was faster but not as accurate. So, they wanted an object detection model that is more accurate than Faster R-CNN and faster than YOLO v1.</p>
+</section>
+<section id="ssd-vs.-yolo-v1-vs.-faster-r-cnn" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="ssd-vs.-yolo-v1-vs.-faster-r-cnn"><span class="header-section-number">1.2</span> SSD vs.&nbsp;YOLO v1 vs.&nbsp;Faster R-CNN</h3>
+<p>Increasing speed would come with decreased detection accuracy. For example, YOLO v1 became faster than Faster R-CNN because it did not have a separate region proposal step and the subsequent feature resampling stage. So, a single-stage detector (aka single-shot detector) was the way to go for the speed. However, at the same time, YOLO v1 was not as accurate as Faster R-CNN. It seemed region-based detectors had more edge if you need better accuracy.</p>
+<p>Most authors (Christian Szegedy, Scott Reed, Dumitru Erhan, and Dragomir Anguelov) previously worked on <a href="https://arxiv.org/abs/1412.1441" target="_blank">MultiBox</a> (2014), a region-based (two-stage) detector. However, they moved from region-based to single-shot detectors. The paper title says it all, “Single Shot MultiBox Detector”.</p>
+<p>Their new model SSD300 is faster than YOLO v1 and more accurate (higher <a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP</a> than Faster R-CNN. Below are the results with the Pascal VOC2007 test dataset (batch size = 1):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Model</th>
+<th style="text-align: center;">FPS (Frames Per Second)</th>
+<th style="text-align: center;">mAP</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">SSD300</td>
+<td style="text-align: center;">46</td>
+<td style="text-align: center;">74.3%</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">YOLO v1</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">63.4%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Faster R-CNN (VGG-16)</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">73.2%</td>
+</tr>
+</tbody>
+</table>
+<p>From here on, I’ll use the word SSD to mean SSD300 and YOLO to mean YOLO v1 to avoid cluttering, except when explicit naming makes the context clearer.</p>
+<p>Let’s look at SSD architecture and compare it with YOLO.</p>
+</section>
+</section>
+<section id="ssd-architecture" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="ssd-architecture"><span class="header-section-number">2</span> SSD Architecture</h2>
+<p>SSD, like YOLO, is a single-shot detector that uses feature maps of the entire input image to predict bounding boxes for each grid cell. However, the SSD architecture is significantly different, as shown in the below image:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of the <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<section id="vgg16-backbone" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="vgg16-backbone"><span class="header-section-number">2.1</span> VGG16 Backbone</h3>
+<p>YOLO used custom convolutional layers as the feature extractor (aka backbone). The accuracy was worse than Faster R-CNN. YOLO also had a variant that used a <a href="https://arxiv.org/abs/1409.1556" target="_blank">VGG-16</a> backbone. The accuracy was better than the standard YOLO but not as accurate as Faster R-CNN (VGG-16). Moreover, YOLO (VGG-16) was six times slower than YOLO. So, YOLO (VGG-16) was mainly for an experiment only.</p>
+<p>SSD uses a VGG-16 backbone and is faster than YOLO and more accurate than Faster R-CNN. Would that be because SSD uses a smaller input image size? They trained two models: SSD300 and SSD512, where input image sizes are 300 x 300 and 512 x 512, respectively. SSD512 is more accurate than SSD300. The below shows detection examples with SSD512 on <a href="https://cocodataset.org/" target="_blank">COCO</a>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-5.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Figure 5 of the <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>SSD300 was much faster than SSD512. So, smaller input resolution makes the model faster but less accurate. However, we can only say this when comparing two models using the same architecture. The logic does not apply when comparing models using different architectures.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-7.png" class="img-fluid figure-img"></p>
+<figcaption>Table 7 of the <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>SSD300 uses an input resolution of 300 x 300. YOLO uses 448 x 448. Faster R-CNN (VGG16) uses up to 1000 x 600. SSD300 is faster than the other two, but we cannot conclude that is due to the smaller input resolution. If anything, a smaller input resolution could be one factor. Most likely, that is not all.</p>
+<p>As for accuracy, SSD300 uses the smallest input resolution but is more accurate than the other two. The speed and accuracy depend on various architectural choices, including input resolution and backbone. Since we are comparing the three models with VGG-16 backbones, the backbone is not the primary deciding factor.</p>
+<p>It is actually due to what happens after the backbone, like how the model generates bounding boxes.</p>
+</section>
+<section id="more-bounding-boxes" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="more-bounding-boxes"><span class="header-section-number">2.2</span> More Bounding Boxes</h3>
+<p>The table suggests that the number of bounding boxes correlates with accuracy. SSD300 generates 8732 bounding boxes, Faster R-CNN (VGG 16) up to 6000, and YOLO only 98. So, SSD300 uses the smallest input resolution yet generates the highest number of bounding boxes. The table shows SSD300 is more accurate than Faster R-CNN (VGG 16).</p>
+<p>YOLO produces the fewest bounding boxes, and the accuracy was the worst of the three. Then, the question is, can we change YOLO by reducing the input resolution and using more bounding boxes per grid cell to achieve a faster and better version?</p>
+<p>That wouldn’t improve the accuracy dramatically because YOLO uses single-scale feature maps.</p>
+</section>
+<section id="single-scale-feature-maps" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="single-scale-feature-maps"><span class="header-section-number">2.3</span> Single-scale Feature Maps</h3>
+<p>YOLO applies convolutional layers that reduce the resolution from 448 x 448 to 7 x 7. The feature maps are coarse. It may be suitable for detecting large objects and background, but it may lack the details required to detect small objects. Hence, YOLO was not good at predicting bounding boxes, especially for small objects.</p>
+<p>YOLO generates 2 bounding boxes per grid cell, totaling only 98 (= 7 x 7 x 2) bounding boxes per image. It made YOLO’s recall rates (the fraction of ground truth object predicted) poor. Even if we increased the number of bounding boxes per grid cell, it wouldn’t improve the recall rate since the feature maps were coarse, and the detector would still miss smaller objects.</p>
+<p>To generate higher-resolution features, they would need to either increase the input image size or reduce the number of feature-extracting convolutional layers (reducing the number of max-pooling operations). The former would slow down the model, and the latter would reduce the accuracy for larger objects. It is impossible to generate simultaneously coarse and fine features because YOLO uses feature maps on a single scale.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2-bottom.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 (bottom) of the <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="multi-scale-feature-maps" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="multi-scale-feature-maps"><span class="header-section-number">2.4</span> Multi-scale Feature Maps</h3>
+<p>SSD uses multi-scale feature maps to extract coarse and fine features and generates more bounding boxes without making the input resolution too large. It has extra feature layers for finer to coarser features. Below red lines show the connection from feature maps of various scales to the detector.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2-bottom-annotated.png" class="img-fluid figure-img"></p>
+<figcaption>I added red lines to show feature maps used for detection.</figcaption>
+</figure>
+</div>
+<p>Larger feature maps represent finer features and smaller feature maps for coarser features. The last feature layer is 1 x 1, covering the entire image. SSD’s detector can reason about larger objects with coarser features and smaller objects with finer features.</p>
+</section>
+<section id="anchor-boxes" class="level3" data-number="2.5">
+<h3 data-number="2.5" class="anchored" data-anchor-id="anchor-boxes"><span class="header-section-number">2.5</span> Anchor Boxes</h3>
+<p>SDD uses anchor boxes similar to the ones found in Faster R-CNN. The anchors are a set of default bounding boxes at each grid cell location on which SSD regresses relative locations and sizes of objects. Unlike Faster R-CNN, SSD uses anchor boxes in feature maps of different resolutions. Each feature map can have a set of anchor boxes in different scales and aspect ratios.</p>
+<p>For example, the image below shows ground truth bounding boxes for a small object (cat) and a large object (dog).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1a.png" class="img-fluid figure-img" style="width:30.0%"></p>
+<figcaption>Figure 1 (a) of the <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>Below is an 8 x 8 feature map suitable for detecting the cat (a small object).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1b.png" class="img-fluid figure-img" style="width:30.0%"></p>
+<figcaption>Figure 1 (b) of the <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>Below is a 4 x 4 feature map suitable for detecting the dog (a big object).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1c.png" class="img-fluid figure-img" style="width:30.0%"></p>
+<figcaption>Figure 1 (c) of the <a href="https://arxiv.org/abs/1512.02325" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>The table below shows the number of bounding boxes generated for each feature map in SSD.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Feature Map Sizes (Grid Cells)</th>
+<th style="text-align: center;">Bounding Boxes per Grid Cell</th>
+<th style="text-align: center;">Number of Bounding Boxes per Feature Layer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">38 x 38</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">5776</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">19 x 19</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">2166</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">10 x 10</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">600</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">5 x 5</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">150</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3 x 3</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">36</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1 x 1</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>Total Detections </strong></td>
+<td style="text-align: center;"><strong>8732</strong></td>
+</tr>
+</tbody>
+</table>
+<p>SSD generates more bounding boxes while keeping the input size smaller than YOLO and Faster R-CNN. Unlike YOLO, it can predict small and large objects well and does not suffer a low recall rate.</p>
+</section>
+<section id="fully-convolutional-detectors" class="level3" data-number="2.6">
+<h3 data-number="2.6" class="anchored" data-anchor-id="fully-convolutional-detectors"><span class="header-section-number">2.6</span> Fully Convolutional Detectors</h3>
+<p>SSD is fully convolutional, including the detector, which uses a 3 x 3 x p kernel to generate <strong>(c+4)k</strong> detections per grid cell.</p>
+<p><img src="images/detection-kernel.png" class="img-fluid"></p>
+<ul>
+<li>p is the number of input channels.</li>
+<li>c is the number of classes (confidence scores).</li>
+<li>4 is for bounding box coordinates.</li>
+<li>k is the number of bounding boxes per grid cell.</li>
+</ul>
+<p>For a feature layer of size m x n with p channels, SSD generates <strong>(c+4)kmn</strong> outputs. So, larger input resolutions (i.e., SSD512) require more processing time. However, the convolutional kernel weights do not depend on the input size. On the contrary, the YOLO detector uses fully-connected layers requiring more weights for a larger input size. So, SSD’s detector executes faster and has fewer weights to train while having richer feature maps and producing more bounding boxes.</p>
+</section>
+<section id="class-probabilities-per-bounding-box" class="level3" data-number="2.7">
+<h3 data-number="2.7" class="anchored" data-anchor-id="class-probabilities-per-bounding-box"><span class="header-section-number">2.7</span> Class Probabilities per Bounding Box</h3>
+<p>Another difference is that SSD predicts class probabilities for each bounding box, whereas YOLO does it per grid cell. In other words, SSD can predict multiple classes based on the same grid cell location like Faster R-CNN can (and YOLO can’t).</p>
+<p><img src="images/bounding-box-example.png" class="img-fluid"></p>
+<hr>
+<p>Finally, SSD filters out most of the bounding boxes using a confidence threshold of 0.01. Then, it performs <a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">NMS</a> (non-maximum suppression) per class to eliminate less promising bounding boxes based on the <a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">IoU</a> (Intersection over Union) threshold of 0.45. It keeps the top 200 detections per image.</p>
+</section>
+</section>
+<section id="ssd-and-yolo-v2" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="ssd-and-yolo-v2"><span class="header-section-number">3</span> SSD and YOLO v2</h2>
+<p>The authors published the SSD paper only six months after YOLO v1 and about one year earlier than <a href="../../blog/2022-08-10-yolo-v2-yolo9000/" target="_blank">YOLO v2</a>. Yet, SSD already had similar ideas found in YOLO v2 that made the model faster and better. Some ideas came from their previous work on MultiBox. They probably got inspiration from YOLO v1 and Faster R-CNN, too. Researchers help each other improve their models by publishing papers and results.</p>
+<p>SSD models generate more bounding boxes than Faster R-CNN and YOLO. It uses anchor boxes of various scales and aspect ratios for many grid cell locations from the multi-scale feature maps. SSD runs faster than YOLO and is more accurate than Faster R-CNN (VGG16).</p>
+<p>Later, YOLO v2 followed a similar approach to SSD, using anchors and fully convolutional detectors, and achieved better and faster detection results than SSD.</p>
+</section>
+<section id="references" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="references"><span class="header-section-number">4</span> References</h2>
+<ul>
+<li><a href="../../blog/2022-07-26-yolo-version-1/" target="_blank">YOLO: You Look Only Once (The 1st Version)</a></li>
+<li><a href="../../blog/2022-08-10-yolo-v2-yolo9000/" target="_blank">YOLO v2: Better, Faster, Stronger</a></li>
+<li><a href="https://arxiv.org/abs/1512.02325" target="_blank">SSD: Single Shot MultiBox Detector</a><br>
+Wei Liu, Dragomir Anguelov, Dumitru Erhan, Christian Szegedy, Scott Reed, Cheng-Yang Fu, Alexander C. Berg</li>
+<li><a href="https://arxiv.org/abs/1412.1441" target="_blank">Scalable High Quality Object Detection</a><br>
+Christian Szegedy, Scott Reed, Dumitru Erhan, Dragomir Anguelov, Sergey Ioffe</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

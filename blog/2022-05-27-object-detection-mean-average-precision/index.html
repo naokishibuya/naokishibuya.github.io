@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-05-27">
+
+<title>Object Detection: mean Average Precision (mAP) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#iou-intersection-over-union" id="toc-iou-intersection-over-union" class="nav-link active" data-scroll-target="#iou-intersection-over-union"><span class="header-section-number">1</span> IoU (Intersection over Union)</a></li>
+  <li><a href="#precision" id="toc-precision" class="nav-link" data-scroll-target="#precision"><span class="header-section-number">2</span> Precision</a></li>
+  <li><a href="#recall" id="toc-recall" class="nav-link" data-scroll-target="#recall"><span class="header-section-number">3</span> Recall</a></li>
+  <li><a href="#average-precision-auc-pr" id="toc-average-precision-auc-pr" class="nav-link" data-scroll-target="#average-precision-auc-pr"><span class="header-section-number">4</span> Average Precision (AUC-PR)</a></li>
+  <li><a href="#calculating-precision-and-recall-with-confidence-pun-intended" id="toc-calculating-precision-and-recall-with-confidence-pun-intended" class="nav-link" data-scroll-target="#calculating-precision-and-recall-with-confidence-pun-intended"><span class="header-section-number">5</span> Calculating Precision and Recall with Confidence (Pun intended)</a></li>
+  <li><a href="#map-mean-average-precision" id="toc-map-mean-average-precision" class="nav-link" data-scroll-target="#map-mean-average-precision"><span class="header-section-number">6</span> mAP (mean Average Precision)</a>
+  <ul class="collapse">
+  <li><a href="#cococommon-objects-in-context" id="toc-cococommon-objects-in-context" class="nav-link" data-scroll-target="#cococommon-objects-in-context"><span class="header-section-number">6.1</span> COCO（Common Objects in Context）</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">7</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Object Detection: mean Average Precision (mAP)</h1>
+<p class="subtitle lead">Calculating mAP with Confidence</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 27, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Object Detection: Calculating mean Average Precision (mAP) with Confidence"></p>
+<p>We use <strong>mean Average Precision (mAP)</strong> when evaluating object detection models like <a href="../../blog/2022-05-08-yolov5-pytorch/" target="_blank">YOLO</a> and <a href="../../blog/2022-07-31-ssd-single-shot-multibox-detector/" target="_blank">SSD</a>. This article explains the objective of mAP and how to calculate it.</p>
+<p>In object detection, a model predicts the locations of objects and their classes (i.e., dog, cat, human, vehicle, etc.), where we need to judge whether or not the model has good accuracy across all classes. In other words, we don’t want our model to predict well only for dogs.</p>
+<p>If the training dataset supports 100 classes, we want our model to perform well for all 100 classes. We use mAP because it’s a single value representing how well a model performs across all classes, which explains the objective of the metric.</p>
+<p>As for how to calculate mAP, we can say (without going into details for now) that we calculate an AP (Average Precision) for each class and take the mean of AP values across all classes. To fully understand the metric, we need to understand <a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">IoU</a>, Precision, and Recall as we use them to calculate an AP for each class.</p>
+<p>Hopefully, it’s evident by now that AP is not an average of precisions. It’s a lot more involved. Furthermore, there are variants of mAP, making understanding mAP even harder. So, this article explains mainly the version that <a href="https://cocodataset.org/#detection-eval" target="_blank">COCO</a> uses but also touches upon why there are variants.</p>
+<p>We’ll go over the following details step by step.</p>
+<ul>
+<li>IoU (Intersection over Union)</li>
+<li>Precision</li>
+<li>Recall</li>
+<li>Average Precision (AUC-PR)</li>
+<li>mAP (mean Average Precision by COCO)</li>
+</ul>
+<p>Ultimately, we’ll discuss problems with mAP that have spawned different mAP versions.</p>
+<section id="iou-intersection-over-union" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="iou-intersection-over-union"><span class="header-section-number">1</span> IoU (Intersection over Union)</h2>
+<p>We’ll talk about only one class briefly to keep our discussion simple. For example, we assume our model detects one or more dog locations in an image—no cats or else. Like YOLO or SSD, we use a bounding box to specify a dog’s location. Any object detection training dataset provides ground truth bounding boxes.</p>
+<p>The below image shows a ground truth bounding box in red. A model would make predictions that may or may not have an overlap with the ground truth. For example, the blue bounding box in the below image represents a model’s prediction.</p>
+<p><img src="images/dog-IoU-good.png" class="img-fluid" style="width:50.0%"></p>
+<p>It is rare to have a perfect match between a prediction bounding box and the ground truth bounding box. So, an overlap like the above image should be pretty good. Quantitatively, we calculate IoU to measure the overlap.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/IoU.png" class="img-fluid figure-img" style="width:40.0%"></p>
+<figcaption>IoU</figcaption>
+</figure>
+</div>
+<p>IoU is a value ranging from 0 to 1. If IoU is 1, the prediction perfectly matches the ground truth. If IoU is 0, there is no overlap. If you’re curious, you may want to refer to <a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">another article</a> in that I explain how to calculate IoU.</p>
+<p>As I said, IoU rarely becomes 1, so we set a threshold for IoU. If IoU satisfies the threshold, we assume the prediction is correct. For example, if the IoU threshold is 0.5, any prediction with an IoU of 0.5 or more is correct.</p>
+<p>So, this IoU threshold is a hyperparameter that affects how many correct and incorrect predictions the model produces. If we used a too-low threshold, it would not produce meaningful evaluation results. Also, we should note that variations in thresholds (like 0.5, 06, 0.7, etc.) would impact benchmarks differently, which is one of the reasons why we have various versions of mAP.</p>
+<p>Once we have the number of correct and incorrect predictions, we need to summarize it to see how good/bad the model is on average for the class (“dog” in our example). It is the same concept in image classification, where we calculate precision and recall using the number of correct and incorrect predictions.</p>
+</section>
+<section id="precision" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="precision"><span class="header-section-number">2</span> Precision</h2>
+<p>Precision tells how many correct predictions over how many a model has predicted. For example, a model predicted four dog locations, but only two were correct. Therefore, the prediction is 2/4 = 50%.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/bbox-precision.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>What is the precision?</figcaption>
+</figure>
+</div>
+<p>Once again, <strong>correct</strong> means a prediction overlaps with the ground truth by the IoU threshold (say 0.5) or more. We call the number of correct predictions <strong>TP</strong> (True Positive) and the number of incorrect predictions <strong>FP</strong> (False Positive).</p>
+<p>For example, if a model predicts a dog’s location and it’s correct, we add 1 to the TP count. If a model predicts a dog’s location but is incorrect, we add 1 to the FP count. In the above, we count TP=2 and FP=2. Therefore, the prediction is defined as follows:</p>
+<p><span class="math display">\[
+\text{precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+\]</span></p>
+<p>However, there is a problem if we only use a precision score to train a model. The model may predict bounding boxes with a high confidence score for fewer locations as we ignore predictions with low confidence scores. Let’s assume the model produces two highly confident predictions, and both are correct. In such a case, we have TP=2 and FP=0, and the precision becomes 100%.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/bbox-less-recall.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>Is this high precision?</figcaption>
+</figure>
+</div>
+<p>But there are four dogs in the ground truth data. So, the model didn’t guess all dogs in the image. We need another metric (recall) to avoid the issue.</p>
+</section>
+<section id="recall" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="recall"><span class="header-section-number">3</span> Recall</h2>
+<p>Precision tells how many correct predictions over how many the ground truth gives. For example, a model predicted two dog locations, and both were correct. However, there are four dogs as per the ground truth. As such, the recall is 2/4 = 50%.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/bbox-precision.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>What is the recall?</figcaption>
+</figure>
+</div>
+<p>The locations a model has missed are where the model thought there was no dog. In other words, the model predicted “no dog” (negative), but there is a dog (positive). So, we call such cased FN (False Negative). If a model missed a dog from the ground truth, we would add 1 to FN.</p>
+<p>In the above image, there are two dogs that the model didn’t detect, so FN=2 even though the model detected two other dogs that account for TP=2. Using TP and FN, the recall is defined as follows:</p>
+<p><span class="math display">\[
+\text{recall} = \frac{\text{TP}}{\text{TP}＋\text{FN}}
+\]</span></p>
+<p>However, there is a problem if we only use a recall score to train a model. The model may predict a lot of bounding boxes with a high confidence score as the recall doesn’t care about FP (False Positive). If the model can reduce FN (False Negative) count, it can achieve a high recall score. The below image shows where a model predicted many bounding boxes, and the recall score becomes 100%.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/bbox-high-recall.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>Is this high recall?</figcaption>
+</figure>
+</div>
+<p>However, there are many FP (False Positives), meaning the precision is low. We don’t want that. In the above case, the precision is 50% (TP=4 and FP=4), while the recall is 100% (TP=4 and FN=0).</p>
+<p>So, we need to train a model using both the precision and recall metrics, keeping both reasonably high. It is where Average Precision comes to play.</p>
+</section>
+<section id="average-precision-auc-pr" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="average-precision-auc-pr"><span class="header-section-number">4</span> Average Precision (AUC-PR)</h2>
+<p>AP (Average Precision) is a metric that combines precision and recall. The name “Average Precision” does not mean an average of precisions. It uses both precision and recall, and they are related to each other (as seen in the previous section).</p>
+<p>Conceptually, the relationship is as shown below:</p>
+<p><img src="images/precision-curve1.png" class="img-fluid" style="width:40.0%"></p>
+<p>A model that produces fewer high-confidence bounding boxes tends to have high precision but low recall. A model that produces many high-confidence bounding boxes tends to have high recall but low precision. The relationship between precision and recall draws a curve downward towards the right.</p>
+<p>A well-balanced (precision and recall are high) model has a less steep slope, shown in blue below.</p>
+<p><img src="images/precision-curve2.png" class="img-fluid" style="width:40.0%"></p>
+<p>In other words, when the area under the curve is larger, precision and recall are both high, which means the model is robust. We use the term <strong>AUC</strong> for the <strong>Area Under the Curve</strong>. AUC for Precision and Recall is AUC-PR, ranging from 0 (worst) to 1 (best), indicating how robust a model is.</p>
+<p>However, AUC-PR has a problem because the actual curve is not smooth like the above images. Also, we don’t have infinite data points of precision-recall combinations. So, we need to use discrete intervals to calculate the area. Let’s look at an example of precision-recall data.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Recall Interval</th>
+<th style="text-align: center;">Precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0.0 ~ 0.2</td>
+<td style="text-align: center;">1.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0.2 ~ 0.4</td>
+<td style="text-align: center;">0.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0.4 ~ 0.6</td>
+<td style="text-align: center;">0.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0.6 ~ 0.8</td>
+<td style="text-align: center;">0.6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0.8 ~ 1.0</td>
+<td style="text-align: center;">0.5</td>
+</tr>
+</tbody>
+</table>
+<p>The above data has only one data point (precision score) per recall interval (for simplicity). The below table shows the same data in a bar graph.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/auc-ap.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>mean Average Precision</figcaption>
+</figure>
+</div>
+<p>We calculate AUC-AP (Average Precision) as follows:</p>
+<p><span class="math display">\[
+\text{AP} = 0.2 \times (1.0 + 0.9 + 0.7 + 0.6 + 0.5) = 0.74
+\]</span></p>
+<p>In other words, we are calculating the average of precisions from recall intervals, which is why we also call it Average Precision. In real scenarios, there would be multiple precisions within each recall interval. So, the graph would be more complicated.</p>
+<p>Let’s take a look at another example of precision-recall data.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Recall Interval</th>
+<th style="text-align: center;">Precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0.0 ~ 0.2</td>
+<td style="text-align: center;">1.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0.2 ~ 0.4</td>
+<td style="text-align: center;">0.9, 0.55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0.4 ~ 0.6</td>
+<td style="text-align: center;">0.7, 0.52</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0.6 ~ 0.8</td>
+<td style="text-align: center;">0.6, 0.55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0.8 ~ 1.0</td>
+<td style="text-align: center;">0.5</td>
+</tr>
+</tbody>
+</table>
+<p>The graph has become zigzag.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/auc-ap-zigzag.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>mean Average Precision</figcaption>
+</figure>
+</div>
+<p>Since the precision-recall relationship should ideally yield a downward slope toward the right, we assume that precision must never go up toward the right. So, we determine the maximum precision value for each recall section using the recall section and the sections to its right and use the maximum precision value for that recall section. That way, it keeps the graph slope going down to the right.</p>
+<p>Now, the table changes as follows:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Recall Interval</th>
+<th style="text-align: center;">Precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0.0 ~ 0.2</td>
+<td style="text-align: center;">1.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0.2 ~ 0.4</td>
+<td style="text-align: center;"><s>0.9, 0.55</s> → 0.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0.4 ~ 0.6</td>
+<td style="text-align: center;"><s>0.7, 0.52</s> → 0.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0.6 ~ 0.8</td>
+<td style="text-align: center;"><s>0.6, 0.55</s> → 0.6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0.8 ~ 1.0</td>
+<td style="text-align: center;">0.5</td>
+</tr>
+</tbody>
+</table>
+<p>The table becomes the same as the previous one (because I set it up that way), so the AP value is the same (0.74). This method ensures that the graph always goes down to the right and has the characteristic that it is not easily affected by the precision variation within each recall section.</p>
+<p>So far, we have used precision and recall scores for each recall interval, but we didn’t discuss how to calculate them. Next, we’ll discuss exactly that.</p>
+</section>
+<section id="calculating-precision-and-recall-with-confidence-pun-intended" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="calculating-precision-and-recall-with-confidence-pun-intended"><span class="header-section-number">5</span> Calculating Precision and Recall with Confidence (Pun intended)</h2>
+<p>I want to explain how to calculate precision and recall in more detail using the example given in Jonathan Hui’s article. We use a dataset with only five apples across all images. When a model predicts a location of an apple, it outputs a confidence score, ranging from 0 (least confident) and 1 (most confident). We sort the model’s predictions by the confidence score.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Order by Confidence</th>
+<th style="text-align: center;">True / False (Correct / Incorrect)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">T</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">T</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">F</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">F</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">F</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">T</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">T</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">F</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">F</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">T</td>
+</tr>
+</tbody>
+</table>
+<p>Now, we’ll calculate precision from top to bottom. We add 1 to TP when we see True and 1 to FP when we see False.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Order by Confidence</th>
+<th style="text-align: center;">True / False</th>
+<th style="text-align: center;">Precision (＝TP/(TP+FP))</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">1/1 = 1.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">2/2 = 1.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">2/3 = 0.67</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">2/4 = 0.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">2/5 = 0.40</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">3/6 = 0.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">4/7 = 0.57</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">4/8 = 0.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">4/9 = 0.44</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">5/10 = 0.50</td>
+</tr>
+</tbody>
+</table>
+<p>Because we scored by confidence score, the precision tends to slope down to the right with some zigzag moves, which is not easily avoidable. Next, we’ll calculate recall from top to bottom because there are five apples in the entire dataset.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Order by Confidence</th>
+<th style="text-align: center;">True / False</th>
+<th style="text-align: center;">Precision</th>
+<th style="text-align: center;">Recall (=TP/5)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">1.00</td>
+<td style="text-align: center;">1/5 = 0.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">1.00</td>
+<td style="text-align: center;">2/5 = 0.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">0.67</td>
+<td style="text-align: center;">2/5 = 0.4</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">2/5 = 0.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">0.40</td>
+<td style="text-align: center;">2/5 = 0.4</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">3/5 = 0.6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">0.57</td>
+<td style="text-align: center;">4/5 = 0.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">4/5 = 0.8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">0.44</td>
+<td style="text-align: center;">4/5 = 0.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">T</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">5/5 = 1.0</td>
+</tr>
+</tbody>
+</table>
+<p>Now, we know which precisions go to which recall interval. So, this is how to calculate precision and recall for one class.</p>
+</section>
+<section id="map-mean-average-precision" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="map-mean-average-precision"><span class="header-section-number">6</span> mAP (mean Average Precision)</h2>
+<p>So far, when thinking about AP, we talked only to one class (dog or apple). However, object detection usually deals with multiple (often many) classes. So, we need to calculate AP for each class and take an average (mean), which becomes mAP (mean Average Precision).</p>
+<section id="cococommon-objects-in-context" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="cococommon-objects-in-context"><span class="header-section-number">6.1</span> COCO（Common Objects in Context）</h3>
+<p>COCO provides an object detection dataset and defines its version of mAP, which many researchers use to evaluate their models.</p>
+<p>Note: COCO calls mAP simply “AP”, and they believe people should be able to tell whether it is for multiple classes or a single class from the context. When reading texts from the COCO website, please be careful not to get confused.</p>
+<p>COCO uses 100 recall intervals to calculate mAP. As such, each recall interval is 0.01. Also, they use multiple IoU thresholds. For example, the two examples below show mAP with IoU Threshold=0.50 and 0.75, respectively.</p>
+<p><span class="math display">\[
+\text{AP}^{\text{IoU}=.50} \quad \text{or} \quad \text{AP@}.50
+\]</span></p>
+<p><span class="math display">\[
+\text{AP}^{\text{IoU}=.75} \quad \text{or} \quad \text{AP@}.75
+\]</span></p>
+<p>COCO defines the main mAP as follows:</p>
+<p><span class="math display">\[
+\text{AP@}[.50:.05:.95]
+\]</span></p>
+<p>It means an average of the mAP results with the IoU Thresholds from 0.50 to 0.95 increased by 0.05. In other words, we calculate the following mAP values and take an average to yield the mAP score.</p>
+<ul>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.50}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.55}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.60}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.65}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.70}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.75}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.80}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.85}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.90}\)</span></li>
+<li><span class="math inline">\(\text{AP}^{\text{IoU}=.95}\)</span></li>
+</ul>
+<p>They also define different mAP scores based on the object sizes.</p>
+<ul>
+<li><span class="math inline">\(\text{AP}^{\text{small}}\)</span> (32 square pixels)</li>
+<li><span class="math inline">\(\text{AP}^{\text{medium}}\)</span> (32 to 96 square pixels)</li>
+<li><span class="math inline">\(\text{AP}^{\text{large}}\)</span> (more than 96 square pixels)</li>
+</ul>
+<p>Although the objective is the same, there are different versions of mAP by other datasets like PASCAL VOC. It can get confusing when using multiple datasets with different mAP definitions. Now that we understand how mAP works, it also manifests some issues.</p>
+<p>For example, deciding which IoU Thresholds to use is arbitrary. It’s not clear what using a different IoU Threshold means. For example, even if the IoU threshold = 0.50 gives a high mAP score but 0.75 gives a bad mAP score, it does not mean the model is entirely inaccurate. It would take various comparisons by measuring more IoU Thresholds like 0.6, 0.7, etc. It’s never-ending. Such hyperparameter tuning could depend on the class imbalance in a dataset.</p>
+<p>Another example is that when a minority class hurts the overall mAP, it may not mean the model is that bad. So, we may want to evaluate AP per class to see how the model performs for each class, especially when evaluating various model designs.</p>
+<p>So, mAP gives a convenient single metric value incorporating precision and recall. It sounds great in theory, but we should realize that mAP depends on how we define thresholds and other hyperparameters (like reflecting image size) and what kind of class imbalance each dataset has.</p>
+</section>
+</section>
+<section id="references" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="references"><span class="header-section-number">7</span> References</h2>
+<ul>
+<li><a href="../../blog/2022-05-23-object-detection-vs-image-classification/" target="_blank">Object Detection vs Image Classification</a></li>
+<li><a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">IoU (Intersection over Union)</a></li>
+<li><a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">NMS (Non-Maximum Suppression)</a></li>
+<li><a href="https://cocodataset.org/#detection-eval" target="_blank">COCO (Common Objects in Context)</a></li>
+<li><a href="https://jonathan-hui.medium.com/map-mean-average-precision-for-object-detection-45c121a31173" target="_blank">mAP (mean Average Precision) for Object Detection</a><br>
+<a href="https://jonathan-hui.medium.com/" target="_blank">Jonathan Hui</a></li>
+<li><a href="https://towardsdatascience.com/breaking-down-mean-average-precision-map-ae462f623a52" target="_blank">Breaking Down Mean Average Precision (mAP)</a><br>
+<a href="https://medium.com/@renjietan" target="_blank">Ren Jie Tan</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

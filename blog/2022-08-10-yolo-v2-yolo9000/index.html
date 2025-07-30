@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-08-10">
+
+<title>YOLO v2: Better, Faster, Stronger – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-aim-of-yolo-v2-and-yolo3000" id="toc-the-aim-of-yolo-v2-and-yolo3000" class="nav-link active" data-scroll-target="#the-aim-of-yolo-v2-and-yolo3000"><span class="header-section-number">1</span> The Aim of YOLO v2 and YOLO3000</a></li>
+  <li><a href="#better" id="toc-better" class="nav-link" data-scroll-target="#better"><span class="header-section-number">2</span> Better</a>
+  <ul class="collapse">
+  <li><a href="#batch-normalization" id="toc-batch-normalization" class="nav-link" data-scroll-target="#batch-normalization"><span class="header-section-number">2.1</span> Batch Normalization</a></li>
+  <li><a href="#high-resolution-classifier" id="toc-high-resolution-classifier" class="nav-link" data-scroll-target="#high-resolution-classifier"><span class="header-section-number">2.2</span> High-Resolution Classifier</a></li>
+  <li><a href="#convolutional-with-anchor-boxes" id="toc-convolutional-with-anchor-boxes" class="nav-link" data-scroll-target="#convolutional-with-anchor-boxes"><span class="header-section-number">2.3</span> Convolutional with Anchor Boxes</a></li>
+  <li><a href="#dimension-clusters" id="toc-dimension-clusters" class="nav-link" data-scroll-target="#dimension-clusters"><span class="header-section-number">2.4</span> Dimension Clusters</a></li>
+  <li><a href="#direct-location-prediction" id="toc-direct-location-prediction" class="nav-link" data-scroll-target="#direct-location-prediction"><span class="header-section-number">2.5</span> Direct Location Prediction</a></li>
+  <li><a href="#find-grained-features" id="toc-find-grained-features" class="nav-link" data-scroll-target="#find-grained-features"><span class="header-section-number">2.6</span> Find-Grained Features</a></li>
+  <li><a href="#multi-scale-training" id="toc-multi-scale-training" class="nav-link" data-scroll-target="#multi-scale-training"><span class="header-section-number">2.7</span> Multi-Scale Training</a></li>
+  </ul></li>
+  <li><a href="#faster" id="toc-faster" class="nav-link" data-scroll-target="#faster"><span class="header-section-number">3</span> Faster</a>
+  <ul class="collapse">
+  <li><a href="#darknet-19" id="toc-darknet-19" class="nav-link" data-scroll-target="#darknet-19"><span class="header-section-number">3.1</span> Darknet-19</a></li>
+  <li><a href="#training-for-classification" id="toc-training-for-classification" class="nav-link" data-scroll-target="#training-for-classification"><span class="header-section-number">3.2</span> Training for Classification</a></li>
+  <li><a href="#training-for-detection" id="toc-training-for-detection" class="nav-link" data-scroll-target="#training-for-detection"><span class="header-section-number">3.3</span> Training for Detection</a></li>
+  </ul></li>
+  <li><a href="#stronger" id="toc-stronger" class="nav-link" data-scroll-target="#stronger"><span class="header-section-number">4</span> Stronger</a>
+  <ul class="collapse">
+  <li><a href="#problems-with-combining-datasets" id="toc-problems-with-combining-datasets" class="nav-link" data-scroll-target="#problems-with-combining-datasets"><span class="header-section-number">4.1</span> Problems with Combining Datasets</a></li>
+  <li><a href="#hierarchical-classification" id="toc-hierarchical-classification" class="nav-link" data-scroll-target="#hierarchical-classification"><span class="header-section-number">4.2</span> Hierarchical Classification</a></li>
+  <li><a href="#classification-with-wordtree" id="toc-classification-with-wordtree" class="nav-link" data-scroll-target="#classification-with-wordtree"><span class="header-section-number">4.3</span> Classification with WordTree</a></li>
+  <li><a href="#wordtree-1k" id="toc-wordtree-1k" class="nav-link" data-scroll-target="#wordtree-1k"><span class="header-section-number">4.4</span> WordTree 1k</a></li>
+  <li><a href="#dataset-combination-with-wordtree" id="toc-dataset-combination-with-wordtree" class="nav-link" data-scroll-target="#dataset-combination-with-wordtree"><span class="header-section-number">4.5</span> Dataset Combination with WordTree</a></li>
+  <li><a href="#joint-classification-and-detection" id="toc-joint-classification-and-detection" class="nav-link" data-scroll-target="#joint-classification-and-detection"><span class="header-section-number">4.6</span> Joint Classification and Detection</a></li>
+  </ul></li>
+  <li><a href="#towards-yolo-v3" id="toc-towards-yolo-v3" class="nav-link" data-scroll-target="#towards-yolo-v3"><span class="header-section-number">5</span> Towards YOLO v3</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">YOLO v2: Better, Faster, Stronger</h1>
+<p class="subtitle lead">YOLO v2 became better and faster than Faster R-CNN and SSD</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 10, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="YOLO v2: Better, Faster, Stronger"></p>
+<p>Joseph Redmon and Ali Farhadi made various improvements to <a href="../../blog/2022-07-26-yolo-version-1/" target="_blank">YOLO v1</a>. The resulted model YOLO v2 became <strong>better</strong> (more accurate) and <strong>faster</strong> than <a href="../../blog/2022-07-11-faster-r-cnn-rpn/" target="_blank">Faster R-CNN</a> and <a href="../../blog/2022-07-31-ssd-single-shot-multibox-detector/" target="_blank">SSD</a>. They trained a <strong>stronger</strong> model (YOLO9000) with a new method, making it capable of detecting over 9000 object categories. So, the paper title reads “YOLO9000: Better, Faster, Stronger”. This article explains what changed since YOLO v1.</p>
+<section id="the-aim-of-yolo-v2-and-yolo3000" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-aim-of-yolo-v2-and-yolo3000"><span class="header-section-number">1</span> The Aim of YOLO v2 and YOLO3000</h2>
+<p>YOLO v1 was faster than Faster R-CNN, but it was less accurate. YOLO v1’s weakness was the bounding box accuracy. It didn’t predict object locations and sizes well, particularly bad at spotting small objects. It seemed that region-based detectors had the edge over single-shot detectors for object localization. However, SSD, another single-stage detector, broke the record by being better (more accurate) than Faster R-CNN and even faster than YOLO v1.</p>
+<p>Eventually, Joseph Redmon and Ali Farhadi developed YOLO v2, which is better and faster than SSD and Faster R-CNN. They made a series of changes, and the paper details how much improvement each incremental change brought. However, they didn’t stop there.</p>
+<p>They wanted to make their object detector recognize a wide variety of objects. The Pascal VOC object detection dataset contains only 20 classes. They wanted their model to recognize much more classes of objects. The problem was that building an object detection dataset with millions of labeled images would take too much time. Labeling images for object detection is far more expensive than image classification. So, they devised a new method to train YOLO9000, simultaneously taking advantage of <a href="https://cocodataset.org/" target="_blank">MS COCO</a> and <a href="https://www.image-net.org/" target="_blank">ImageNet</a> datasets. As a result, YOLO9000 can detect over 9000 object categories.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO3000-485x1024.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>YOLO3000: Figure 1 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The following sections discuss how YOLO became better, faster, and stronger.</p>
+</section>
+<section id="better" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="better"><span class="header-section-number">2</span> Better</h2>
+<p>In the below table, the paper summarizes each change made to YOLO (v1) with the accuracy measured in <a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP</a>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLOv2-mAP-changes-1024x425.png" class="img-fluid figure-img"></p>
+<figcaption>Table 2 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>You’d probably notice some ideas came from <a href="../../blog/2022-07-31-ssd-single-shot-multibox-detector/" target="_blank">SSD</a> and <a href="../../blog/2022-07-11-faster-r-cnn-rpn/" target="_blank">Faster R-CNN</a>. Joseph Redmon says the following in the paper:</p>
+<blockquote class="blockquote">
+<p>We pool a variety of ideas from past work with our own novel concepts to improve YOLO’s performance. <cite>Source: <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></cite></p>
+</blockquote>
+<p>Researchers help each other improve their models by publishing papers and results, which is why reading a series of related papers is insightful.</p>
+<hr>
+<p>Let’s look at each improvement.</p>
+<section id="batch-normalization" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="batch-normalization"><span class="header-section-number">2.1</span> Batch Normalization</h3>
+<p>In YOLO v2, they added Batch Normalization to all convolutional layers.</p>
+<ul>
+<li>It improved mAP by 2%.</li>
+<li>It helped the model avoid overfitting.</li>
+<li>They removed dropout as Batch Normalization regularized the model well.</li>
+</ul>
+</section>
+<section id="high-resolution-classifier" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="high-resolution-classifier"><span class="header-section-number">2.2</span> High-Resolution Classifier</h3>
+<p>In YOLO v1, they trained a classifier with ImageNet images of size 224 x 224. Then, they increase the image resolution to 448 x 448 to train their object detection models. Hence, the network had to simultaneously adjust to the new input resolution and learn object detection.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLOv1_overview.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3 of <a href="https://arxiv.org/abs/1506.02640" target="_blank">the YOLO v1 paper</a></figcaption>
+</figure>
+</div>
+<p>In YOLOv2, they made the following changes to make learning easier:</p>
+<ul>
+<li>First, they trained the classifier on images of size 224 x 224.</li>
+<li>Next, they fine-tuned the classifier on images of size 448 x 448 for ten epochs on ImageNet.</li>
+<li>Then, they trained the object detection model using the convolutional layers of the classifier.</li>
+<li>It improved mAP by almost 4%.</li>
+</ul>
+</section>
+<section id="convolutional-with-anchor-boxes" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="convolutional-with-anchor-boxes"><span class="header-section-number">2.3</span> Convolutional with Anchor Boxes</h3>
+<p>They introduced anchor boxes similar to Faster R-CNN and SSD to increase the recall rate (the fraction of ground truth object predicted) to detect more objects in an image.</p>
+<section id="problem-with-bounding-box-predictions" class="level4">
+<h4 class="anchored" data-anchor-id="problem-with-bounding-box-predictions">Problem with Bounding Box Predictions</h4>
+<p>YOLO v1 only predicted two bounding boxes per grid cell, which means a total of 49 (= 7 x 7 x 2) bounding boxes per image, much lower than Faster R-CNN and SSD (see the fifth column below).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/SSD-table7-modified.png" class="img-fluid figure-img"></p>
+<figcaption>Table 7 of <a href="https://arxiv.org/abs/1512.02325" target="_blank">the SSD paper</a> (I put the red box)</figcaption>
+</figure>
+</div>
+<p>Therefore, YOLO v1 suffered from a low recall rate. Furthermore, due to the coarse resolution of 7 x 7, the model didn’t recognize small objects very well. However, increasing the grid cells would cause other problems because the model used fully-connected layers for detection. Larger resolution means more weights, slower inference speed, and longer training time.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-two-FCs.png" class="img-fluid figure-img"></p>
+<figcaption>YOLO v1 used fully-connected layers as <a href="../../blog/2022-07-26-yolo-version-1/#object-detector" target="_blank">the detector</a></figcaption>
+</figure>
+</div>
+<p>Another issue with YOLO v1 was that it predicted class probabilities per grid cell location. In other words, two bounding boxes had to share the same class probabilities. As such, increasing the number of bounding boxes would not benefit much. On the contrary, Faster R-CNN and SSD predicted class probabilities for each bounding box, making it easier to predict multiple classes sharing a similar center location.</p>
+<p><img src="images/bounding-boxes.png" class="img-fluid"></p>
+<p>So, they fixed these issues in YOLO v2.</p>
+</section>
+<section id="increasing-feature-map-resolution" class="level4">
+<h4 class="anchored" data-anchor-id="increasing-feature-map-resolution">Increasing Feature Map Resolution</h4>
+<p>They removed one max-pooling layer, leaving five of them for downsampling input images by a factor of 32. It would convert the original input size of 448 x 448 into 14 x 14 feature maps, four times more grid cell locations than the original feature map of 7 x 7.</p>
+<p>However, the even number of locations in the feature maps means there is no single central location, which is not ideal.</p>
+<blockquote class="blockquote">
+<p>Objects, especially large objects, tend to occupy the center of the image so it’s good to have a single location right at the center to predict these objects instead of four locations that are all nearby. <cite>Source: <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></cite></p>
+</blockquote>
+<p>So, they changed the input image size from 448 x 448 to 416 x 416, resulting in the feature maps of size 13 x 13. It is much finer than the original 7 x 7 feature maps. But they needed to avoid having more weights in the fully-connected layers.</p>
+</section>
+<section id="going-fully-convolutional" class="level4">
+<h4 class="anchored" data-anchor-id="going-fully-convolutional">Going Fully Convolutional</h4>
+<p>They replaced the fully-connected layers with convolutional layers. The number of weights became negligible since the kernel size is small and fixed no matter the input resolution. It allowed them to use more bounding boxes per grid cell. As such, they introduced anchor boxes similar to Faster R-CNN and SSD:</p>
+<ul>
+<li>The total number of bounding box predictions dramatically increased.</li>
+<li>The model predicts objectness and class probabilities per anchor box.</li>
+<li>The recall rate increased from 81% to 88%.</li>
+</ul>
+<p>The recall rate increased thanks to the increased feature map resolution and more bounding boxes. However, the accuracy went down from 69.5 mAP to 69.2 mAP. So, why did they still make this change?</p>
+<blockquote class="blockquote">
+<p>Even though the mAP decreases, the increase in recall means that our model has more room to improve. <cite>Source: <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></cite></p>
+</blockquote>
+<p>A higher recall rate means more opportunities to spot objects. Improving IoU between predicted bounding boxes and ground truths can increase overall mAP.</p>
+</section>
+</section>
+<section id="dimension-clusters" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="dimension-clusters"><span class="header-section-number">2.4</span> Dimension Clusters</h3>
+<section id="better-priors-for-bounding-boxes" class="level4">
+<h4 class="anchored" data-anchor-id="better-priors-for-bounding-boxes">Better Priors for Bounding Boxes</h4>
+<p>The model can start with reasonable priors if we use appropriate sizes and aspect ratios for anchor boxes. However, it’d be challenging to hand-pick good values. So, they used k-means clustering on the training set bounding boxes. k-means clustering would start with randomly generated k-bounding boxes as centroids (cluster centers). Then, it assigns each bounding box from the training dataset to one of the k centroids by a distance metric. They used <strong>1 - IoU</strong> as the distance metric, assigning each bounding box to a centroid having the largest overlap.</p>
+<p><span class="math display">\[
+\text{d}(\text{box}, \text{centroid}) = 1 \ - \ \, \text{IoU}(\text{box}, \text{centroid})
+\]</span></p>
+<p>Then, it recalculates each centroid as the average of bounding boxes within the cluster. Then, it reassigns all bounding boxes to their closest centroid. It repeats the process until the centroids stop changing or the change becomes tiny. The question is how to determine the number of centroids k.</p>
+</section>
+<section id="clustering-box-dimensions" class="level4">
+<h4 class="anchored" data-anchor-id="clustering-box-dimensions">Clustering Box Dimensions</h4>
+<p>Increasing the number of centroids k would fit the dataset better. For example, k=10 would fit the dataset better than k=5. However, more boxes may cause an overfit. Also, increasing k does not mean IoU increases linearly. As shown in the below diagram (left), the IoU return on k diminishes as k increases. We must balance good recall (more anchor boxes) and detection model complexity (slow and harder to train). They found that k=5 gave a good trade-off for recall vs.&nbsp;complexity of the model.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/k-means.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 2 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a> (on the right, grey boxes are for VOC 2007, purple boxes are for MS COCO)</figcaption>
+</figure>
+</div>
+<p>The right side shows the five anchor box sizes and aspect ratios (gray boxes are for VOC 2007, and purple boxes are for MS COCO). For both datasets, thinner and taller boxes are more common. In other words, bounding boxes are not entirely random, supporting the idea of choosing reasonable priors to help the detection model learn more efficiently.</p>
+<p>Let’s do a thought experiment on how choosing bad priors may adversely affect detection performance. Suppose we use transfer learning for an object detection model to count the number of giraffes in a safari park. Anchor boxes calculated from a vehicle detection dataset would probably make it more difficult for the model to reason about long-neck giraffes. So, we should always choose priors from the target domain.</p>
+<p>Overall, going convolutional with anchor boxes brought many benefits. However, the anchor box approach caused another issue: model instability, especially during early iterations of training. They had to make a change in location prediction.</p>
+</section>
+</section>
+<section id="direct-location-prediction" class="level3" data-number="2.5">
+<h3 data-number="2.5" class="anchored" data-anchor-id="direct-location-prediction"><span class="header-section-number">2.5</span> Direct Location Prediction</h3>
+<section id="unconstrained-location-prediction" class="level4">
+<h4 class="anchored" data-anchor-id="unconstrained-location-prediction">Unconstrained Location Prediction</h4>
+<p>Faster R-CNN allows an object’s center to go outside the grid cell. The region proposal network predicts the following unbounded values:</p>
+<p><span class="math display">\[
+t_x, \quad t_y
+\]</span></p>
+<p>The model calculates (x, y) center coordinates as follows:</p>
+<p><span class="math display">\[
+\begin{align}
+x &amp;= (t_x \times w_a) \ + \ x_a \\
+y &amp;= (t_y \times h_a\,) \ + \ y_a
+\end{align}
+\]</span></p>
+<p>where <span class="math inline">\((x_a, y_a)\)</span> is the anchor box center and <span class="math inline">\(w_a\)</span> and <span class="math inline">\(h_a\)</span> are anchor box width and height. The location prediction was indirect and relative to an anchor box size. <span class="math inline">\(t_x = 1\)</span> means shifting the center towards the left by the width of the anchor box. Also, x and y can be inside or outside the grid cell. A predicted bounding box may end up anywhere.</p>
+<p>This formulation was not working well with YOLO, especially during the initial stage of training. Since the model had to start with randomly initialized weights and predicted bounding boxes could be anywhere, the model took a long time to converge to stable predictions. They decided to constrain an object’s center position prediction within a grid cell using the sigmoid function, as in YOLO v1.</p>
+</section>
+<section id="constrained-location-prediction" class="level4">
+<h4 class="anchored" data-anchor-id="constrained-location-prediction">Constrained Location Prediction</h4>
+<p>YOLO v2 predicts five coordinates per bounding box.</p>
+<p><span class="math display">\[
+t_x, \quad t_y, \quad t_w, \quad t_h, \quad t_o
+\]</span></p>
+<p>The first two predicted values are for the center location of a bounding box. They are unbounded values. The model applies the sigmoid function to constrain them in the range between 0 and 1. So, the bounding box center is as follows:</p>
+<p><span class="math display">\[
+\begin{align}  
+b_x &amp;= \sigma(t_x) + c_x \quad (c_x \text{ is the offset from the left of the image}) \\
+b_y &amp;= \sigma(t_y) + c_y \quad (c_y \text{ is the offset from the top of the image})
+\end{align}
+\]</span></p>
+<p>It also means that the model directly predicts the location (not relative to an anchor box size).</p>
+<p>The third and fourth predicted values are unbounded, too. The model uses the exponential function to constrain them in the range between 0 and positive infinity.</p>
+<p><span class="math display">\[
+\begin{align}
+b_w &amp;= p_w e^{t_w} \quad (p_w \text{ is the width of anchor box}) \\
+b_h &amp;= p_h e^{t_h} \quad (p_h \text{ is the height of anchor box})
+\end{align}
+\]</span></p>
+<p>Note: the image size also constrains any bounding box width and height.</p>
+<p>Finally, the last predicted value represents the objectness score times the predicted IoU. The value is unbounded. The model applies the sigmoid function to constrain it between 0 and 1.</p>
+<p><span class="math display">\[
+\text{Pr}(\text{object}) \times \text{IoU}(b, \text{object}) = \sigma(t_o)
+\]</span></p>
+<p>The below diagram summarizes the formulation.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-3.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 4 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The direct location prediction with constraints made the model’s learning stable. Together with dimension clusters, mAP improved by almost 5%.</p>
+</section>
+</section>
+<section id="find-grained-features" class="level3" data-number="2.6">
+<h3 data-number="2.6" class="anchored" data-anchor-id="find-grained-features"><span class="header-section-number">2.6</span> Find-Grained Features</h3>
+<p>YOLO v1 had trouble detecting small objects. Anchor boxes provided part of the solution to improving the recall rate. It also needed more fine features while keeping the 13 x 13 (coarser) feature maps. SSD used the <a href="../../blog/2022-07-31-ssd-single-shot-multibox-detector/#multi-scale-feature-maps" target="_blank">multi-scale feature maps</a> to incorporate various fine-to-coarse features. In YOLO v2, they took a different approach.</p>
+<p>The idea is similar to the skip connections in ResNet. They turned the 26 x 26 x 512 feature maps from the earlier convolutional layers into 13 x 13 x 2048 by stacking adjacent features into different channels. In this way, the detector can have access to fine-grained features. It gave a 1% performance increase.</p>
+</section>
+<section id="multi-scale-training" class="level3" data-number="2.7">
+<h3 data-number="2.7" class="anchored" data-anchor-id="multi-scale-training"><span class="header-section-number">2.7</span> Multi-Scale Training</h3>
+<p>They trained YOLO v2 with various input resolutions to make the model robust. The multi-scale training randomly chooses an input resolution for every ten batches. Being fully convolutional does not require us to adjust network weights for different input resolutions. They used input resolution multiples of 32: {320, 352, …, 608} since the convolutional layers downsample by 32.</p>
+<blockquote class="blockquote">
+<p>This regime forces the network to learn to predict well across a variety of input dimensions. This means the same network can predict detections at different resolutions. The network runs faster at smaller sizes so YOLOv2 offers an easy tradeoff between speed and accuracy. <cite>Source: <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></cite></p>
+</blockquote>
+<p>The idea was similar to SSD, having two versions (SSD300 and SSD500) based on input resolutions. YOLO v2’s multi-scale training was more exhaustive, so YOLO v2 became capable of handling a wide range of speed-accuracy trade-offs from low to high resolution. The below table shows the test results with Pascal VOC 2007.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/table-3.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Table 3 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>With 288 x 288, YOLO v2 runs at 91 FPS while being fairly accurate (almost as good as the Fast R-CNN). It is suitable for high-framerate video running on less powerful GPUs. With 544 x 544, YOLO v2 is a high-resolution detector with state-of-art accuracy while maintaining a real-time speed of 40 FPS. The below chart clearly shows the accuracy and speed trade-off.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-4.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 4 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<hr>
+<p>We have discussed all the improvements that made YOLO more accurate. Once again, the below table summarizes the changes and their improvements.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/better.png" class="img-fluid figure-img"></p>
+<figcaption>Table 2 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>There is one item we haven’t explicitly discussed. YOLO v2 introduced a new base network called Darknet-19. It made the model better and also faster.</p>
+</section>
+</section>
+<section id="faster" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="faster"><span class="header-section-number">3</span> Faster</h2>
+<p>Faster R-CNN and SSD used convolutional layers from VGG-16 for feature extraction. The network provided good accuracy but required 30.69 billion floating-point calculations. On the other hand, YOLO v1 used a custom model based on GoogLeNet, and the amount of computation remained at 8.52 billion. So, YOLO v1’s base network was faster. However, its top-5 accuracy on ImageNet (at 224 x 224) was 88%, worse than 90.0% by VGG-16.</p>
+<p>Therefore, they improved the base network for YOLO v2.</p>
+<section id="darknet-19" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="darknet-19"><span class="header-section-number">3.1</span> Darknet-19</h3>
+<p>They proposed a new image classifier, Darknet-19, as the base network for YOLO v2. We’ve seen some of the features of the network in the previous section. In this section, we’ll see the internals.</p>
+<p>Darknet-19 has a total of 19 convolutional layers and five max pooling operations, as shown below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/table-6.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>Table 6 (Darknet-19) of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The network repeats 3 x 3 convolutions to double filters (channels) and max-pooling to downsample feature map resolutions, similar to the VGG models. In addition, it incorporated methods from “<a href="https://arxiv.org/abs/1312.4400" target="_blank">Network in network</a>” (that inspired GoogLeNet’s Inception module), such as 1 x 1 convolution to compress the channel dimensions (in between 3 x 3 convolutions) and global average pooling to make predictions.</p>
+<p>They used batch normalization to stabilize training, speed up convergence, and regularize the model. First, they trained Darknet-19 for image classification to ensure that the network has good accuracy.</p>
+</section>
+<section id="training-for-classification" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="training-for-classification"><span class="header-section-number">3.2</span> Training for Classification</h3>
+<p>They trained Darknet-19 using ImageNet’s 1000 classes (image size: 224 x 224).</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Hyper-parameters</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Epochs</td>
+<td>160</td>
+</tr>
+<tr class="even">
+<td>Optimizer</td>
+<td>SGD (Stochastic Gradient Descent)</td>
+</tr>
+<tr class="odd">
+<td>Initial Learning Rate</td>
+<td>0.1</td>
+</tr>
+<tr class="even">
+<td>Learning Rate Decay</td>
+<td>Polynomial rate decay with a power of 4</td>
+</tr>
+<tr class="odd">
+<td>Weight Decay (L2 Regularization)</td>
+<td>0.0005</td>
+</tr>
+<tr class="even">
+<td>Momentum</td>
+<td>0.9</td>
+</tr>
+</tbody>
+</table>
+<p>The polynomial rate decay reduces the learning rate at every batch.</p>
+<p><span class="math display">\[
+\text{Learning Rate} \times \left(1 \ - \ \frac{\text{Batch Step}}{\text{Max Batch Steps}} \right)^4
+\]</span></p>
+<p>Other than that, they used data augmentation tricks by randomly adjusting the following values:</p>
+<ul>
+<li>Crops</li>
+<li>Rotations</li>
+<li>Hue, Saturation, and Exposure Shifts</li>
+</ul>
+<p>Darknet-19 achieved the top-5 accuracy of 91.2% (top-1 accuracy of 72.9%) with only 5.58 billion floating-point computations. After that, they fine-tuned the classifier with an increased input resolution of 448 x 448 for ten epochs using a lower learning rate of 0.001. The adjusted model achieved the top-5 accuracy of 93.3% (top-1 accuracy of 76.5%).</p>
+</section>
+<section id="training-for-detection" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="training-for-detection"><span class="header-section-number">3.3</span> Training for Detection</h3>
+<p>The below shows a simplified architecture of Darknet-19.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Darknet-19.png" class="img-fluid figure-img"></p>
+<figcaption>Darknet-19 (Classifier)</figcaption>
+</figure>
+</div>
+<p>We’ll see how they modified Darknet-19 for object detection. First, they removed the classification head (the last convolutional layer and the layers after that) and added three additional 3 x 3 x 1024 convolutional layers to enrich features for detection further.</p>
+<p><img src="images/Darknet-19-D.png" class="img-fluid"></p>
+<p>Then, they added one 1 x 1 convolution layer with 125 channels for five bounding boxes, each of which consists of the following values:</p>
+<ul>
+<li>Four coordinate values</li>
+<li>One objectness score</li>
+<li>20 conditional class probabilities</li>
+</ul>
+<p>Therefore, the total number of values is 125 (= 5 x (4 + 1 + 20)) per grid cell. The below image shows the model architecture when the input resolution is 416 x 416. The last yellow box is for the 1 x 1 convolution layer.</p>
+<p><img src="images/Darknet-19-C.png" class="img-fluid"></p>
+<p>Further, they added a passthrough layer to intake high-resolution features (26 x 26 x 512). The below image shows where the concatenation happens:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Darknet-19-A.png" class="img-fluid figure-img"></p>
+<figcaption>YOLO v2 (Object Detector)</figcaption>
+</figure>
+</div>
+<p>According to the YOLO v2 configuration for Pascal VOC (<a href="https://github.com/pjreddie/darknet/blob/master/cfg/yolov2-voc.cfg" target="_blank">GitHub link</a>), the passthrough is a 1 x 1 x 64 convolutional layer. So, 26 x 26 x 256 becomes 26 x 26 x 64. Then, there is a reorganization (<code>reorg</code>) with a stride of 2, turning 26 x 26 x 64 feature maps into 13 x 13 x 256 by stacking adjacent features into channels.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[convolutional]</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">batch_normalize</span><span class="op">=</span>1</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">size</span><span class="op">=</span>1</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="va">stride</span><span class="op">=</span>1</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="va">pad</span><span class="op">=</span>1</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">filters</span><span class="op">=</span>64</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="va">activation</span><span class="op">=</span>leaky</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">[reorg]</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="va">stride</span><span class="op">=</span>2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The below table shows the hyperparameters used in training for Pascal VOC and MS COCO.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Hyper-parameters</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Epochs</td>
+<td>160</td>
+</tr>
+<tr class="even">
+<td>Optimizer</td>
+<td>SGD (Stochastic Gradient Descent)</td>
+</tr>
+<tr class="odd">
+<td>Initial Learning Rate</td>
+<td>0.001</td>
+</tr>
+<tr class="even">
+<td>Learning Rate Decay</td>
+<td>Divide the learning rate by 10 at 60 and 90 epochs</td>
+</tr>
+<tr class="odd">
+<td>Weight Decay (L2 Regularization)</td>
+<td>0.0005</td>
+</tr>
+<tr class="even">
+<td>Momentum</td>
+<td>0.9</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="stronger" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="stronger"><span class="header-section-number">4</span> Stronger</h2>
+<p>They proposed a new method to train a <strong>stronger</strong> model, enabling it to detect far more classes than Pascal VOC and MS COCO datasets can offer. Their method mixes images labeled for detection and classification datasets. For a detection image, they back-propagate based on the full YOLO v2 loss function. For a classification image, they back-propagate loss from the classification-specific parts of the architecture.</p>
+<section id="problems-with-combining-datasets" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="problems-with-combining-datasets"><span class="header-section-number">4.1</span> Problems with Combining Datasets</h3>
+<p>Mixing detection and classification datasets had a few challenges:</p>
+<ul>
+<li>Detection datasets have only common objects and general labels (i.e., “dog”, “boat”).</li>
+<li>Classification datasets have a much broader and deeper range of labels.</li>
+</ul>
+<p>For example, ImageNet has more than a hundred breeds of dog (i.e., “Norfolk terrier”, “Yorkshire terrier”, “Bedlington terrier”, etc.). Usually, classification models assume the classes are mutually exclusive. Hence, they use a softmax layer across all possible categories to compute the final probability distribution. Therefore, if we combined ImageNet and MS COCO, assuming classes were mutually exclusive, classifying a “Norfolk terrier” image as “dog” would be a wrong prediction, even though “Norforkl terrier” is a kind of “dog”.</p>
+<p>So, they came up with a hierarchical classification approach.</p>
+</section>
+<section id="hierarchical-classification" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="hierarchical-classification"><span class="header-section-number">4.2</span> Hierarchical Classification</h3>
+<p>ImageNet labels came from WordNet:</p>
+<blockquote class="blockquote">
+<p>ImageNet is an image dataset organized according to the WordNet hierarchy. Each meaningful concept in WordNet, possibly described by multiple words or word phrases, is called a “synonym set” or “synset”. <cite>Source: <a href="https://www.image-net.org/about.php" target="_blank">About ImageNet</a></cite></p>
+</blockquote>
+<p>In WordNet, “Norfolk terrier” and “Yorkshire terrier” are <strong>specific kinds</strong> (hyponyms) of “terrier”.</p>
+<ul>
+<li>“terrier” is a type of “hunting dog”.</li>
+<li>“hunting dog” is a type of “dog”.</li>
+<li>“dog” is a type of “canine”.</li>
+</ul>
+<p>WordNet structure is a directed graph in that multiple words or phrases may describe one concept. For example, a “dog” is simultaneously a type of “canine” and a type of “domestic animal”, which is not convenient for labeling. Instead, they simplified the problem by building a tree structure (where one node has only one parent node).</p>
+<p>They examined the classes in ImageNet and looked at their paths through the WordNet graph to the root node (“physical object”). They chose the shortest path for a class having more than one path to the root. As a result, they created a tree structure called WordTree.</p>
+</section>
+<section id="classification-with-wordtree" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="classification-with-wordtree"><span class="header-section-number">4.3</span> Classification with WordTree</h3>
+<p>To perform classification with WordTree, a model predicts conditional probabilities at every node in WordTree.</p>
+<p><img src="images/WordTree-example-1.png" class="img-fluid"></p>
+<p>For example, at the “terrier” node, the model predicts:</p>
+<p><span class="math display">\[
+\begin{align}
+\text{Pr}(\text{Norfork terrier} &amp;| \text{terrier} ) \\
+\text{Pr}(\text{Yorkshire terrier} &amp;| \text{terrier} ) \\
+\text{Pr}(\text{Bedlington terrier} &amp;| \text{terrier} ) \\
+\dots &amp;
+\end{align}
+\]</span></p>
+<p>So, the probability of a Norfolk terrier is:</p>
+<p><span class="math display">\[
+\begin{align}
+P(\text{Norfolk terrier}) = &amp;\ P(\text{Norfolk terrier}|\text{terrier})\ \times \\
+&amp;\ P(\text{terrier}|\text{hunging dog})\ \times \\
+&amp;\quad \dots \\
+&amp;\ P(\text{mammal}|\text{animal})\ \times \\
+&amp;\ P(\text{annimal}|\text{physical object})\ \times \\
+&amp;\ P(\text{physical object})
+\end{align}
+\]</span></p>
+<p>We assume Pr(physical object) = 1 for classification since any classification image has a physical object. As for detection, Pr(physical object) is the objectness score of a bounding box predicted by YOLO v2.</p>
+</section>
+<section id="wordtree-1k" class="level3" data-number="4.4">
+<h3 data-number="4.4" class="anchored" data-anchor-id="wordtree-1k"><span class="header-section-number">4.4</span> WordTree 1k</h3>
+<p>To validate the approach, they trained Darknet-19 on WordTree, built using the 1000 classes from ImageNet. The tree has 1000 leaves, and there are 369 higher-level concepts. So, the model outputs a vector of 1369 values. However, as discussed earlier, we can’t simply apply the softmax over all 1369 classes.</p>
+<p>In the multi-label hierarchical classification, if an image is a “Norfolk terrier”, it is also a “hunting dog”, …, a “mammal”, an “animal”, and a “physical object”. So, the model must predict all of them correctly. As such, the model performs the softmax operation at each level. For example, the softmax predicts the most likely class under “physical object” is “animal”. Then, another softmax predicts the most likely class under “animal” is “mammal”, and so on, until it reaches the leaf node class like “Norfolk terrier”.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/wordtree.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 5 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The hierarchical Darknet-19 classification model achieved the top-5 accuracy of 90.4% (top-1 accuracy of 71.9%).</p>
+<p>One benefit of multi-label classification is that the performance degrades gracefully on unknown object categories. For example, suppose the model sees a new picture and is sure it is a dog but is uncertain what type of dog it is (possibly because it has never seen such a dog). In that case, it still predicts “dog” with high confidence while having lower confidence scores among the sub-classes.</p>
+<p>The same formulation works for detection. The model predicts objectness, giving the root probability Pr(physical object), and predicts conditional class probabilities, helping traverse the tree down, taking the highest confidence path at every split until it reaches some threshold. So, it may predict “dog” instead of a specific type when the confidence is not high at the specific nodes.</p>
+</section>
+<section id="dataset-combination-with-wordtree" class="level3" data-number="4.5">
+<h3 data-number="4.5" class="anchored" data-anchor-id="dataset-combination-with-wordtree"><span class="header-section-number">4.5</span> Dataset Combination with WordTree</h3>
+<p>WordTree allows us to incorporate labels from multiple datasets into a hierarchical structure. They used the top 9000 labels from the full version of ImageNet and layered them with MS COCO object detection data in a WordTree structure. They also added classes from the ImageNet detection dataset into the tree for evaluation purposes. The corresponding WordTree has 9418 classes.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/imagenet_coco_wordtree.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 6 of <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>ImageNet is much larger than MS COCO, so they adjusted the size ratio to 4:1 by oversampling from MS COCO. They trained the model on the ImageNet classification and MS COCO detection datasets and evaluated it on the ImageNet detection dataset.</p>
+</section>
+<section id="joint-classification-and-detection" class="level3" data-number="4.6">
+<h3 data-number="4.6" class="anchored" data-anchor-id="joint-classification-and-detection"><span class="header-section-number">4.6</span> Joint Classification and Detection</h3>
+<p>YOLO9000’s architecture is the same as YOLO v2, except it uses three anchor boxes per grid cell (instead of five) to limit the number of outputs.</p>
+<p>When the model sees an image from a <strong>detection dataset</strong>, it back-propagates localization loss and classification loss. It ignores any sub-classes that are not part of the detection dataset. For example, given the label “dog”, it calculates loss at and above the “dog” level. It does not assign any error to sub-classes like “German Shepherd” because the dataset has no information.</p>
+<p>When the model sees an image from a <strong>classification dataset</strong>, it only back-propagates classification loss (no localization loss) by finding a bounding box with the highest probability for the label class. Although there is no ground truth bounding box for any classification image, they assume the bounding box has at least 0.3 IoU with (hypothetical) ground truth to allow objectness loss to be back-propagated.</p>
+<p>With the above, YOLO9000 learns to:</p>
+<ul>
+<li>detect objects in images using the detection data in MS COCO</li>
+<li>classify a wide variety of objects using data from ImageNet.</li>
+</ul>
+<p>They evaluated YOLO9000 on the ImageNet object detection dataset, which shares only 44 object categories with MS COCO. As they trained the model on the ImageNet classification and MS COCO detection datasets (not using images from the ImageNet detection dataset), the model had no chance to localize many classes from the ImageNet detection dataset during the training. Still, YOLO9000 achieved 19.7 mAP. Also, it achieved 16.0 mAP for the 156 object classes, for which it had never seen labeled detection data.</p>
+</section>
+</section>
+<section id="towards-yolo-v3" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="towards-yolo-v3"><span class="header-section-number">5</span> Towards YOLO v3</h2>
+<p>The paper ends with a very hopeful outlook about future work.</p>
+<blockquote class="blockquote">
+<p>For future work we hope to use similar techniques for weakly supervised image segmentation. We also plan to improve our detection results using more powerful matching strategies for assigning weak labels to classiﬁcation data during training. <cite>Source: <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></cite></p>
+</blockquote>
+<p>They made YOLO better, faster, and stronger. Supporting more data sources would make the model even more robust. Joseph Redmon thought the computer vision world was full of great opportunities.</p>
+<blockquote class="blockquote">
+<p>Computer vision is blessed with an enormous amount of labelled data. We will continue looking for ways to bring different sources and structures of data together to make stronger models of the visual world. <cite>Source: <a href="https://arxiv.org/abs/1612.08242" target="_blank">the paper</a></cite></p>
+</blockquote>
+<hr>
+<p>However, the hopeful tone changes significantly in the YOLOv3 paper.</p>
+</section>
+<section id="references" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
+<ul>
+<li><a href="../../blog/2022-07-26-yolo-version-1/" target="_blank">YOLO: You Look Only Once (The 1st Version)</a></li>
+<li><a href="../../blog/2022-07-31-ssd-single-shot-multibox-detector/" target="_blank">SSD: Single Shot MultiBox Detector</a></li>
+<li><a href="https://arxiv.org/abs/1612.08242" target="_blank">YOLO9000: Better, Faster, Stronger</a><br>
+Joseph Redmon, Ali Farhadi</li>
+<li><a href="https://www.youtube.com/watch?v=VOC3huqHrss" target="_blank">YOLO v2 Video Demo</a><br>
+Joseph Redmon</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-06-01">
+
+<title>Object Detection: Non-Maximum Suppression (NMS) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overlapping-bounding-boxes" id="toc-overlapping-bounding-boxes" class="nav-link active" data-scroll-target="#overlapping-bounding-boxes"><span class="header-section-number">1</span> Overlapping Bounding Boxes</a></li>
+  <li><a href="#non-maximum-suppression" id="toc-non-maximum-suppression" class="nav-link" data-scroll-target="#non-maximum-suppression"><span class="header-section-number">2</span> Non-Maximum Suppression</a>
+  <ul class="collapse">
+  <li><a href="#dealing-with-multiple-classes" id="toc-dealing-with-multiple-classes" class="nav-link" data-scroll-target="#dealing-with-multiple-classes"><span class="header-section-number">2.1</span> Dealing with Multiple Classes</a></li>
+  <li><a href="#dealing-with-slowness" id="toc-dealing-with-slowness" class="nav-link" data-scroll-target="#dealing-with-slowness"><span class="header-section-number">2.2</span> Dealing with Slowness</a></li>
+  <li><a href="#eliminate-low-score-predictions-first" id="toc-eliminate-low-score-predictions-first" class="nav-link" data-scroll-target="#eliminate-low-score-predictions-first"><span class="header-section-number">2.3</span> Eliminate Low Score Predictions First</a></li>
+  <li><a href="#non-maximum-suppression-speed-versus-map" id="toc-non-maximum-suppression-speed-versus-map" class="nav-link" data-scroll-target="#non-maximum-suppression-speed-versus-map"><span class="header-section-number">2.4</span> Non-Maximum Suppression Speed versus mAP</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">3</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Object Detection: Non-Maximum Suppression (NMS)</h1>
+<p class="subtitle lead">Understanding the Logic and Tricky Part of NMS</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 1, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Object Detection: Non-Maximum Suppression (NMS)"></p>
+<p>Object detection models like <a href="../../blog/2022-05-08-yolov5-pytorch/" target="_blank">YOLOv5</a> and <a href="../../blog/2022-07-31-ssd-single-shot-multibox-detector/" target="_blank">SSD</a> predict objects’ locations by generating bounding boxes (shown in blue rectangles below).</p>
+<p><img src="images/non-maximum-suppression3.png" class="img-fluid" style="width:70.0%"></p>
+<p>However, object detection models produce more bounding boxes than the final output with different locations, sizes, and confidence levels. They do not just predict one bounding box per object. It is where Non-Maximum Suppression (NMS) comes to play, keeping the most probable bounding boxes and eliminating other less likely bounding boxes.</p>
+<p>This article explains how NMS works.</p>
+<section id="overlapping-bounding-boxes" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="overlapping-bounding-boxes"><span class="header-section-number">1</span> Overlapping Bounding Boxes</h2>
+<p>If we don’t do NMS, an object detection output may look like the one below, with many overlapping bounding boxes. There would be many more bounding boxes than in the image below, but that would make the image too chaotic, so I’m showing only some overlapping bounding boxes to get my point across.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/non-maximum-suppression.png" class="img-fluid figure-img" style="width:70.0%"></p>
+<figcaption>Non-Maximum Suppression</figcaption>
+</figure>
+</div>
+<p>Some object detection models like YOLO (since version 2) use anchors to generate predictions. Anchors are a predefined set of boxes (width and height) located at every grid cell. For example, YOLOv2 predicts more than a thousand bounding boxes. In other words, anchor boxes provide reasonable priors for object shapes (width-height ratios) calculated from the training dataset. The model only needs to predict an offset and scale to each anchor box, simplifying the network as we can make it fully convolutional.</p>
+<p>In this article, we are not going into more detail about anchors. We only need to know that an object detection model generates many bounding boxes, and we need to apply post-processing to eliminate redundant ones.</p>
+<p>Each predicted bounding box has a confidence score which indicates how likely (the model believes) an object exists in a bounding box. For example, the model may output a bounding box for a dog with a confidence score of 75%. The confidence score tells us which bounding boxes are more important (or less important). So, we can use it to rank bounding boxes. We’ll call it “<strong>score</strong>” in this article.</p>
+<p>Now, we are ready to discuss how NMS works. For simplicity, we’ll deal with only one class (“dog”). Doing so does not change the nature of NMS. We’ll touch upon the multi-class case later on.</p>
+</section>
+<section id="non-maximum-suppression" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="non-maximum-suppression"><span class="header-section-number">2</span> Non-Maximum Suppression</h2>
+<p>As the name suggests, NMS means “suppress the ones that are not maximum (score)”. We are eliminating predicted bounding boxes overlapping with the highest score bounding box. For example, the image below has multiple predicted bounding boxes for a dog, and those bounding boxes overlap each other.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/nms-bounding-boxes.png" class="img-fluid figure-img" style="width:30.0%"></p>
+<figcaption>Overlapping Bounding Boxes</figcaption>
+</figure>
+</div>
+<p>Since each bounding box has a score, we can sort them by descending order. Suppose the red bounding box has the highest score.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/nms-confidence-scores.png" class="img-fluid figure-img" style="width:30.0%"></p>
+<figcaption>Confidence Scores</figcaption>
+</figure>
+</div>
+<p>For each of the blue bounding boxes (with a lower score than the red one), we calculate the IoU (<a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">Intersection over Union</a>) with the red one. An IoU value represents an overlap between two boxes, ranging from 0 (no overlap) to 1 (maximum overlap). The below image shows the IoU concept, where the black part is an overlap area (intersection) between two boxes. Then, we calculate the IoU between the blue and red boxes as the intersection over the union area of the two boxes.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/intersection-over-union.png" class="img-fluid figure-img" style="width:40.0%"></p>
+<figcaption>IoU</figcaption>
+</figure>
+</div>
+<p>We set an IoU threshold (hyperparameter) to determine if two predicted bounding boxes are for the same object or not. Let’s say we use 0.5 as the IoU threshold. If the above blue and red boxes overlap with an IoU value of 0.5 or more, we say they are for the same object (“dog” in this case), and we should suppress (eliminate) the blue box because the red box has a higher score. As we repeat the steps, we eliminate all overlapping (lower score) bounding boxes and leave the highest score one. And that’s how NMS works for a single dog case.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/nms-single-dog.png" class="img-fluid figure-img" style="width:30.0%"></p>
+<figcaption>Non-Maximum Suppression</figcaption>
+</figure>
+</div>
+<p>Even if there is more than one dog, the process works the same way. We sort all bounding boxes by score and repeat, eliminating the lower score bounding boxes as per the IoU threshold hyperparameter. First, we eliminate all overlapping bounding boxes for the highest score bounding box. Then, we’ll find the next highest score bounding box that does not overlap with the highest score bounding box to eliminate lower score ones. And the process repeats.</p>
+<p>The following summarizes the NMS steps for one class:</p>
+<ol type="1">
+<li>Prepare an empty list for selected bounding boxes. <code>outputs = []</code></li>
+<li>Sort all bounding boxes by score (descending) and call the list <code>bboxes</code>.</li>
+<li>Take out the highest score bounding box from <code>bboxes</code> and put it into <code>outputs</code>.</li>
+<li>Calculate IoU between the highest score bounding box with other bounding boxes in <code>bboxes</code>. We remove bounding boxes from <code>bboxes</code> if IoU is 0.5 or higher. (The IoU threshold is a hyperparameter).</li>
+<li>If <code>bboxes</code> is not empty, we repeat the process from step 3.</li>
+<li>Finally, we return <code>outputs</code> containing the non-overlapping bounding boxes (per the IoU threshold).</li>
+</ol>
+<p>Hopefully, NMS is not that scary or complicated to understand. In reality, we’d use a function provided by a library like PyTorch (<a href="https://pytorch.org/vision/stable/ops.html#torchvision.ops.nms" target="_blank">torchvision.ops.nms</a>), so it’s easy to perform NMS. YOLOv5 also uses that internally.</p>
+<p>Now, let’s extend the process to multiple classes.</p>
+<section id="dealing-with-multiple-classes" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="dealing-with-multiple-classes"><span class="header-section-number">2.1</span> Dealing with Multiple Classes</h3>
+<p>So far, we have talked about one “dog” class only. We must deal with multiple classes like “cat” and others in real object detection datasets. In this case, we perform NMS for each class as an object-detection model outputs scores for all classes the target dataset supports.</p>
+<p>If there are 80 classes, a model produces 80 probabilities per bounding box. For example, a model would predict a bounding box with confidence scores like 75% “dog”, 20% “cat”, and some probabilities for the other 78 classes. There would be many bounding boxes, each with 80 probabilities.</p>
+<p>We perform NMS independently for each class, ranking bounding boxes by score within one class. We do that for “dog”, “cat”, and others. It can work well even when a dog and a cat are very close to each other since we are dealing with different classes separately, overlapping bounding boxes for different classes can survive NMS.</p>
+<p>However, we may not want to repeat NMS for each class because it takes too much time.</p>
+</section>
+<section id="dealing-with-slowness" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="dealing-with-slowness"><span class="header-section-number">2.2</span> Dealing with Slowness</h3>
+<p>NMS is a sequential process, and it cannot run in parallel. We are dealing with 80 or so classes, so running NMS for thousands of bounding boxes may take too much time. For example, to detect running vehicles via a stream of video images, we’d want to reduce latency as much as possible.</p>
+<p>Therefore, implementations such as YOLOv5 shift the (x, y) coordinates of bounding boxes for each class so that bounding boxes in one class never overlap with bounding boxes in another class. Such an arrangement allows one NMS process to handle all classes in an image in one NMS function call instead of 80 NMS function calls.</p>
+</section>
+<section id="eliminate-low-score-predictions-first" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="eliminate-low-score-predictions-first"><span class="header-section-number">2.3</span> Eliminate Low Score Predictions First</h3>
+<p>Since more bounding boxes require more time in NMS, we should probably eliminate low-score predictions as they will likely not survive NSM anyway.</p>
+<p><img src="images/non-maximum-suppression.png" class="img-fluid" style="width:70.0%"></p>
+<p>In other words, we set a confidence threshold to eliminate bounding boxes with less than a specific score value. It’s yet another hyperparameter. For example, we could set the confidence threshold to 0.05 and eliminate all bounding boxes with 0.05 or lower scores before starting NMS. If the confidence threshold is high enough, it can remove many bounding boxes and dramatically improve the speed.</p>
+<p><img src="images/non-maximum-suppression2.png" class="img-fluid" style="width:70.0%"></p>
+<p>However, it can sacrifice the accuracy (<a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP</a>) because a lower score does not necessarily mean the prediction is wrong. So, we should be careful when setting this hyperparameter, as it balances speed and accuracy.</p>
+<p>Another way of eliminating lower score bounding boxes is to limit the number of bounding boxes we give to NMS. It is another hyperparameter. For example, if the limit is 1000, we enter only the top 1000 bounding boxes into NMS. Since we have less number of bounding boxes handled by NMS, it could run a lot faster depending on the limit. In terms of accuracy, one image won’t usually have so many ground truth bounding boxes, so it may still produce a good mAP. However, as mentioned before, a low score does not necessarily mean the prediction is wrong. So, this approach still requires us to adjust the hyperparameter carefully.</p>
+</section>
+<section id="non-maximum-suppression-speed-versus-map" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="non-maximum-suppression-speed-versus-map"><span class="header-section-number">2.4</span> Non-Maximum Suppression Speed versus mAP</h3>
+<p>Another way of looking at this balancing act is to adjust those hyperparameters depending on whether we focus on speed or accuracy.</p>
+<ul>
+<li>Confidence threshold</li>
+<li>IoU threshold</li>
+<li>Maximum number of bounding boxes</li>
+</ul>
+<p>If you look closely at <a href="https://github.com/ultralytics/yolov5" target="_blank">the speed test of YOLO v5 and the mAP report</a>, you can see that the parameters are adjusted differently for speed and mAP. For example, if you want to increase the speed, set the confidence threshold to a higher value (say, 0.25), and if you want to improve mAP, set the confidence threshold to a lower value (say, 0.001).</p>
+<p><strong>Reproduce mAP</strong> by:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>python test.py <span class="op">--</span>data coco.yaml <span class="op">--</span>img <span class="dv">640</span> <span class="op">--</span>conf <span class="fl">0.001</span> <span class="op">--</span>iou <span class="fl">0.65</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Reproduce speed</strong> by:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>python test.py <span class="op">--</span>data coco.yaml <span class="op">--</span>img <span class="dv">640</span> <span class="op">--</span>conf <span class="fl">0.25</span> <span class="op">--</span>iou <span class="fl">0.45</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><cite><a href="https://github.com/ultralytics/yolov5/blob/master/README.md" target="_blank">https://github.com/ultralytics/yolov5/blob/master/README.md</a></cite></p>
+<p>Looking at the above settings, the IoU threshold (<code>--iou</code>) is also set low in the speed test so that the NMS execution is faster, excluding bounding boxes with a small overlap.</p>
+</section>
+</section>
+<section id="references" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="references"><span class="header-section-number">3</span> References</h2>
+<ul>
+<li><a href="../../blog/2022-05-23-object-detection-vs-image-classification/" target="_blank">Object Detection vs Image Classification</a></li>
+<li><a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">IoU (Intersection over Union)</a></li>
+<li><a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP (mean Average Precision)</a></li>
+<li><a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">NMS (Non-maximum Suppression)</a></li>
+<li><a href="https://towardsdatascience.com/non-maximum-suppression-nms-93ce178e177c" target="_blank">Non-maximum Suppression (NMS)</a><br>
+<a href="https://medium.com/@SambasivaraoK" target="_blank">Sambasivarao. K</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

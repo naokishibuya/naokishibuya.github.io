@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2019-08-05">
+
+<title>Raspberry Pi 3 for the Second Time – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#restart-the-journey" id="toc-restart-the-journey" class="nav-link active" data-scroll-target="#restart-the-journey"><span class="header-section-number">1</span> Restart the journey!</a></li>
+  <li><a href="#fix-the-broken-cage" id="toc-fix-the-broken-cage" class="nav-link" data-scroll-target="#fix-the-broken-cage"><span class="header-section-number">2</span> Fix the broken cage!</a></li>
+  <li><a href="#list-up-all-the-parts" id="toc-list-up-all-the-parts" class="nav-link" data-scroll-target="#list-up-all-the-parts"><span class="header-section-number">3</span> List up all the parts!</a></li>
+  <li><a href="#attach-raspberry-pi-on-the-base-plate" id="toc-attach-raspberry-pi-on-the-base-plate" class="nav-link" data-scroll-target="#attach-raspberry-pi-on-the-base-plate"><span class="header-section-number">4</span> Attach Raspberry Pi on the base plate!</a></li>
+  <li><a href="#wire-up-the-servo-driver" id="toc-wire-up-the-servo-driver" class="nav-link" data-scroll-target="#wire-up-the-servo-driver"><span class="header-section-number">5</span> Wire up the Servo Driver!</a>
+  <ul class="collapse">
+  <li><a href="#the-servo-driver" id="toc-the-servo-driver" class="nav-link" data-scroll-target="#the-servo-driver"><span class="header-section-number">5.1</span> The servo driver</a></li>
+  <li><a href="#raspberry-pis-gpio-pins" id="toc-raspberry-pis-gpio-pins" class="nav-link" data-scroll-target="#raspberry-pis-gpio-pins"><span class="header-section-number">5.2</span> Raspberry Pi’s GPIO pins</a></li>
+  <li><a href="#the-cable-color-scheme" id="toc-the-cable-color-scheme" class="nav-link" data-scroll-target="#the-cable-color-scheme"><span class="header-section-number">5.3</span> The cable color scheme</a></li>
+  <li><a href="#about-i2c" id="toc-about-i2c" class="nav-link" data-scroll-target="#about-i2c"><span class="header-section-number">5.4</span> About I2C</a></li>
+  </ul></li>
+  <li><a href="#connect-the-voltage-converter" id="toc-connect-the-voltage-converter" class="nav-link" data-scroll-target="#connect-the-voltage-converter"><span class="header-section-number">6</span> Connect the Voltage Converter!</a></li>
+  <li><a href="#slide-down-the-wide-angle-camera" id="toc-slide-down-the-wide-angle-camera" class="nav-link" data-scroll-target="#slide-down-the-wide-angle-camera"><span class="header-section-number">7</span> Slide down the wide-angle camera!</a></li>
+  <li><a href="#install-the-donkey-car-software" id="toc-install-the-donkey-car-software" class="nav-link" data-scroll-target="#install-the-donkey-car-software"><span class="header-section-number">8</span> Install the donkey car software!</a></li>
+  <li><a href="#remote-control-the-robocar" id="toc-remote-control-the-robocar" class="nav-link" data-scroll-target="#remote-control-the-robocar"><span class="header-section-number">9</span> Remote control the robocar!</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">10</span> Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">11</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Raspberry Pi 3 for the Second Time</h1>
+<p class="subtitle lead">Let’s Build a Vehicle</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Self-Driving Cars</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 5, 2019</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Raspberry Pi 3 for the Second Time: Let's Build a Vehicle"></p>
+<section id="restart-the-journey" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="restart-the-journey"><span class="header-section-number">1</span> Restart the journey!</h2>
+<p>It’s been 1.5 years since I wrote the <a href="raspberry-pi-3-for-the-first-time/" target="_blank">Raspberry Pi 3 for the First Time</a> article. I wanted to build a mobile robot (i.e., a small autonomous vehicle) so that I could use Raspberry Pi 3 to control it. I hoped to run some cool algorithm (whatever that is) on it.</p>
+<p>I did build a few mobile robots.</p>
+<p><img src="images/image-18.jpeg" class="img-fluid"></p>
+<p>But I was unsure how to control these robots using Raspberry Pi 3.</p>
+<p>What device do I need to control the steering angle? How do I send acceleration signals to the motor? I need a reference machine that works to understand the mechanism.</p>
+<p>So, I decided to try it for the <a href="https://www.donkeycar.com" target="_blank">donkey car</a>. After all, the people who participate in the <a href="http://meetu.ps/c/2Pjj7/xyg2h/a" target="_blank">DIY Robocars Meetup</a> are using it. It shouldn’t be that hard. So I thought.</p>
+<p>I was downright wrong about it.</p>
+<p>It was not easy. It made me want to give up many times.</p>
+<p>Moreover, I made a lot of mistakes. I wanted to blog about the process, but I kept losing track of the build sequence as I went back and forth, fixing the car. I didn’t think writing about a series of unfortunate events was worthwhile.</p>
+<p>But I persisted. I pushed myself hard because I wanted to build it on the weekends. Otherwise, I would have lost motivation and stopped working on it.</p>
+<p>Eventually, I made it thus far to run the donkey car using the Raspberry Pi 3 and the Gamepad remote controller.</p>
+<p>This article is the record of the journey.</p>
+</section>
+<section id="fix-the-broken-cage" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="fix-the-broken-cage"><span class="header-section-number">2</span> Fix the broken cage!</h2>
+<p>The first mistake was that I didn’t try building a <a href="https://www.donkeycar.com" target="_blank">donkey car</a> earlier. I was indecisive about whether I should do it for over a year. I knew multiple online shops were available, and I could order one with a few clicks.</p>
+<p>I thought it would be cheating if I relied on a well-known kit. Moreover, I would miss learning opportunities by just following someone’s instructions.</p>
+<p>I was utterly wrong with this.</p>
+<p>As you will watch me fail repeatedly in this series, this is a challenging task, and there is tons of learning, especially if you are new to building such a thing.</p>
+<p>I ordered a kit from <a href="https://www.robocarstore.com" target="_blank">Robocar Store</a> (no affiliation link) simply because they provide an option that sells a package without a Raspberry Pi and micro SD card, both of which I already owned.</p>
+<p><img src="images/image-19.jpeg" class="img-fluid"></p>
+<p>It arrived in about ten days from Hong Kong to Japan. I was excited, but my full-time job kept me engaged on weekdays, so I had no time to work on the package.</p>
+<p>Every night, after coming home from work, I watched the box and imagined the fun of building the car on the weekend.</p>
+<p>Four days later, on a Saturday morning, I opened the box with my heart pounding.</p>
+<p><img src="images/image-20.jpeg" class="img-fluid"></p>
+<p>I stared at the 3D-printed cage in two parts for a moment.</p>
+<p><img src="images/image-21.jpeg" class="img-fluid"></p>
+<p><img src="images/image-22.jpeg" class="img-fluid"></p>
+<p>Yes, I saw it right. It’s broken. The breakage must have happened somewhere between Hong Kong and Japan.</p>
+<p>Calm down. It must have come with a warranty.</p>
+<p>The kit included a paper that says:</p>
+<blockquote class="blockquote">
+If any part is missing or malfunctioning, please contact us within three days of receipt, and we’ll arrange to reship or exchange to you.
+</blockquote>
+<p>Was I too late to notice the problem? I should’ve checked the product as soon as it arrived. My heart was pounding strange beats.</p>
+<p><em>Why didn’t I order from a shop in Japan? If a part is broken or missing, they can send me a replacement faster. Was it worth trying to save the cost of Raspberry Pi 3 and micro SD card by ordering from <em>overseas? Why didn’t I consider the worst-case</em> scenario?</em></p>
+<p>I emailed the Robocar store with some images of the broken parts. I got a reply within an hour, and they promised to send me a new one. What a relief!</p>
+<p>But I didn’t want to wait another week to build the donkey car. I should strike while my motivation is hot.</p>
+<p>So, I applied glue to the disconnected surfaces of the 3D-printed cage and patched it up with vinyl tape.</p>
+<p><img src="images/image-23.jpeg" class="img-fluid"></p>
+<p><img src="images/image-24.jpeg" class="img-fluid"></p>
+<p>I was proud that I was able to do that. I just needed to be resourceful to deal with any issue and move on.</p>
+<p>Let’s open up this little monster to conduct an operation, shall we?</p>
+<p><img src="images/image-25.jpeg" class="img-fluid"></p>
+<p><img src="images/image-26.jpeg" class="img-fluid"></p>
+</section>
+<section id="list-up-all-the-parts" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="list-up-all-the-parts"><span class="header-section-number">3</span> List up all the parts!</h2>
+<p>I removed four clips, two from the front and two from the back.</p>
+<p><img src="images/image-27.jpeg" class="img-fluid"></p>
+<p><img src="images/image-28.jpeg" class="img-fluid"></p>
+<p>I slowly and carefully opened the cover.</p>
+<p><img src="images/image-29.jpeg" class="img-fluid"></p>
+<p>When I finished opening the cover, I found a small switch attached.</p>
+<p><img src="images/image-30.jpeg" class="img-fluid"></p>
+<p><img src="images/image-31.jpeg" class="img-fluid"></p>
+<p>I had no idea what the use of such a switch was. For that matter, I didn’t know much about anything that came in this package.</p>
+<p>I thought I should at least know the names of all those parts and devices.</p>
+<p>There were a lot of screws and devices in the part list. So, I took them all out and ensured I had them all.</p>
+<p><img src="images/image-32.jpeg" class="img-fluid"></p>
+<p>My order didn’t include Raspberry Pi, SD card, and SD card adapter, as I already had them. Otherwise, everything was there.</p>
+<p><strong>NiMH Battery and NiMH Battery Charger</strong></p>
+<p><img src="images/image-33.jpeg" class="img-fluid"></p>
+<p><img src="images/image-34.jpeg" class="img-fluid"></p>
+<p><strong>3D Printed Roll Cage</strong></p>
+<p><img src="images/image-35.jpeg" class="img-fluid"></p>
+<p><strong>Laser Cut Acrylic Base Plate</strong></p>
+<p><img src="images/image-36.jpeg" class="img-fluid"></p>
+<p><strong>Wide Angle Camera and Camera Cable</strong></p>
+<p><img src="images/image-37.jpeg" class="img-fluid"></p>
+<p><strong>Female-Female Jumper Wire</strong></p>
+<p><img src="images/image-38.jpeg" class="img-fluid"></p>
+<p><strong>16-Channel Servo Driver PCA9685</strong></p>
+<p><img src="images/image-39.jpeg" class="img-fluid"></p>
+<p><strong>DC-DC 5V/2A Voltage Converter</strong></p>
+<p><img src="images/image-40.jpeg" class="img-fluid"></p>
+<p><strong>Mini Tamiya Splitter</strong></p>
+<p><img src="images/image-41.jpeg" class="img-fluid"></p>
+<p><strong>USB cable</strong></p>
+<p><img src="images/image-42.jpeg" class="img-fluid"></p>
+<p><strong>M3x12mm PT Screws (3)</strong></p>
+<p><img src="images/image-43.jpeg" class="img-fluid"></p>
+<p><strong>M2.5 Hexagon Copper Standoff Spacer (12)</strong></p>
+<p><img src="images/image-44.jpeg" class="img-fluid"></p>
+<p><strong>M2.5 Nuts (12)</strong></p>
+<p><img src="images/image-45.jpeg" class="img-fluid"></p>
+<p><strong>M2 5x5mm Screws (10)</strong></p>
+<p><img src="images/image-46.jpeg" class="img-fluid"></p>
+<p><strong>M1.8x6mm PT Screws (2)</strong></p>
+<p><img src="images/image-47.jpeg" class="img-fluid"></p>
+<p>Checking all the part names was tedious, but it was perfect. As I followed the build instructions from <a href="https://docs.robocarstore.com" target="_blank">https://docs.robocarstore.com</a>, knowing where each part was made me work very efficiently.</p>
+<p><img src="images/image-48.jpeg" class="img-fluid"></p>
+<p>So, I did very well in this episode. Right?</p>
+<p>Yes, except that I missed a small thing that made me waste about 30 minutes. I will talk about that a few sections down the line.</p>
+</section>
+<section id="attach-raspberry-pi-on-the-base-plate" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="attach-raspberry-pi-on-the-base-plate"><span class="header-section-number">4</span> Attach Raspberry Pi on the base plate!</h2>
+<p>Let’s go back to where I was.</p>
+<p>I removed four clips, two from the front and two from the back.</p>
+<p><img src="images/image-49.jpeg" class="img-fluid"></p>
+<p><img src="images/image-50.jpeg" class="img-fluid"></p>
+<p>I didn’t realize that time, but I needed those clips later to fix the base plate on the car, which holds the Raspberry Pi. So, if you happen to follow this, you will need to keep them aside.</p>
+<p>Next, I slowly and carefully opened the cover.</p>
+<p><img src="images/image-51.jpeg" class="img-fluid"></p>
+<p>When I finished opening the cover, I found a small switch attached.</p>
+<p><img src="images/image-52.jpeg" class="img-fluid"></p>
+<p><img src="images/image-53.jpeg" class="img-fluid"></p>
+<p>I had no idea what the use of such a switch was.</p>
+<p>But I knew I wouldn’t use the cover, so I removed the switch.</p>
+<p><img src="images/image-54.jpeg" class="img-fluid"></p>
+<p>I saw white stuff in the middle, which turned out to be where the RC receiver was.</p>
+<p><img src="images/image-55.jpeg" class="img-fluid"></p>
+<p>The shop removed it as robocars don’t need it. Hence, not included in the kit.</p>
+<hr>
+<p>From here, I followed the instructions from <a href="https://docs.robocarstore.com" target="_blank">https://docs.robocarstore.com</a>, which originates from <a href="http://docs.donkeycar.com" target="_blank">http://docs.donkeycar.com</a>, but the contents are specifically for the Donkey Car Kit from the <a href="https://robocarstore.com/" target="_blank">Robocar store</a>.</p>
+<p>First, I started peeling off the protection sheet from the base plate.</p>
+<p><img src="images/image-56.jpeg" class="img-fluid"></p>
+<p><img src="images/image-57.jpeg" class="img-fluid"></p>
+<p>According to the documentation, many people missed that they needed to peel off the protection. It would be best not to miss it because the base plate has a beautiful transparent body.</p>
+<p><img src="images/image-58.jpeg" class="img-fluid"></p>
+<p>Next, I mounted the M2.5 Hexagon Copper Standoff Spacer and M2.5 Nuts to the base plate.</p>
+<p><img src="images/image-59.jpeg" class="img-fluid"></p>
+<p><img src="images/image-60.jpeg" class="img-fluid"></p>
+<p>It took no time to do this, thanks to well-prepared nuts and bolts.</p>
+<p><img src="images/image-61.jpeg" class="img-fluid"></p>
+<p><img src="images/image-62.jpeg" class="img-fluid"></p>
+<p>After that, I attached Raspberry Pi to the base plate using the M2 5x5mm Screws.</p>
+<p><img src="images/image-63.jpeg" class="img-fluid"></p>
+<p>You need four skews to attach Raspberry Pi to the base plate.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-64.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-65.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+<p>Then, I attached 16-Channel Servo Driver PCA9685 to the base plate using the same M2 5x5mm Screws. Again, you need to use four skews for the servo driver.</p>
+<p><img src="images/image-66.jpeg" class="img-fluid"></p>
+<p>Finally, I again attached the DC-DC 5V/2A Voltage Converter to the base plate using the same M2 5x5mm Screws. But there are only two of the M2 5x5mm Screws left. Don’t I need four screws?</p>
+<p><img src="images/image-67.jpeg" class="img-fluid"></p>
+<p>DC-DC 5V/2A Voltage Converter has four holes for screws, but only two can fit the M2 5x5mm Screws. As it turns out, the other two don’t need any screws. Who would know that!?</p>
+<p>I spent 10–15 minutes trying to use M1.8x6mm PT Screws for the two holes, but they don’t fit. So, it would be best if you did not try that.</p>
+<p>They are for electric power. You can see the texts near the holes that read “5V+” and “GND” (Ground).</p>
+<p><img src="images/image-68.jpeg" class="img-fluid"></p>
+<p>By this time, the base plate had everything on it.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-69.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+<p>Let’s wire them up!</p>
+</section>
+<section id="wire-up-the-servo-driver" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="wire-up-the-servo-driver"><span class="header-section-number">5</span> Wire up the Servo Driver!</h2>
+<p>But wait. What are these small blue boards (the servo driver and the voltage converter) doing?</p>
+<section id="the-servo-driver" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="the-servo-driver"><span class="header-section-number">5.1</span> The servo driver</h3>
+<p>First, we are connecting the servo driver to Raspberry Pi. The servo driver in this kit is the 16-Channel Servo Driver PCA9685.</p>
+<p><img src="images/image-70.jpeg" class="img-fluid"></p>
+<p>A servo driver is a device that can control the servo motors. The 16-Channel Servo Driver PCA9685 can handle up to 16 servo motors.</p>
+<p><img src="images/image-71.jpeg" class="img-fluid"></p>
+<p>We have two servo motors on the car: one for controlling the wheel angle and the other for speed control.</p>
+<p>The speed controller is not strictly a servo motor but can accept the same signals from the servo driver. So, from the servo driver’s point of view, it appears as a servo motor. I will explain more details in the next episode.</p>
+<p><img src="images/image-72.jpeg" class="img-fluid"></p>
+<p>We use the Female-Female Jumper Wire to connect Rasberry Pi to the servo driver so that a program on Rasberry Pi (like the donkey car software) can control multiple servo motors.</p>
+<p><img src="images/image-73.jpeg" class="img-fluid"></p>
+<p>So, what are those four wires connecting?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-74.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+</section>
+<section id="raspberry-pis-gpio-pins" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="raspberry-pis-gpio-pins"><span class="header-section-number">5.2</span> Raspberry Pi’s GPIO pins</h3>
+<p>Raspberry Pi 3 has 40 GPIO (General Purpose Input Output) pins to communicate with other devices.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-75.jpeg" class="img-fluid figure-img"></p>
+<figcaption>https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/#prettyPhoto</figcaption>
+</figure>
+</div>
+<p>We use the 3v3 (Power), GPIO2 (SDA1 I2C), GPIO3 (SCL1 I2C), and Ground pins. Power and Ground are for electricity supply. SDA and SCL are for I2C communications — more on this later.</p>
+<p><img src="images/image-76.jpeg" class="img-fluid"></p>
+</section>
+<section id="the-cable-color-scheme" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="the-cable-color-scheme"><span class="header-section-number">5.3</span> The cable color scheme</h3>
+<p>When I connected the four cables to Raspberry Pi, I didn’t know which color should go to which pin.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-77.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+<p>As it turned out, there is no standard for the cable colors except for a dark color (i.e., black), typically used for the ground.</p>
+<p>For the servo driver, you should ensure the ground goes to the ground, SDA goes to SDA, SCL goes to SCL, and 3v3 goes to VCC (power) on the servo driver.</p>
+<p><img src="images/image-78.jpeg" class="img-fluid"></p>
+<p>The cable colors help you to match the corresponding pins.</p>
+</section>
+<section id="about-i2c" class="level3" data-number="5.4">
+<h3 data-number="5.4" class="anchored" data-anchor-id="about-i2c"><span class="header-section-number">5.4</span> About I2C</h3>
+<p>SCL stands for ”serial clock”, and SDA for ”serial data”. These terms are part of the I2C bus specification.</p>
+<p>Quoting from the I2C Info website:</p>
+<blockquote class="blockquote">
+A bus means specification for the connections, protocol, formats, addresses and procedures that define the rules on the bus.
+</blockquote>
+<p>It allows devices to communicate with each other as long as they follow the rules defined in the I2C specificities.</p>
+<p>As per Wikipedia, I2C stands for “Inter-Integrated Circuit” (whatever that means), pronounced as “I-Two-C” or “I-I-C”. But I heard someone says “I-Squared-C”. So, be aware.</p>
+<p>The thing is that it uses only two wires to communicate with multiple devices. We already know what those two wires are. They are SCL and SDA.</p>
+<p><img src="images/image-157.png" class="img-fluid"></p>
+<p>Both Raspberry Pi and the 16-Channel Servo Driver PCA9685 support I2C to communicate. As such, we need to connect and match the pins for the same purpose.</p>
+<p>As a metaphor, you can think of a USB-C cable that allows devices to communicate with each other as long as both devices support the USB-C bus.</p>
+<p>I2C is unique in that a slow device can communicate with a faster device without slowing down the faster one by synchronizing the timing using the clock signals via the SCL line.</p>
+<p>For more details, I listed links in the reference section at the end of this episode.</p>
+<hr>
+<p>One more thing: I will need to connect two servo motors to the servo driver since we want to control them, but I will come to that after attaching the base plate to the car body.</p>
+<p>Next, look at the other blue board: DC-DC 5V/2A Voltage Converter.</p>
+</section>
+</section>
+<section id="connect-the-voltage-converter" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="connect-the-voltage-converter"><span class="header-section-number">6</span> Connect the Voltage Converter!</h2>
+<p>Let’s wire the DC-DC 5V/2A Voltage Converter!</p>
+<p><img src="images/image-79.jpeg" class="img-fluid"></p>
+<p>It has a USB port through which you can supply electricity to your Rasberry Pi.</p>
+<p><strong>DC vs.&nbsp;AC</strong></p>
+<p>DC stands for Direct Current as opposed to AC, which stands for Alternating Current. AC is suitable for long-distance transmissions, which is why electricity from the house wall electricity socket is AC.</p>
+<p>A battery uses chemical reactions to generate electricity, which can only be DC. Motors and Raspberry Pi also use DC.</p>
+<p>A DC-DC voltage converter takes DC electricity in one voltage and outputs DC electricity in a different voltage.</p>
+<p>The DC-DC 5V/2A Voltage Converter converts an input of 4.5–40V into a stable 5V 2A output.</p>
+<p><strong>The battery</strong></p>
+<p>The battery is secured on the car’s body. We can take it out to see the whole body.</p>
+<p><img src="images/image-80.jpeg" class="img-fluid"></p>
+<p><img src="images/image-81.jpeg" class="img-fluid"></p>
+<p><img src="images/image-82.jpeg" class="img-fluid"></p>
+<p>It says, “HSP Ni-MH SC 7.2V 1100 mAh”. The voltage converter can handle 7.2V, within the 4.5–40V input range. That should be obvious, as they came in the same package, but it’s good to know.</p>
+<p><strong>Warning</strong></p>
+<p>There is a yellow sticker that has a warning.</p>
+<p><img src="images/image-83.jpeg" class="img-fluid"></p>
+<p><img src="images/image-84.jpeg" class="img-fluid"></p>
+<blockquote class="blockquote">
+The electronic speed controller (ESC) on this model is designed to operate with 7.2V 1000 m Ah — 1500 m Ah No-MH battery only. Operating beyond the ESC’s recommended specification (using the incorrect type of battery or higher capacity battery) might damage the ESC.
+</blockquote>
+<p>Since our battery came in the package, there is no problem here. But if you plan to replace the battery, you must pay attention to it.</p>
+<p><strong>ESC</strong></p>
+<p>The electronic speed controller (ESC) talks to the DC motor to adjust the car’s speed.</p>
+<p><img src="images/image-85.jpeg" class="img-fluid"></p>
+<p>ESC can accept signals from the servo driver so it appears as a servo motor from the servo driver’s point of view.</p>
+<p>I revised the diagram from the last episode to clarify the point.</p>
+<p><img src="images/image-86-720x1024.jpeg" class="img-fluid"></p>
+<p><strong>Mini Tamiya Splitter</strong></p>
+<p>We use the Mini Tamiya Splitter to connect the battery to the voltage converter and to ESC.</p>
+<p><img src="images/image-87.jpeg" class="img-fluid"></p>
+<p>The cable exposes the metal parts which should go into the power inputs of the voltage converter.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-88.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+<p>So, I loosened the power inputs.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-89.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+<p>But the metal parts were quite thick and wouldn’t go inside. I tried loosening more. However, it was already fully opened.</p>
+<p><img src="images/image-90.jpeg" class="img-fluid"></p>
+<p>After some struggle, I thought, “Why don’t I just flatten them?” So, I did.</p>
+<p><img src="images/image-91.jpeg" class="img-fluid"></p>
+<p>Then, they fit perfectly into the power inputs. I tightened the holes with a screwdriver, which were nicely fixed.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/image-92.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Raspberry Pi</figcaption>
+</figure>
+</div>
+<p><strong>DC-DC 5V/2A Voltage Converter</strong></p>
+<p>The voltage converter has two types of outputs: the USB output and the two small holes (output + and -) which I was sadly trying to insert a screw two episodes ago.</p>
+<p><img src="images/image-93.jpeg" class="img-fluid"></p>
+<p>As we use the USB output, the USB output enables the button should be pressed, and the USB indicator should light up when there is electricity.</p>
+<p>The lower power button puts the voltage converter into standby mode, effectively turning off the device. The USB output will stop supplying electricity.</p>
+<p>In my case, the USB output enables button was on, and the lower power button was off from the box, which is probably the factory default. So I didn’t need to change anything on the voltage converter. You may want to check these settings if your USB output isn’t working.</p>
+<p><img src="images/image-94.jpeg" class="img-fluid"></p>
+<p>The voltmeter displays incoming voltage, which varies depending on how much the battery is charged. Although it should be around 7.2V, it can go above 8V when the battery is fully charged. The output of the voltage converter is 5V 2A regardless.</p>
+<p>If the voltmeter shows a low number, you can charge the battery with the NiMH Battery Charger.</p>
+<p><img src="images/image-95.jpeg" class="img-fluid"></p>
+<p><strong>The whole picture</strong></p>
+<p>Later, when the base plate is fixed on the car, I will convert the whole thing as shown in the below image.</p>
+<p><img src="images/image-96.jpeg" class="img-fluid"></p>
+<p>Well, we’re still missing the camera in the picture. Let’s work on that in the next section.</p>
+<p><img src="images/image-97.jpeg" class="img-fluid"></p>
+<hr>
+<p>Last but not least, be careful when dealing with electricity. Don’t touch any electrical parts.</p>
+</section>
+<section id="slide-down-the-wide-angle-camera" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="slide-down-the-wide-angle-camera"><span class="header-section-number">7</span> Slide down the wide-angle camera!</h2>
+<p><img src="images/image-98.jpeg" class="img-fluid"></p>
+<p>There are two problems in the above pictures. Can you tell me what they are?</p>
+<p>If not, you’ll be glad that you are reading this article.</p>
+<hr>
+<p>Raspberry Pi has built-in support for camera modules. As such, it should be easy to plug the cable into the camera and connect it to Raspberry Pi.</p>
+<p>So, I connected the Wide Angle Camera and Camera Cable. The first problem was here. I inserted the Camera Cable incorrectly. I should have flipped the cable around.</p>
+<p><img src="images/image-99.jpeg" class="img-fluid"></p>
+<p><img src="images/image-100.jpeg" class="img-fluid"></p>
+<p>Without noticing the problem, I went ahead and connected the Camera Cable to Raspberry Pi — again incorrectly. This time, it’s connected to the wrong place.</p>
+<p><img src="images/image-101.jpeg" class="img-fluid"></p>
+<p>I inserted the cable to the DSI, not the camera module port!</p>
+<p>So, please do not refer to the above images when you work on the camera module.</p>
+<p><img src="images/image-102.jpeg" class="img-fluid"></p>
+<p>FYI — there is a detailed description of how to connect the camera module on the Raspberry Pi website.</p>
+<p>[embed]https://projects.raspberrypi.org/en/projects/getting-started-with-picamera[/embed]</p>
+<hr>
+<p>Without realizing my mistakes, I attached the 3D Printed Roll Cage to the base plate.</p>
+<p><img src="images/image-103.jpeg" class="img-fluid"></p>
+<p>Again, the camera module Cable was still in the wrong place.</p>
+<p><img src="images/image-104.jpeg" class="img-fluid"></p>
+<p><img src="images/image-105.jpeg" class="img-fluid"></p>
+<p>Then, I slid the Wide Angle Camera into the cage.</p>
+<p><img src="images/image-106.jpeg" class="img-fluid"></p>
+<p><img src="images/image-107.jpeg" class="img-fluid"></p>
+<p><img src="images/image-108.jpeg" class="img-fluid"></p>
+<p>The Camera sits there perfectly. It didn’t seem necessary to use the M1.8x6mm PT Screws, but I did anyway, which was the wrong thing to do.</p>
+<p>Even worse, it took quite some time to do it because the surface of the slit area is not flat at all, as you can see from the images.</p>
+<p><img src="images/image-109.jpeg" class="img-fluid"></p>
+<p><img src="images/image-110.jpeg" class="img-fluid"></p>
+<p>Later on, I noticed that the description in the part list says it clearly.</p>
+<blockquote class="blockquote">
+M1.8x6mm PT Screws (for mounting the camera)
+</blockquote>
+<blockquote class="blockquote">
+Not applicable for the new cage. Slide the camera in instead.
+</blockquote>
+<p>If you’ve read the earlier episode, I checked all the parts and laid them out neatly so that I could find them efficiently. That was a great thing to do, except that I didn’t go back to the part list after that and missed the description completely.</p>
+<hr>
+<p>Without realizing all those mistakes, I attached the base plate to the car using the four clips we put aside in the earlier episode.</p>
+<p><img src="images/image-111.jpeg" class="img-fluid"></p>
+<p><img src="images/image-112.jpeg" class="img-fluid"></p>
+<p><img src="images/image-113.jpeg" class="img-fluid"></p>
+<p><img src="images/image-114.jpeg" class="img-fluid"></p>
+<p>After this, I connected ESC and the servo motor to the servo controller so that Raspberry Pi could control them.</p>
+<p><img src="images/image-115.jpeg" class="img-fluid"></p>
+<p><img src="images/image-116.jpeg" class="img-fluid"></p>
+<p><img src="images/image-117.jpeg" class="img-fluid"></p>
+<p>ESC goes to channel 0, and the servo motor goes to channel 1.</p>
+<p><img src="images/image-118.jpeg" class="img-fluid"></p>
+<p>Then, I connected all the other cables: the voltage converter to Raspberry Pi via the USB cable and the battery to ESC, and the voltage converter:</p>
+<p><img src="images/image-119.jpeg" class="img-fluid"></p>
+<p>Be careful with electricity when you do this. The battery will send electricity to the parts:</p>
+<p><img src="images/image-120.jpeg" class="img-fluid"></p>
+<p><img src="images/image-121.jpeg" class="img-fluid"></p>
+<p>The voltmeter lit up the input voltage, which reads 7.4V. Everything looked ok to me, as I didn’t notice the camera cable issue yet.</p>
+<p>So, I said to myself — now that the hardware is set up, I only need to install the donkey car software on the micro SD card and slot that into Raspberry Pi!</p>
+<p><img src="images/image-122.jpeg" class="img-fluid"></p>
+<p><img src="images/image-123.jpeg" class="img-fluid"></p>
+</section>
+<section id="install-the-donkey-car-software" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="install-the-donkey-car-software"><span class="header-section-number">8</span> Install the donkey car software!</h2>
+<p>I finished building the hardware. I just needed to install the donkey car software on the micro SD card and slot that into Raspberry Pi.</p>
+<p>But first, I had to install the Raspbian OS.</p>
+<p><strong>Raspbian OS</strong></p>
+<p>Two years ago, I installed Raspbian on Raspberry Pi. So, I knew what to do.</p>
+<p>I went to the Raspberry Pi website and downloaded Raspbian Buster — the latest version.</p>
+<p>And this was the wrong thing to do.</p>
+<p>The donkey car doesn’t support Raspbian Buster. It supports the previous version, Raspbian Stretch. When I was working on the vehicle, Raspbian Buster had only been released less than a month ago.</p>
+<p><img src="images/image-124.jpeg" class="img-fluid" style="width:60.0%"></p>
+<p>So, I downloaded Raspbian Stretch and followed instructions to copy the OS onto the micro SD card, which requires an SD card adapter.</p>
+<p><img src="images/image-125.jpeg" class="img-fluid" style="width:30.0%"></p>
+<p><img src="images/image-126.jpeg" class="img-fluid" style="width:30.0%"></p>
+<p>Also, you’ll need an SD card reader (built-in or external).</p>
+<p><strong>What’s wrong with my SD card?</strong></p>
+<p>I found an SD card reader from a box of junk cables at home, so I can’t throw away things. Even though they may not spark joy, junk could be helpful one day.</p>
+<p><img src="images/image-127.jpeg" class="img-fluid" style="width:60.0%"></p>
+<p><img src="images/image-128.jpeg" class="img-fluid" style="width:60.0%"></p>
+<p>I connected the SD card reader to my Linux PC, but it did not recognize the SD card for some reason.</p>
+<p>I searched for a solution on the internet for a while but couldn’t find a way to read the SD card or even format it.</p>
+<p>I tried it on my Mac mini as well but in vain. I started suspecting something wrong with the SD card reader, but that SD card reader was the only one I could find at home.</p>
+<p><em>Should I go out and buy a new SD card reader? But how would I know that would fix the problem?</em></p>
+<p>I suddenly remembered that my wife’s PC had Windows 10 and a built-in SD card reader. I borrowed it from her and inserted the SD card. I could access it!</p>
+<p>I formatted the card, thanked my wife with a big smile, and returned to my Linux PC. Yes, I was able to copy Raspbian Stretch to it!</p>
+<p>So, that was not a problem with the SD card reader. Then, what was it? I have no idea why it worked until this date.</p>
+<p><strong>Boot up the Raspbian</strong></p>
+<p>I pushed the SD card into the Raspberry Pi’s SD card reader. It’s underneath and a bit hard to handle.</p>
+<p><img src="images/image-129.jpeg" class="img-fluid"></p>
+<p><img src="images/image-130.jpeg" class="img-fluid"></p>
+<p>I connected the battery cable to Tamiya Mini Splitter, connecting to the DC-DC voltage converter and ESC.</p>
+<p><img src="images/image-131.jpeg" class="img-fluid"></p>
+<p>The Raspbian OS started booting up.</p>
+<p><img src="images/image-132.jpeg" class="img-fluid"></p>
+<p>I had a small monitor supporting HDMI to see the boot sequence. Once the OS boots up well, you can remotely access it. So, a local monitor is not a must. But a monitor would be much more convenient as you can watch the boot sequence.</p>
+<p>For that matter, I had a USB keyboard and mouse connected to Raspberry Pi.</p>
+<p><img src="images/image-133.jpeg" class="img-fluid"></p>
+<p>In more detail, I covered similar stuff in <a href="https://medium.com/activating-robotic-minds/raspberry-pi-3-for-the-first-time-50634b115620" target="_blank">Raspberry Pi 3 for the First Time</a>.</p>
+<hr>
+<p>I updated and upgraded the OS.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get upgrade</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then, I enabled a few interfaces using the command:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> raspi-config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I enabled I12C.</p>
+<p><img src="images/image-134.jpeg" class="img-fluid"></p>
+<p><img src="images/image-135.jpeg" class="img-fluid"></p>
+<p><img src="images/image-136.jpeg" class="img-fluid"></p>
+<p>I enabled the camera support.</p>
+<p><img src="images/image-137.jpeg" class="img-fluid"></p>
+<p><img src="images/image-138.jpeg" class="img-fluid"></p>
+<p>I finished the OS setup without any problems.</p>
+<p><strong>Donkey car software installation</strong></p>
+<p>The donkey car software uses behavior cloning to control the car. As such, we need to train the machine learning model, which requires a lot of computing resources. So, the training is done on a PC (i.e., Linux machine), ideally with some GPU.</p>
+<p>For training, we need to collect data which consists of camera image frames, speed levels, and steering angles. As such, we need to manually and remotely drive the car to collect data.</p>
+<p>So, installing the donkey car software allows me to drive the car using a remote controller.</p>
+<hr>
+<p>I installed all the dependencies and cloned the Donkey software.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/autorope/donkeycar</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> donkeycar</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-e</span> .<span class="pp">[</span><span class="ss">pi</span><span class="pp">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I will not put all other details here as you can follow the instructions to set up the donkey car application on Raspbian and the training environment on a host PC.</p>
+<p>All in all, I was ready to drive the car.</p>
+</section>
+<section id="remote-control-the-robocar" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="remote-control-the-robocar"><span class="header-section-number">9</span> Remote control the robocar!</h2>
+<p>It is the final episode of the series. Thank you for reading all along. I hope you’ll enjoy this little ending too.</p>
+<p><strong>What’s wrong with my camera module?</strong></p>
+<p>When I started the donkey car application, I got an error saying it didn’t recognize the camera.</p>
+<p>I looked at the camera and immediately realized I had to remove the camera cap. So I did that.</p>
+<p><img src="images/image-139.jpeg" class="img-fluid"></p>
+<p>Still, the same error occurred.</p>
+<p>If you’ve read the penultimate episode, you know the problem. I connected the camera cable to the wrong place, and the camera cable should be twisted as well.</p>
+<p><img src="images/image-140.jpeg" class="img-fluid"></p>
+<p>I realized this while watching <a href="https://www.youtube.com/watch?v=OaVqWiR2rS0&amp;feature=youtu.be" target="_blank">Donkey Car Assembly Video</a>.</p>
+<p>I fixed the camera cable connection, and the camera error had gone.</p>
+<p><strong>Remote controller</strong></p>
+<p>The remote controller is not part of the package. It’s one of those things I bought and forgotten about. It’s Logitech F710 Wireless Gamepad with a Bluetooth wireless receiver that you can plug into the Raspberry Pi’s USB port.</p>
+<p><img src="images/image-141.jpeg" class="img-fluid"></p>
+<p>I grabbed my remote controller and controlled the wheels, which moved toward left and right as I wished. Great!</p>
+<p>But it didn’t move forward. It didn’t go back, either. Why?</p>
+<p>Soon, I realized it was because of the little switch for ESC.</p>
+<p><img src="images/image-142.jpeg" class="img-fluid"></p>
+<p>Until now, I didn’t realize the use of this little switch.</p>
+<p>I switched on ESC, and I could remote control the car around in my place.</p>
+<p>Such a wonderful feeling!</p>
+<p><img src="images/image-143.jpeg" class="img-fluid"></p>
+</section>
+<section id="conclusion" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">10</span> Conclusion</h2>
+<p>The journey ends here. It was only a two-day adventure, but I learned a ton and was delighted with the result.</p>
+<p>Now, I have a neat little hardware platform to experiment with whatever algorithm I want. I succeeded!</p>
+<hr>
+<p><strong>One last thing</strong>: the replacement for the 3D printed cage arrived a week after I contacted the robocar store. It came in a well-protected box. So, I now have a spare 3D-printed cage. 😊👍</p>
+<p><img src="images/image-144.jpeg" class="img-fluid"></p>
+<p><img src="images/image-145.jpeg" class="img-fluid"></p>
+</section>
+<section id="references" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="references"><span class="header-section-number">11</span> References</h2>
+<ul>
+<li><a href="../../blog/2017-02-09-raspberry-pi-3-for-the-first-time/" target="_blank">Raspberry Pi 3 for the First Time</a></li>
+<li><a href="https://diyrobocars.com" target="_blank">DIY Robo Cars</a></li>
+<li><a href="https://www.donkeycar.com" target="_blank">Donkey Car</a></li>
+<li><a href="https://youtu.be/OaVqWiR2rS0" target="_blank">Donkey car assembly video</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

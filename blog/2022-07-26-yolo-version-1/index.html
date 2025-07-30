@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-07-26">
+
+<title>YOLO: You Look Only Once (The 1st Version) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">1</span> Background</a></li>
+  <li><a href="#yolo-architecture" id="toc-yolo-architecture" class="nav-link" data-scroll-target="#yolo-architecture"><span class="header-section-number">2</span> YOLO Architecture</a>
+  <ul class="collapse">
+  <li><a href="#single-stage-object-detection" id="toc-single-stage-object-detection" class="nav-link" data-scroll-target="#single-stage-object-detection"><span class="header-section-number">2.1</span> Single-stage Object Detection</a></li>
+  <li><a href="#feature-extractor" id="toc-feature-extractor" class="nav-link" data-scroll-target="#feature-extractor"><span class="header-section-number">2.2</span> Feature Extractor</a></li>
+  <li><a href="#object-detector" id="toc-object-detector" class="nav-link" data-scroll-target="#object-detector"><span class="header-section-number">2.3</span> Object Detector</a></li>
+  <li><a href="#bounding-boxes-and-confidence-scores" id="toc-bounding-boxes-and-confidence-scores" class="nav-link" data-scroll-target="#bounding-boxes-and-confidence-scores"><span class="header-section-number">2.4</span> Bounding Boxes and Confidence Scores</a></li>
+  <li><a href="#conditional-class-probabilities" id="toc-conditional-class-probabilities" class="nav-link" data-scroll-target="#conditional-class-probabilities"><span class="header-section-number">2.5</span> Conditional Class Probabilities</a></li>
+  <li><a href="#confidence-score-thresholding-and-non-maximum-suppression" id="toc-confidence-score-thresholding-and-non-maximum-suppression" class="nav-link" data-scroll-target="#confidence-score-thresholding-and-non-maximum-suppression"><span class="header-section-number">2.6</span> Confidence Score Thresholding and Non-Maximum Suppression</a></li>
+  </ul></li>
+  <li><a href="#experiment-results" id="toc-experiment-results" class="nav-link" data-scroll-target="#experiment-results"><span class="header-section-number">3</span> Experiment Results</a>
+  <ul class="collapse">
+  <li><a href="#yolo-vs.-real-time-detectors" id="toc-yolo-vs.-real-time-detectors" class="nav-link" data-scroll-target="#yolo-vs.-real-time-detectors"><span class="header-section-number">3.1</span> YOLO vs.&nbsp;Real-time Detectors</a></li>
+  <li><a href="#yolo-vs.-less-than-real-time-detectors" id="toc-yolo-vs.-less-than-real-time-detectors" class="nav-link" data-scroll-target="#yolo-vs.-less-than-real-time-detectors"><span class="header-section-number">3.2</span> YOLO vs.&nbsp;Less-than Real-time Detectors</a></li>
+  <li><a href="#yolo-vs.-fast-r-cnn-for-error-analysis" id="toc-yolo-vs.-fast-r-cnn-for-error-analysis" class="nav-link" data-scroll-target="#yolo-vs.-fast-r-cnn-for-error-analysis"><span class="header-section-number">3.3</span> YOLO vs.&nbsp;Fast R-CNN for Error Analysis</a></li>
+  <li><a href="#generalizability-person-detection-in-artwork" id="toc-generalizability-person-detection-in-artwork" class="nav-link" data-scroll-target="#generalizability-person-detection-in-artwork"><span class="header-section-number">3.4</span> Generalizability: Person Detection in Artwork</a></li>
+  </ul></li>
+  <li><a href="#limitations-of-yolo" id="toc-limitations-of-yolo" class="nav-link" data-scroll-target="#limitations-of-yolo"><span class="header-section-number">4</span> Limitations of YOLO</a></li>
+  <li><a href="#towards-yolov2" id="toc-towards-yolov2" class="nav-link" data-scroll-target="#towards-yolov2"><span class="header-section-number">5</span> Towards YOLOv2</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">YOLO: You Look Only Once (The 1st Version)</h1>
+<p class="subtitle lead">An object detection model that is very fast, pretty accurate, yet simple.</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 26, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="YOLO: You Look Only Once (The 1st Version)"></p>
+<p>YOLO is an object detection model that is very fast, pretty accurate, yet simple. This article explains the architecture of YOLO (the 1st version).</p>
+<section id="background" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="background"><span class="header-section-number">1</span> Background</h2>
+<p>In 2015, Joseph Redmon (University of Washington) developed YOLO. One of his co-authors, Ross Girshick (Microsoft Research), published a paper for Faster R-CNN around the same time. They probably shared common ideas in computer vision research as there are some similarities between YOLO and Faster R-CNN. For example, both models apply convolutional layers on input images to generate feature maps. However, Faster R-CNN uses a two-stage object detection pipeline, while YOLO has no separate region proposal step and is much faster than Faster R-CNN.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Faster-R-CNN-pipeline.png" class="img-fluid figure-img"></p>
+<figcaption>Faster R-CNN pipeline</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-pipeline-1.png" class="img-fluid figure-img"></p>
+<figcaption>YOLO pipeline</figcaption>
+</figure>
+</div>
+<p>YOLO has many versions (variants). Joseph Redmon developed the first three versions of YOLO: YOLOv1, v2, and v3. Then, he quit.</p>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+I stopped doing CV research because I saw the impact my work was having. I loved the work but the military applications and privacy concerns eventually became impossible to ignore.<a href="https://t.co/DMa6evaQZr">https://t.co/DMa6evaQZr</a>
+</p>
+— Joseph Redmon (<span class="citation" data-cites="pjreddie">@pjreddie</span>) <a href="https://twitter.com/pjreddie/status/1230524770350817280?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>After YOLOv3, different groups of people developed their versions of YOLO:</p>
+<ul>
+<li><a href="https://arxiv.org/abs/2004.10934?" target="_blank">YOLOv4</a> by Alexey Bochkovskiy, et al.</li>
+<li><a href="../../blog/2022-05-08-yolov5-pytorch/" target="_blank">YOLOv5</a> by <a href="https://ultralytics.com/" target="_blank">Ultralytics</a></li>
+<li><a href="https://github.com/meituan/YOLOv6" target="_blank">YOLOv6</a> by Meituan</li>
+<li><a href="https://arxiv.org/pdf/2107.08430.pdf" target="_blank">YOLOX</a> by Zheng Ge et al.</li>
+<li><a href="https://arxiv.org/abs/2207.02696" target="_blank">YOLOv7</a> by Chien-Yao Wang et al.&nbsp;(The same people from YOLOv4)</li>
+</ul>
+<p>The YOLOv4 team, including Alexey Bochkovskiy, published the YOLOv7 paper in July 2022. So, people are still making improvements on YOLO to this date. What makes it so attractive?</p>
+<p>I believe it’s the simplicity of the architecture.</p>
+</section>
+<section id="yolo-architecture" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="yolo-architecture"><span class="header-section-number">2</span> YOLO Architecture</h2>
+<section id="single-stage-object-detection" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="single-stage-object-detection"><span class="header-section-number">2.1</span> Single-stage Object Detection</h3>
+<blockquote class="blockquote">
+We reframe object detection as a single regression problem, straight from image pixels to bounding box coordinates and class probabilities. Using our system, you only look once (YOLO) at an image to predict what objects are present and where they are. <cite>Source: <a href="https://arxiv.org/abs/1506.02640v5" target="_blank">paper</a></cite>
+</blockquote>
+<p>The YOLO pipeline is simple.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<ol type="1">
+<li>It resizes input images to 448 x 448.</li>
+<li>It runs a single convolutional network on the input images.</li>
+<li>It thresholds the resulting detections by the model’s confidence.</li>
+</ol>
+<p>The feed-forward process extracts convolutional features and regresses them into bounding box values and class probabilities. The training is also end-to-end via back-propagation.</p>
+</section>
+<section id="feature-extractor" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="feature-extractor"><span class="header-section-number">2.2</span> Feature Extractor</h3>
+<p>YOLO has 24 convolutional layers, processing input images of 448 x 448 (3 channels) to produce 7 x 7 (1024 channels) feature maps (the third last box in the below diagram).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-3.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3 of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>In other words, YOLO divides an input image into 7 x 7 grid cells, each having a 1024-dimensional vector.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2-left.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Figure 2 (left) of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>YOLO’s detector processes the feature maps to generate bounding boxes and class probabilities for each grid cell.</p>
+</section>
+<section id="object-detector" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="object-detector"><span class="header-section-number">2.3</span> Object Detector</h3>
+<p>YOLO flattens the feature maps and uses the detector (two fully-connected layers) to regress object positions (bounding boxes) and class probabilities.</p>
+<p><img src="images/YOLO-two-FCs-1024x218.png" class="width-50 img-fluid"></p>
+<p>Unlike region-based detectors, YOLO’s detector sees the features from the entire image. It learns to use global features to encode contextual information on classes and object appearance. YOLO makes fewer mistakes about the background than region-based detectors, as it can access the whole context of an image.</p>
+<blockquote class="blockquote">
+Fast R-CNN, a top detection method [14], mistakes background patches in an image for objects because it can’t see the larger context. YOLO makes less than half the number of background errors compared to Fast R-CNN. <cite>Source: <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></cite>
+</blockquote>
+<p>The last fully-connected layer outputs a 1470-dimensional vector, which has the layout shown below:</p>
+<p><img src="images/YOLO-1470d-vector-layout.png" class="img-fluid"></p>
+<p>At a glance, this may not make any obvious sense. But if you look closely, there are 49 sets of values. 49 is the number of grid cells (= 7 x 7). In other words, each cell contains 30 (= 1470 / 49) values. So, YOLO can treat the 1470-dimensional vector like a 7 x 7 x 30 tensor of predictions.</p>
+<p>As a side note, the YOLO implementation (<a href="https://github.com/pjreddie/darknet" target="_blank">Darknet</a>) copies the predicted values into an array of below C struct, a C programming language construct representing a collection of variables under a single name.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c++ code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="kw">struct</span> detection<span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    box bbox<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> classes<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> <span class="op">*</span>prob<span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> <span class="op">*</span>mask<span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> objectness<span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> sort_class<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> detection<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>However, we don’t need to go that route to understand YOLO. In short, the detector converts the feature maps (7 x 7 x 1024) into predictions (7 x 7 x 30). The paper says the same thing without programming details:</p>
+<blockquote class="blockquote">
+The ﬁnal output of our network is the 7 × 7 × 30 tensor of predictions. <cite>Source: <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></cite>
+</blockquote>
+<p>And each grid cell contains predicted values as a 30-dimensional vector:</p>
+<ul>
+<li>Two confidence scores (2 values)</li>
+<li>Two bounding boxes (8 values)</li>
+<li>20 conditional class probabilities (20 values)</li>
+</ul>
+<p>For the sake of visualization, we assume the layout of the 7 x 7 x 30 tensor as follows:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-output.png" class="img-fluid figure-img"></p>
+<figcaption>YOLO output</figcaption>
+</figure>
+</div>
+<p>Note: there are 20 classes because the Pascal VOC object detection dataset defines the 20 classes.</p>
+<p>So, if we understand what those values mean, we understand how YOLO works.</p>
+</section>
+<section id="bounding-boxes-and-confidence-scores" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="bounding-boxes-and-confidence-scores"><span class="header-section-number">2.4</span> Bounding Boxes and Confidence Scores</h3>
+<p>If the center of an object falls into a grid cell, that grid cell is responsible for detecting that object.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-object-location.png" class="img-fluid figure-img"></p>
+<figcaption>I added the red dot to the original image.</figcaption>
+</figure>
+</div>
+<p>The center location (x, y) is relative to a grid cell width and height. So, x and y range between 0 and 1.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-bbox-x-y.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>x and y are relative to grid cell size</figcaption>
+</figure>
+</div>
+<p>The bounding box size (w, h) is relative to the image size. So, w and h range between 0 and 1.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-bbox-w-h.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>w and h are relative to image size</figcaption>
+</figure>
+</div>
+<p>Given those four values, we can calculate the location and size of the bounding box within the image.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-bbox.png" class="img-fluid figure-img"></p>
+<figcaption>I added the red dot and rectangle to the original image.</figcaption>
+</figure>
+</div>
+<p>YOLO predicts the confidence score for each bounding box. The confidence score represents how confident the model thinks about the object’s location and size predictions. It consists of two parts:</p>
+<ul>
+<li>The probability of an object having the center in the grid cell: Pr(Object)</li>
+<li>The overlap of the bounding box with the ground truth: <a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">IoU</a>(bbox, gt)</li>
+</ul>
+<p>Both values are predictions. If <strong>Pr(Object)</strong> is closer to 1, the model is more confident that an object’s center exists within the grid cell. If <strong>IoU(bbox, gt)</strong> is closer to 1, the model is more confident that the bounding box well approximates the ground truth. Mathematically, the confidence score is defined as follows:</p>
+<p><span class="math display">\[
+\text{confidence\_score} = \text{Pr}(\text{Object}) \times \text{IoU}\_{\text{pred}}^{\text{truth}}
+\]</span></p>
+<p>Therefore, when the Pr(Object) and IoU(bbox, gt) are close to 1, the confidence score becomes close to 1. When Pr(Object) is closer to zero, the model is less confident that an object’s center exists within the grid cell. In other words, it doesn’t think any object has the center in the grid cell. In this case, IoU does not matter at all. So, it makes sense to multiply these two values and call it the confidence score. Both values must be closer to 1 to have high confidence.</p>
+<p>YOLO predicts two bounding boxes per grid cell, and each bounding box accompanies a confidence score. The below figure shows an example of two bounding boxes and confidence scores for a grid cell.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-bbox-values.png" class="img-fluid figure-img"></p>
+<figcaption>YOLO two bounding boxes per grid cell</figcaption>
+</figure>
+</div>
+<p>One bounding box requires five values (x, y, w, h, c). So, two bounding boxes account for 10 out of 30 values.</p>
+<p><img src="images/YOLO-30-values.png" class="img-fluid"></p>
+<p>Note: YOLO is configurable on how many bounding boxes per grid cell it predicts. We assume the same setting the paper uses for PASCAL VOC, two bounding boxes per grid cell (also 7 x 7 grid cells and 20 labeled classes).</p>
+<p>Drawing all 49 predicted bounding boxes may look like the below. Bolder lines indicate higher confidence scores.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2-top-middle.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Figure 2 (top-middle) of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>It looks messy, but YOLO only predicts 98 (= 49 x 2) bounding boxes per image, far less than 2000 region proposals by Fast R-CNN’s Selective Search.</p>
+</section>
+<section id="conditional-class-probabilities" class="level3" data-number="2.5">
+<h3 data-number="2.5" class="anchored" data-anchor-id="conditional-class-probabilities"><span class="header-section-number">2.5</span> Conditional Class Probabilities</h3>
+<p>YOLO predicts 20 class probabilities per grid cell. It tells what kind of object is most likely to exist in a grid cell. The below image shows an example of class detections. Each grid cell color indicates the most probable class for that cell.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2-bottom-middle.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Figure 2 (bottom-middle) of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>A class probability in a grid cell only matters when an object’s center locates in the grid cell. In other words, the class probabilities are conditional on the grid cell’s objectness score Pr(Object).</p>
+<p><span class="math display">\[
+\text{class\_conditional\_probability} = \text{Pr}(\text{Class}\_i|\text{Object})
+\]</span></p>
+<p>So, if a grid cell has a low objectness score, the probability of that cell being responsible for any class will be low, which we can see in the following formula:</p>
+<p><span class="math display">\[
+\text{class\_probability} = \text{Pr}(\text{Class}\_i) = \text{Pr}(\text{Class}\_i|\text{Object}) \times \text{Pr}(\text{Object})
+\]</span></p>
+<p>This value should be high (i.e., closer to 1) when the grid cell has a high objectness score and a high conditional class probability. For example, YOLO should output a high probability of the dog class for the grid cell that contains the center of a dog.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2-left-annotated.png" class="img-fluid figure-img"></p>
+<figcaption>I added the red dot and rectangle.</figcaption>
+</figure>
+</div>
+<p>Furthermore, the model should predict a bounding box with high confidence, indicated by the expected IoU between the predicted bounding box and the ground truth. Altogether, we can calculate class-specific confidence scores for each box:</p>
+<p><span class="math display">\[
+\begin{align}  
+\text{class\_confidence\_score} &amp;= \text{Pr}( \text{Class}\_i | \text{Object} ) \times \text{Pr}(\text{Object}) \times \text{IoU}\_{ \text{pred} }^{ \text{truth} } \\
+&amp;= \text{Pr}( \text{Class}\_i ) \times \text{IoU}\_{ \text{pred} }^{ \text{truth} }  
+\end{align}
+\]</span></p>
+<p>The class-specific confidence level indicates how confident the model thinks a particular class object appears within the bounding box and how well it fits the object.</p>
+</section>
+<section id="confidence-score-thresholding-and-non-maximum-suppression" class="level3" data-number="2.6">
+<h3 data-number="2.6" class="anchored" data-anchor-id="confidence-score-thresholding-and-non-maximum-suppression"><span class="header-section-number">2.6</span> Confidence Score Thresholding and Non-Maximum Suppression</h3>
+<p>YOLO removes class probabilities lower than a certain threshold, reducing the load on post-processing (non-maximum suppression, <a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">NMS</a>) that eliminates lower score bounding boxes overlapping with more promising ones.</p>
+<p>By now, we should have a good understanding of all the ingredients in the YOLO pipeline. I hope the below diagram makes good sense to you.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="experiment-results" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="experiment-results"><span class="header-section-number">3</span> Experiment Results</h2>
+<section id="yolo-vs.-real-time-detectors" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="yolo-vs.-real-time-detectors"><span class="header-section-number">3.1</span> YOLO vs.&nbsp;Real-time Detectors</h3>
+<p>They compared YOLO with other real-time detectors on Pascal VOC 2007.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-vs-real-time-detectors-1024x271.png" class="img-fluid figure-img" style="width:65.0%"></p>
+<figcaption>Table 1 (top) of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>YOLO is slower than 100Hz DPM, but the accuracy (<a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP</a>) is way better. Fast YOLO uses nine convolutional layers (instead of 24), is faster than 100Hz DPM, and is way more accurate.</p>
+<p>Since YOLO is so fast, they do not consider Faster R-CNN as a real-time detector.</p>
+</section>
+<section id="yolo-vs.-less-than-real-time-detectors" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="yolo-vs.-less-than-real-time-detectors"><span class="header-section-number">3.2</span> YOLO vs.&nbsp;Less-than Real-time Detectors</h3>
+<p>They trained YOLO with the VGG-16 backbone, which is more accurate but slower than the plain YOLO.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/YOLO-vs-less-than-real-time-detectors-1024x355.png" class="img-fluid figure-img" style="width:65.0%"></p>
+<figcaption>Table 1 (bottom) of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>YOLO VGG-16 scores well amongst this group of detectors while being faster than others. However, we should note that YOLO VGG-16’s mAP is worse than Faster R-CNN VGG-16. So, there is some room for improvement in YOLO.</p>
+</section>
+<section id="yolo-vs.-fast-r-cnn-for-error-analysis" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="yolo-vs.-fast-r-cnn-for-error-analysis"><span class="header-section-number">3.3</span> YOLO vs.&nbsp;Fast R-CNN for Error Analysis</h3>
+<p>They compared the type of errors by Fast R-CNN and YOLO.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-4.png" class="img-fluid figure-img" style="width:65.0%"></p>
+<figcaption>Figure 4 of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>Each prediction is either correct or classified based on the type of error:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Category</th>
+<th>Class</th>
+<th style="text-align: center;">IoU Threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Correct</td>
+<td>Correct class</td>
+<td style="text-align: center;">0.5 &lt; IoU</td>
+</tr>
+<tr class="even">
+<td>Localization</td>
+<td>Correct class</td>
+<td style="text-align: center;">0.1 &lt; IoU &lt; 0.5</td>
+</tr>
+<tr class="odd">
+<td>Similar</td>
+<td>Similar class</td>
+<td style="text-align: center;">0.1 &lt; IoU</td>
+</tr>
+<tr class="even">
+<td>Other</td>
+<td>Wrong class</td>
+<td style="text-align: center;">0.1 &lt; IoU</td>
+</tr>
+<tr class="odd">
+<td>Background</td>
+<td>Background</td>
+<td style="text-align: center;">IoU &lt; 0.1 for any object</td>
+</tr>
+</tbody>
+</table>
+<p>YOLO struggles to localize objects correctly. YOLO’s localization error (19.0%) is much more than Fast R-CNN (8.6%). YOLO produces fewer background errors (4.75%) than Fast R-CNN (13.6%).</p>
+</section>
+<section id="generalizability-person-detection-in-artwork" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="generalizability-person-detection-in-artwork"><span class="header-section-number">3.4</span> Generalizability: Person Detection in Artwork</h3>
+<p>YOLO seems to be particularly good at detecting people. They compared the performances of YOLO and other models with person class from VOC2007, Picasso paintings, and the People-Art dataset.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-5b.png" class="img-fluid figure-img" style="width:65.0%"></p>
+<figcaption>Figure 5 (b) of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+<p>They also posted experimental results using images from the Internet.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-6.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 6 of the <a href="https://arxiv.org/abs/1506.02640" target="_blank">paper</a></figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="limitations-of-yolo" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="limitations-of-yolo"><span class="header-section-number">4</span> Limitations of YOLO</h2>
+<p>In the paper, Joseph Redmon explains the limitations of YOLO.</p>
+<ul>
+<li><strong>Strong Spatial Constraints</strong>:
+<ul>
+<li>Each grid cell only predicts two bounding boxes and can only have one class.</li>
+<li>YOLO struggles with small objects that appear in groups, like flocks of birds.</li>
+</ul></li>
+<li><strong>Relatively Coarse Features</strong>:
+<ul>
+<li>YOLO has many downsampling layers.</li>
+<li>It struggles to generalize to objects in new or unusual aspect ratios or configurations.</li>
+</ul></li>
+<li><strong>Small-Object Localization</strong>:
+<ul>
+<li>YOLO’s primary source of errors is incorrect localization.</li>
+<li>YOLO can not localize small objects very well.</li>
+</ul></li>
+</ul>
+<p>As for the last point, YOLO uses sum-squared error as the loss function for localization. A small error in a large box is not critical, but a small error in a small box has a much more significant effect on IoU.</p>
+</section>
+<section id="towards-yolov2" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="towards-yolov2"><span class="header-section-number">5</span> Towards YOLOv2</h2>
+<p>YOLO was not as accurate in predicting bounding boxes as region-based detectors like Fast R-CNN and Faster R-CNN. The specialized region proposal step may increase the latency but results in higher mAP.</p>
+<p><a href="../../blog/2022-08-10-yolo-v2-yolo9000/" target="_blank">YOLOv2</a> has several improvements to address YOLOv1’s shortcomings. They introduced the anchor mechanism found in Faster R-CNN. Anchors make it easier for the model to predict bounding boxes. They also made YOLOv2 faster than YOLOv1. Furthermore, they developed YOLO9000, which can predict over 9000 classes.</p>
+<p>As they said, YOLOv2 became “Better, Faster, Stronger”.</p>
+</section>
+<section id="references" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
+<ul>
+<li><a href="../../blog/2022-07-11-faster-r-cnn-rpn/" target="_blank">Faster R-CNN</a></li>
+<li><a href="../../blog/2022-06-21-fast-r-cnn-213/" target="_blank">Fast R-CNN</a></li>
+<li><a href="../../blog/2022-08-10-yolo-v2-yolo9000/" target="_blank">YOLO v2</a></li>
+<li><a href="../../blog/2022-05-24-object-detection-intersection-over-union/" target="_blank">IoU (Intersection over Union)</a></li>
+<li><a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP (mean Average Precision)</a></li>
+<li><a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">Non-Maximum Suppression</a></li>
+<li><a href="https://arxiv.org/abs/1506.02640" target="_blank">You Only Look Once (Paper)</a><br>
+Joseph Redmon,&nbsp;Santosh Divvala,&nbsp;Ross Girshick,&nbsp;Ali Farhadi</li>
+<li><a href="https://www.youtube.com/watch?v=NM6lrxy0bxs" target="_blank">You Only Look Once (CVPR 2016 Presentation)</a><br>
+Joseph Redmon</li>
+<li><a href="https://www.youtube.com/watch?v=Cgxsv1riJhI" target="_blank">How computers learn to recognize objects instantly (TED Presentation)</a><br>
+Joseph Redmon</li>
+<li><a href="https://github.com/pjreddie/darknet" target="_blank">Darknet (GitHub Repository)</a><br>
+Joseph Redmon, Alexey Bochkovskiy</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

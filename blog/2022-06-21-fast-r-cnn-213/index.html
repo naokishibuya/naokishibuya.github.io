@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-06-21">
+
+<title>Fast R-CNN: Understanding why it’s 213 Times Faster than R-CNN and More Accurate – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#r-cnn-slowness-reasons" id="toc-r-cnn-slowness-reasons" class="nav-link active" data-scroll-target="#r-cnn-slowness-reasons"><span class="header-section-number">1</span> R-CNN Slowness Reasons</a>
+  <ul class="collapse">
+  <li><a href="#training-is-a-multi-stage-pipeline" id="toc-training-is-a-multi-stage-pipeline" class="nav-link" data-scroll-target="#training-is-a-multi-stage-pipeline"><span class="header-section-number">1.1</span> Training is a multi-stage pipeline</a></li>
+  <li><a href="#training-is-expensive-in-space-and-time." id="toc-training-is-expensive-in-space-and-time." class="nav-link" data-scroll-target="#training-is-expensive-in-space-and-time."><span class="header-section-number">1.2</span> Training is expensive in space and time.</a></li>
+  <li><a href="#object-detection-is-slow." id="toc-object-detection-is-slow." class="nav-link" data-scroll-target="#object-detection-is-slow."><span class="header-section-number">1.3</span> Object detection is slow.</a></li>
+  </ul></li>
+  <li><a href="#sppnets" id="toc-sppnets" class="nav-link" data-scroll-target="#sppnets"><span class="header-section-number">2</span> SPPnets</a>
+  <ul class="collapse">
+  <li><a href="#cnn-feature-extraction-once-and-for-all" id="toc-cnn-feature-extraction-once-and-for-all" class="nav-link" data-scroll-target="#cnn-feature-extraction-once-and-for-all"><span class="header-section-number">2.1</span> CNN Feature Extraction Once And For All</a></li>
+  </ul></li>
+  <li><a href="#fast-r-cnn" id="toc-fast-r-cnn" class="nav-link" data-scroll-target="#fast-r-cnn"><span class="header-section-number">3</span> Fast R-CNN</a>
+  <ul class="collapse">
+  <li><a href="#roi-pooling" id="toc-roi-pooling" class="nav-link" data-scroll-target="#roi-pooling"><span class="header-section-number">3.1</span> RoI Pooling</a></li>
+  <li><a href="#bounding-box-regression" id="toc-bounding-box-regression" class="nav-link" data-scroll-target="#bounding-box-regression"><span class="header-section-number">3.2</span> Bounding Box Regression</a></li>
+  </ul></li>
+  <li><a href="#multi-task-loss" id="toc-multi-task-loss" class="nav-link" data-scroll-target="#multi-task-loss"><span class="header-section-number">4</span> Multi-task Loss</a>
+  <ul class="collapse">
+  <li><a href="#negative-log-loss-for-classification" id="toc-negative-log-loss-for-classification" class="nav-link" data-scroll-target="#negative-log-loss-for-classification"><span class="header-section-number">4.1</span> Negative Log Loss for Classification</a></li>
+  <li><a href="#robust-loss-for-bounding-box-regression" id="toc-robust-loss-for-bounding-box-regression" class="nav-link" data-scroll-target="#robust-loss-for-bounding-box-regression"><span class="header-section-number">4.2</span> Robust Loss for Bounding Box Regression</a></li>
+  </ul></li>
+  <li><a href="#fast-r-cnn-test-results" id="toc-fast-r-cnn-test-results" class="nav-link" data-scroll-target="#fast-r-cnn-test-results"><span class="header-section-number">5</span> Fast R-CNN Test Results</a></li>
+  <li><a href="#towards-faster-r-cnn-and-mask-r-cnn" id="toc-towards-faster-r-cnn-and-mask-r-cnn" class="nav-link" data-scroll-target="#towards-faster-r-cnn-and-mask-r-cnn"><span class="header-section-number">6</span> Towards Faster R-CNN and Mask R-CNN</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">7</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Fast R-CNN: Understanding why it’s 213 Times Faster than R-CNN and More Accurate</h1>
+<p class="subtitle lead">What were we really comparing?</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 21, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/thumbnail.png" alt="Fast R-CNN"></p>
+<p>In 2013, Ross Girshick et al.&nbsp;introduced <a href="../../blog/2022-06-11-r-cnn-original/" target="_blank">R-CNN</a>, an object detection model that combined convolutional layers with existing computer vision techniques, breaking previous records. It was a groundbreaking model at the time.</p>
+<p>In 2015, Ross Girshick developed Fast R-CNN, setting a new record. It was more accurate, and the inference speed became 213 times faster.</p>
+<p>Of course, we need to know what they were comparing. So, this article examines the results published in the paper to understand how Fast R-CNN became that fast.</p>
+<p>If you are not familiar with R-CNN, please first read <a href="../../blog/2022-06-11-r-cnn-original/" target="_blank">the previous article</a> so that this article makes better sense.</p>
+<section id="r-cnn-slowness-reasons" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="r-cnn-slowness-reasons"><span class="header-section-number">1</span> R-CNN Slowness Reasons</h2>
+<p>In the original R-CNN paper, Ross Girshick explained that R-CNN is more accurate than <a href="https://arxiv.org/abs/1312.6229" target="_blank">OverFeat</a> (Yann LeCun et al.) and then pointed out that R-CNN was nine times slower than OverFeat. So, he wanted to make R-CNN faster.</p>
+<blockquote class="blockquote">
+Speeding up R-CNN should be possible in a variety of ways and remains as future work.<cite>Source: <a href="https://arxiv.org/abs/1311.2524" target="_blank">paper</a></cite>
+</blockquote>
+<p>However, the below figure from <a href="https://arxiv.org/abs/1311.2524" target="_blank">the paper</a> shows that the pipeline is rather complex.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/R-CNN-figure-1.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1311.2524" target="_blank">R-CNN paper</a></figcaption>
+</figure>
+</div>
+<p>Ross Girshick raised three problems of R-CNN.</p>
+<ol type="1">
+<li>Training is a multi-stage pipeline.</li>
+<li>Training is expensive in space and time.</li>
+<li>Object detection is slow.</li>
+</ol>
+<p>Let’s examine each problem:</p>
+<section id="training-is-a-multi-stage-pipeline" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="training-is-a-multi-stage-pipeline"><span class="header-section-number">1.1</span> Training is a multi-stage pipeline</h3>
+<p>The training R-CNN is rather complex. They needed to train a CNN, SVMs, and bounding-box regressors.</p>
+<p>First, they pre-trained their CNN on ImageNet (2012) classification tasks for 1000 classes. Then, they replaced the classification layer with an (N+1)-way classification layer (For Pascal VOC, N = 20 classes. For ImageNet detection task, N = 200. Plus one is for background) with randomly initialized weights and fine-tuned the model using only warped region proposals.</p>
+<p>They treated any region proposal with 0.5 or greater IoU overlap with a ground-truth box as positive for that box’s class and the other proposals as negatives. Using those positive and negative regions, they built batches of size 128 for training. Each batch sampled 32 positive regions (over all classes) and 96 background regions. They biased the sampling toward positive region proposals because they are infrequent compared to background regions.</p>
+<p>Once they finished fine-tuning the model, they replaced the (N+1)-way classifier with class-specific SVMs and trained them. According to the paper, SVMs empirically performed better than the (N+1)-way classifier:</p>
+<blockquote class="blockquote">
+Why, after ﬁne-tuning, train SVMs at all? It would be cleaner to simply apply the last layer of the ﬁne-tuned network, which is a 21-way softmax regression classiﬁer, as the object detector. We tried this and found that performance on VOC 2007 dropped from 54.2% to 50.9% mAP.<cite>Source: <a href="https://arxiv.org/abs/1311.2524" target="_blank">paper</a> (Appendix B)</cite>
+</blockquote>
+<p>Finally, they trained class-specific bounding-box regressors that regress bounding boxes (4 values per box that are center x, center y, width, and height). So, there was a lot involved in the multi-stage training pipeline, making it slow.</p>
+</section>
+<section id="training-is-expensive-in-space-and-time." class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="training-is-expensive-in-space-and-time."><span class="header-section-number">1.2</span> Training is expensive in space and time.</h3>
+<p>During training, they needed to store CNN-extracted features on a disc for each image for SVM and bounding-box regressor training. As CNN extracted features from object proposals in each image, it consumed a long time and a lot of space. For 5,000 training images from Pascal VOC, it took 2.5 GPU days when using <a href="https://arxiv.org/abs/1409.1556" target="_blank">VGG16</a>, and the amount of data was hundreds of gigabytes.</p>
+<p>Note: GPU day is the number of GPUs times training days. For example, if you train for a half-day on 5 GPUs, 0.5 Days x 5 GPUs = 2.5 GPU days.</p>
+</section>
+<section id="object-detection-is-slow." class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="object-detection-is-slow."><span class="header-section-number">1.3</span> Object detection is slow.</h3>
+<p>Object detection (inference) was slow because R-CNN transformed (warped) about 2,000 selected areas in each image to a size of 227 x 227 pixels and used CNN to extract features from each warped area. The process took about 47 seconds (with VGG) per image during test inference on a GPU.</p>
+<p>Moreover, those selected regions overlap each other. Therefore, R-CNN applied CNN to the overlapping areas over and over, which was a waste of time and computation power. It was the primary culprit for the R-CNN slowness in inference.</p>
+<p>Now that we understand the three problems that made R-CNN slow, let’s look at how Fast R-CNN resolved the three problems.</p>
+</section>
+</section>
+<section id="sppnets" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sppnets"><span class="header-section-number">2</span> SPPnets</h2>
+<section id="cnn-feature-extraction-once-and-for-all" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="cnn-feature-extraction-once-and-for-all"><span class="header-section-number">2.1</span> CNN Feature Extraction Once And For All</h3>
+<p>In 2014, Kaiming He et al.&nbsp;published a new model called <a href="https://arxiv.org/abs/1406.4729" target="_blank">SPPnets</a> (Spatial pyramid pooling networks), which was an improved version of R-CNN. Like R-CNN, it used <strong>Selective Search</strong> to make about 2,000 region proposals.</p>
+<p>However, unlike R-CNN, it resized the entire image and then applied CNN to the image only once. It then picked up features of each selected area for classification by fully-connected layers.</p>
+<p>As shown below diagram, SPPnets applied max-pooling of various kernel sizes and strides to pool the features, capturing finer to coarser details into fixed-length representation.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/SPPnets-figure-3.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Figure 3 of <a href="https://arxiv.org/abs/1406.4729" target="_blank">SPPnets paper</a></figcaption>
+</figure>
+</div>
+<p>For example, if the size of a region proposal (window in the above image) is 13x13, we can apply the following three max-pooling to generate a fixed-length representation:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">kernel size</th>
+<th style="text-align: center;">stride size</th>
+<th style="text-align: center;">pooled cells</th>
+<th style="text-align: center;"># of feature vectors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">4x4</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">4x4</td>
+<td style="text-align: center;">16</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">7x7</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">2x2</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">13x13</td>
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">1x1</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+<p>If the feature map depth is 256, we have 256 * (16 + 4 + 1) fixed-length representation for classification. The point is that only one CNN forward pass with per-region spatial pyramid pooling could replace 2,000 region-specific overlapping CNN feature extractions and eliminate the need to warp each selected area. SPPnet accelerated R-CNN, reducing training time to one-third and making inference 10 to 100 times faster.</p>
+<p>However, SPPnets used a multi-stage pipeline like R-CNN, and there was still room for improvement. Ross Girshick said in the paper:</p>
+<blockquote class="blockquote">
+SPPnet also has notable drawbacks. Like R-CNN, training is a multi-stage pipeline that involves extracting features, ﬁne-tuning a network with log loss, training SVMs, and ﬁnally ﬁtting bounding-box regressors. Features are also written to disk.<cite>Source: <a href="https://arxiv.org/abs/1504.08083" target="_blank">paper</a></cite>
+</blockquote>
+</section>
+</section>
+<section id="fast-r-cnn" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="fast-r-cnn"><span class="header-section-number">3</span> Fast R-CNN</h2>
+<p>In the Fast R-CNN paper, they proposed a new training algorithm that fixed the disadvantages of R-CNN and SPPnets by combining the multiple stages into one:</p>
+<ol type="1">
+<li>It extracts CNN features from the input image to produce a feature map.</li>
+<li>It extracts a fixed-length feature vector for each proposed region (RoI pooling).</li>
+<li>It passes each feature vector through fully-connected layers (FCs in the diagram) for further enrichment.</li>
+<li>Softmax provides probability estimates over K object classes and a catch-all “background” class.</li>
+<li>The bounding box regressor estimates four values for each K class.</li>
+</ol>
+<p>The below image from the paper should clarify the process.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/figure-1.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1504.08083" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>Although the Selective Search step was not part of the single-stage training, Fast R-CNN streamlined a large part of the multi-stage training and eliminated the need for warping regions, region-specific CNN operations, and CNN-feature caching. There were no more class-specific SVMs, and updating all network parameters in single-stage training became possible.</p>
+<p>Next, let’s discuss the RoI pooling and bounding box regression.</p>
+<section id="roi-pooling" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="roi-pooling"><span class="header-section-number">3.1</span> RoI Pooling</h3>
+<p>RoI (Region of Interest) pooling is similar to the spatial pyramid pooling from SPPnets that pools CNN features from selected regions into a fixed-length feature vector for further enrichment.</p>
+<blockquote class="blockquote">
+The RoI layer is simply the special-case of the spatial pyramid pooling layer used in SPPnets [11] in which there is only one pyramid level.<cite>Source: <a href="https://arxiv.org/abs/1504.08083" target="_blank">paper</a></cite>
+</blockquote>
+<p>RoI max-pooling divides a window (proposed area) of size <code>h × w</code> pixels into an <code>H × W</code> grid of sub-window of size approximately <code>h/H × w/W</code> pixels. It applies max-pooling in each sub-window to generate a fixed spatial extent of H × W compatible with the first fully-connected layer.</p>
+<p>For example, when they experimented with VGG16 (the winner of the ImageNet 2014 image classification competition), they used H × W = 7 × 7 = 49, which is compatible with the first fully connected layer of VGG16. RoI pooling was applied independently to each feature map channel as in a standard max-pooling.</p>
+<p>For sure, Ross Girshick got inspiration from SPPnets. Still, it might be easier to understand RoI pooling as a simple max-pooling to select representative feature values from each sub-window rather than considering it a simpler version of spatial pyramid pooling.</p>
+<p>Simple max-pooling was advantageous, making it easier to back-propagate through the RoI pooling layer. Gradients flow through activations selected by the argmax operation. If an activation contributes through multiple pooling outputs, we can sum all partial derivatives (of the loss) by that activation.</p>
+</section>
+<section id="bounding-box-regression" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="bounding-box-regression"><span class="header-section-number">3.2</span> Bounding Box Regression</h3>
+<p>Rectangular areas by Selective Search didn’t produce accurate bounding boxes. In the original R-CNN, the bounding-box regressors adjusted rectangular areas. They trained one regression model per class, which I suppose could learn to make a class-specific adjustment because each class has typical shapes (i.e., aspect ratio), requiring different adjustments on selected regions.</p>
+<p>The bounding box regression step happened after the SVM classification step, so it was disjoint from the CNN feature extraction. Hence, the CNN parameter update occurs separately from the bounding-box regressor parameter update. However, in Fast R-CNN, this became no longer the case.</p>
+<p>Fast R-CNN adjusted the rectangular area in the same network. It did not divide the forward process by class and reduced training time. After CNN feature extraction, RoI pooling, and fully-connected layers, the flow continued into softmax for classification and bounding-box regressor for rectangular area adjustment.</p>
+<p>So, back-propagation can adjust parameters for the bounding-box regressor that naturally incorporates class-specific information from CNN features. As such, CNN-parameter updates incorporate losses by the classifier and the regressor. There was no need for class-specific regression models.</p>
+</section>
+</section>
+<section id="multi-task-loss" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="multi-task-loss"><span class="header-section-number">4</span> Multi-task Loss</h2>
+<p>Fast R-CNN has two sibling output layers, so they have two loss functions, one for the classifier and the other for the regressor. Although there is λ (a hyperparameter) that can balance the two losses, all their experiments use λ = 1.</p>
+<p><span class="math display">\[
+\text{L} = \text{L}_{\text{class}} + \lambda \, \text{L}_{\text{bbox}}
+\]</span></p>
+<p>Note: I’m using simpler math notation than the paper to avoid cluttering.</p>
+<section id="negative-log-loss-for-classification" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="negative-log-loss-for-classification"><span class="header-section-number">4.1</span> Negative Log Loss for Classification</h3>
+<p>The loss for the classifier is a negative log probability for true class T.</p>
+<p><span class="math display">\[
+\text{L}_{\text{class}} = -\log \, P_T
+\]</span></p>
+<p>Intuitively, the logarithm would be an enormous negative value if the probability is tiny for the true class. Hence, it is multiplied by -1. The result is a higher loss when the softmax produces a lower probability for the true class.</p>
+</section>
+<section id="robust-loss-for-bounding-box-regression" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="robust-loss-for-bounding-box-regression"><span class="header-section-number">4.2</span> Robust Loss for Bounding Box Regression</h3>
+<p>They used robust loss (smooth L1 loss) to calculate the loss for object position (rectangular area) prediction. Robust loss is mostly L1 loss but becomes L2 loss where L1 loss is less than 1. As a result, it has a smooth curve, and we can calculate the derivative at any point.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/Smooth-L1-Loss.png" class="img-fluid figure-img"></p>
+<figcaption>Robust Loss (Smooth L1 Loss)</figcaption>
+</figure>
+</div>
+<p>Mathematically, it is defined as follows:</p>
+<p><span class="math display">\[
+L_{bbox} = \sum_\limits{i \in \{x, y, w, h\}} \text{smooth}_{L_1}(T_i, V_i)
+\]</span></p>
+<p><span class="math display">\[
+\text{smooth}_{\text{L}_1}(T_i, V_i) =
+\begin{cases}
+  0.5 (T_i \ - \ V_i)^2 \quad \text{if } |T_i \ - \ V_i| &lt; 1 \\
+  |T_i \ - \ V_i| \ - \ 0.5 \quad \text{otherwise}
+\end{cases}
+\]</span></p>
+<ul>
+<li>A ground truth bounding box for class is <span class="math inline">\((T_x, T_y, T_w, T_h)\)</span></li>
+<li>A predicted bounding box is <span class="math inline">\((V_x, V_y, V_w, V_h)\)</span></li>
+<li><span class="math inline">\(\sum_\limits{i \in \{x, y, w, h\}}\)</span> means smooth loss is calculated for each of <span class="math inline">\(x, y, w, h\)</span> and summed up.</li>
+</ul>
+<p>The paper reasoned that robust loss could avoid exploding gradients more than L2 loss.</p>
+<blockquote class="blockquote">
+When the regression targets are unbounded, training with L2 loss can require careful tuning of learning rates in order to prevent exploding gradients.<cite>Source: <a href="https://arxiv.org/abs/1504.08083" target="_blank">paper</a></cite>
+</blockquote>
+<p>While L2 loss may be a typical loss function for regression models, it is too sensitive to outliers and challenging to adjust the learning rate.</p>
+</section>
+</section>
+<section id="fast-r-cnn-test-results" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="fast-r-cnn-test-results"><span class="header-section-number">5</span> Fast R-CNN Test Results</h2>
+<p>Fast R-CNN addressed the three problems and achieved the following advantages over R-CNN.</p>
+<ul>
+<li>Higher detection quality than R-CNN</li>
+<li>Training is single-stage</li>
+<li>Training can update all network layers</li>
+<li>No feature caching. Hence, no disk storage requirement.</li>
+</ul>
+<p>As the name of Fast R-CNN suggests, it improved execution speed and even achieved better accuracy (<a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mAP</a>). Overall, the test results sum up to the following:</p>
+<ul>
+<li>With Pascal VOC07, 2010, and 2012, mAP is more accurate than ever.</li>
+<li>It’s much faster than R-CNN and SPPnets.</li>
+<li>Fine-tuning the convolutional layer of VGG16 improved the accuracy.</li>
+</ul>
+<p>In the original R-CNN, they used AlexNet because VGG16 was too slow. Fast R-CNN was faster even with VGG16, giving better accuracy than AlexNet. So, VGG16 became the primary model for feature extraction.</p>
+<p>The speed comparison was between the original R-CNN and Fast R-CNN, with VGG16 as the feature extraction layer. Therefore, the comparison was with the slower version of the original R-CNN, which is not a problem, as the paper clearly stated.</p>
+<p>However, it may be hard to notice by only reading the abstract section of the paper that says Fast R-CNN is 213 times faster.</p>
+<p>Furthermore, where Fast R-CNN is 213 times faster, they reduced the number of parameters to improve the execution speed by factorizing fully-connected layers by the Truncated SVD method.</p>
+<p>As a result, it reduced the parameter count. It made inference faster because the number of RoIs to process was large, and almost half of the forward pass time was due to repeated computation in fully-connected layers. With SVD, mAP became slightly lower but not too much. You can see it in the table below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/table-4.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Table 4 of <a href="https://arxiv.org/abs/1504.08083" target="_blank">the paper</a> (Yellow Highlight by me)</figcaption>
+</figure>
+</div>
+<p><strong>S</strong>, <strong>M</strong>, and <strong>L</strong> are abbreviations for small, medium, and large, respectively, representing the number of parameters (weights). <strong>L</strong> corresponds to the version using VGG16 for feature extraction. The speedup by the Fast R-CNN <strong>L</strong> model (with SVD) was 213 times the R-CNN <strong>L</strong> model in test inference. What used to take about 47 seconds per image is now 0.22 seconds.</p>
+<p>One thing to note is that the above time measurement does not include the time spent by the Selective Search process, which took 2 seconds. So, overall, Fast R-CNN was not ready for real-time use, and the slowness of the region proposal step became the most significant bottleneck to resolve in future work.</p>
+</section>
+<section id="towards-faster-r-cnn-and-mask-r-cnn" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="towards-faster-r-cnn-and-mask-r-cnn"><span class="header-section-number">6</span> Towards Faster R-CNN and Mask R-CNN</h2>
+<p>The R-CNN used Cafe (C++) and MATLAB, while the Fast R-CNN used Cafe and Python. Perhaps this also contributed a bit to the speedup. I am not entirely sure about it, but I thought it was interesting to know people were using different tools than today.</p>
+<p>By the way, this Cafe was an open-source project by BVLC (Berkeley Vision and Learning Center), and Ross Girshick also participated in the research and development. Later, Facebook adopted Cafe, which became Cafe2, and eventually integrated into PyTorch, which started as a fork from <a href="https://github.com/chainer/chainer" target="_blank">Chainer</a> (now discontinued), developed by <a href="https://www.preferred.jp/en/" target="_blank">Preferred Networks</a> in Japan.</p>
+<p>Ross Girshick, a Microsoft research team member then, later joined <a href="https://ai.facebook.com/" target="_blank">FAIR (Facebook AI Research)</a>, where Yann LeCun was the principal research scientist. I wonder if Yann LeCun noticed Ross Girshick’s work on R-CNN since the R-CNN paper cited OverFeat, whereas the OverFeat paper does not cite any Ross Girshick works. Or maybe they knew each other via Cafe development? Perhaps, they met at related conferences.</p>
+<p>In any case, Ross Girshick joined Facebook (Meta) in Fall 2015. Also, Kaiming He, who published the SPPnets paper and is well-known for <a href="https://arxiv.org/abs/1502.01852v1" target="_blank">Kaiming Weight Initialization</a> (or He Weight Initialization), joined Facebook in August 2016. Before joining Facebook, he was at Microsoft Research, working with Ross Girshick (who was already at Facebook) to publish a paper on <a href="https://arxiv.org/abs/1506.01497" target="_blank">Faster R-CNN</a>. Later, at FAIR, Kaiming He and Ross Girshick published a paper on another object detection model called <a href="https://arxiv.org/abs/1703.06870" target="_blank">Mask R-CNN</a>.</p>
+</section>
+<section id="references" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="references"><span class="header-section-number">7</span> References</h2>
+<ul>
+<li><a href="../../blog/2022-06-11-r-cnn-original/" target="_blank">R-CNN</a></li>
+<li><a href="../../blog/2022-05-23-object-detection-vs-image-classification/" target="_blank">Object Detection vs Image Classification</a></li>
+<li><a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">Non-Maximum Suppression (NMS)</a></li>
+<li><a href="../../blog/2022-05-27-object-detection-mean-average-precision/" target="_blank">mean Average Precision (mAP)</a></li>
+<li><a href="https://arxiv.org/abs/1504.08083" target="_blank">Fast R-CNN</a><br>
+Ross Girshick</li>
+<li><a href="https://arxiv.org/abs/1409.1556" target="_blank">Very Deep Convolutional Networks for Large-Scale Image Recognition</a><br>
+Karen Simonyan,&nbsp;Andrew Zisserman</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

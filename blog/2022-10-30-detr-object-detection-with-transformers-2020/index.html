@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-10-30">
+
+<title>DETR: Object Detection with Transformers (2020) – Naoki Shibuya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-29de8ff0bda8c3945b3bc800bc3de51a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-4ce53cc8fa3480dea59bbdb16272c622.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="floating nav-fixed quarto-dark"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = true;
+    const darkModeDefault = authorPrefersDark;
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-sm " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Naoki Shibuya</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/naokishibuya"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/naokishibuya"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#detr-architecture" id="toc-detr-architecture" class="nav-link active" data-scroll-target="#detr-architecture"><span class="header-section-number">1</span> DETR Architecture</a>
+  <ul class="collapse">
+  <li><a href="#overview-of-the-pipeline" id="toc-overview-of-the-pipeline" class="nav-link" data-scroll-target="#overview-of-the-pipeline"><span class="header-section-number">1.1</span> Overview of the Pipeline</a></li>
+  <li><a href="#d-positional-encoding" id="toc-d-positional-encoding" class="nav-link" data-scroll-target="#d-positional-encoding"><span class="header-section-number">1.2</span> 2D Positional Encoding</a></li>
+  <li><a href="#parallel-decoding" id="toc-parallel-decoding" class="nav-link" data-scroll-target="#parallel-decoding"><span class="header-section-number">1.3</span> Parallel Decoding</a></li>
+  <li><a href="#object-queries" id="toc-object-queries" class="nav-link" data-scroll-target="#object-queries"><span class="header-section-number">1.4</span> Object Queries</a></li>
+  <li><a href="#learned-positional-encoding" id="toc-learned-positional-encoding" class="nav-link" data-scroll-target="#learned-positional-encoding"><span class="header-section-number">1.5</span> Learned Positional Encoding</a></li>
+  </ul></li>
+  <li><a href="#detr-training" id="toc-detr-training" class="nav-link" data-scroll-target="#detr-training"><span class="header-section-number">2</span> DETR Training</a>
+  <ul class="collapse">
+  <li><a href="#direct-set-prediction" id="toc-direct-set-prediction" class="nav-link" data-scroll-target="#direct-set-prediction"><span class="header-section-number">2.1</span> Direct Set Prediction</a></li>
+  <li><a href="#matching-process" id="toc-matching-process" class="nav-link" data-scroll-target="#matching-process"><span class="header-section-number">2.2</span> Matching Process</a></li>
+  <li><a href="#hungarian-loss" id="toc-hungarian-loss" class="nav-link" data-scroll-target="#hungarian-loss"><span class="header-section-number">2.3</span> Hungarian Loss</a></li>
+  </ul></li>
+  <li><a href="#detr-performance" id="toc-detr-performance" class="nav-link" data-scroll-target="#detr-performance"><span class="header-section-number">3</span> DETR Performance</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">DETR: Object Detection with Transformers (2020)</h1>
+<p class="subtitle lead">End-to-End Object Detection with Transformers</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Object Detection</div>
+    <div class="quarto-category">Transformer</div>
+  </div>
+  </div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 30, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img alt="DETR: Object Detection with Transformers (2020)" src="images/thumbnail.png"></p>
+<p>In 2020, Meta (Facebook) AI built a new object detection model using <a href="../../blog/2021-12-13-transformers-encoder-decoder/" target="_blank">the Transformer’s encoder and decoder architecture</a>. They named it <strong>DETR</strong>(<strong>DE</strong>tection <strong>TR</strong>ansformer). Unlike <a href="../../blog/2022-10-24-yolov3-2018/" target="_blank">YOLO</a> and <a href="../../blog/2022-07-11-faster-r-cnn-rpn" target="_blank">Faster R-CNN</a>, it does not require box priors (<a href="../../blog/2022-07-11-faster-r-cnn-rpn/#anchor-boxes" target="_blank">anchors</a>) and post-processing (<a href="../../blog/2022-06-01-object-detection-non-maximum-suppression/" target="_blank">NMS</a>). However, DETR performs on par with Faster R-CNN on the COCO object detection dataset.</p>
+<p>This article explains how DETR works.</p>
+<section id="detr-architecture" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="detr-architecture"><span class="header-section-number">1</span> DETR Architecture</h2>
+<section id="overview-of-the-pipeline" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="overview-of-the-pipeline"><span class="header-section-number">1.1</span> Overview of the Pipeline</h3>
+<p>DETR has three major components:</p>
+<ul>
+<li>A Convolutional Neural Network (CNN) Backbone</li>
+<li>A Transformer’s Encoder-Decoder</li>
+<li>Feed-forward Networks (FFN)</li>
+</ul>
+<p>Note: I ignore the batch dimension in what follows to keep the discussion simple.</p>
+<p>Like YOLO and Faster R-CNN, DETR extracts image features using a CNN backbone.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/DETR-CNN.png" class="img-fluid figure-img"></p>
+<figcaption>DETR feature extraction</figcaption>
+</figure>
+</div>
+<p>Suppose an input image shape is 3 x 800 x 960 (C x H x W), and the backbone is ResNet50. Then, this step would produce a 2048 x 25 x 30 tensor. The resulting feature map size is reduced by 32 from the image size since the backbone has five max-pooling layers. After this, DETR uses a 1 x 1 convolution to reduce the feature dimension from 2048 to 256. So, each grid cell location in the feature map has a vector of 256 values. In the following discussion, I’ll call the number of elements in a feature vector <strong>d_embed</strong>.</p>
+<p>DETR flattens the H x W feature map to HW feature vectors and adds positional encodings to each feature vector. Since the Transformer’s encoder is permutation invariant and does not have a built-in structure to handle positional information, we must enrich each feature vector with the positional encoding (more details later).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/DETR-add-positional-encodings.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>DETR add positional encodings</figcaption>
+</figure>
+</div>
+<p>Then, DETR passes the input embeddings to the Transformer’s encoder-decoder, which generates output embeddings. Finally, DETR passes each output embedding to classifier FFN and bounding box FFN for producing the final predictions.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/DETR-pipeline-overview.png" class="img-fluid figure-img"></p>
+<figcaption>DETR pipeline overview</figcaption>
+</figure>
+</div>
+<p>Therefore, as you can see, there are no anchors or NMS, unlike YOLO and Faster R-CNN, and the pipeline is pretty simple. However, I explained here a zoomed-out overview as I skipped details like how DETR performs 2D positional encoding, which we’ll see in the next section.</p>
+</section>
+<section id="d-positional-encoding" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="d-positional-encoding"><span class="header-section-number">1.2</span> 2D Positional Encoding</h3>
+<p>DETR uses a fixed positional encoding similar to the one used in the original Transformer, which you can read about <a href="../../blog/2021-10-31-transformers-positional-encoding/" target="_blank">here</a>. However, the original Transformer handles word sequences where the word positions are one-dimensional. On the contrary, DETR handles a grid of feature vectors where the grid cell positions are two-dimensional.</p>
+<p>DETR encodes row and column positions separately in the half-size <span class="math inline">\(d_\text{embed} / 2\)</span>. Then, it creates permutations of row and column position encodings. A pair of a row position and a column position is a concatenation of the row positional encoding and the column positional encoding.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/DETR-Positional-Encodings.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>DETR positional encodings</figcaption>
+</figure>
+</div>
+<p>As a result, DETR encodes H x W positions into positional encodings and can add them to the input embeddings.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/DETR-add-positional-encodings.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>DETR add positional encodings</figcaption>
+</figure>
+</div>
+<p>Accordingly, figure 2 from the paper (below) shows the entire pipeline. We can see that the backbone generates a set of image features, and DETR adds positional encoding to them.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2 of <a href="https://arxiv.org/abs/2005.12872" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The Transformer’s encoder enriches embeddings through the multi-head self-attention layers. If you are unfamiliar with that, you may want to read the related article <a href="../../blog/2021-11-15-transformers-self-attention/" target="_blank">here</a>. One notable difference from the original encoder is that DETR adds the positional encodings to the input of each multi-head attention layer, which is not clear from the above diagram, so I quote the below from the paper:</p>
+<blockquote class="blockquote">
+<p>Since the transformer architecture is permutation-invariant, we supplement it with ﬁxed positional encodings [31,3] that are added to the input of each attention layer. <cite>Source: <a href="https://arxiv.org/abs/2005.12872" target="_blank">the paper</a></cite></p>
+</blockquote>
+<p>Moreover, the decoder also has a notable difference from the original Transformer. We see <strong>object queries</strong> in the above figure, for which we should first discuss parallel decoding.</p>
+</section>
+<section id="parallel-decoding" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="parallel-decoding"><span class="header-section-number">1.3</span> Parallel Decoding</h3>
+<p>The original Transformer is a translator, and the decoder is auto-regressive, meaning it processes a series of embeddings in order, one embedding at a time, using outputs from previous ones as input to predict the next.</p>
+<p>For example, suppose it translates an English sentence to French. It first produces a French output given the SOS (start-of-sentence) marker and the embeddings from the English sentence. The next iteration produces the second French output, given all the previous inputs and the first French output. Then, it produces the third French output, given all the previous inputs and the second French output. The process repeatedly iterates until it spits out the EOS (end-of-sentence) marker.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/English-French-translation.png" class="img-fluid figure-img"></p>
+<figcaption>English-French translation</figcaption>
+</figure>
+</div>
+<p>However, this approach has a very high inference cost (proportional to output length and hard to batch). Moreover, object detection is not a sequence prediction problem. Instead, it’s a set prediction problem. Therefore, DETR’s decoder uses parallel decoding, handling all input embeddings in parallel. As such, DETR performs a direct set prediction, producing a set of object predictions (bounding boxes and classes) from the input image features (embeddings from the encoder).</p>
+<p>Then, the question is how to ask the decoder to produce output embeddings for different objects. Suppose we want the decoder to generate output embeddings for 100 objects, and we are not sequentially feeding one feature embedding at a time to it. We are asking the decoder to do it all at once.</p>
+<p>It is where object queries come in.</p>
+</section>
+<section id="object-queries" class="level3" data-number="1.4">
+<h3 data-number="1.4" class="anchored" data-anchor-id="object-queries"><span class="header-section-number">1.4</span> Object Queries</h3>
+<p>In the English-French translation example, the original Transformer’s decoder receives all previous inputs and the final output from the decoder. These input embeddings are nothing but hints for the decoder to produce the subsequent output. Similarly, DETR’s decoder needs hints to product output embeddings.</p>
+<p>Intuitively speaking, those hints should work like how anchors give priors for bounding box locations, size, and aspect ratios in Faster R-CNN and YOLO. It’s like we are querying the decoder to find objects with some prior knowledge of how to look for them. As such, we call input embeddings to the decoder <strong>object queries</strong>.</p>
+<p>Hence, the decoder receives the object queries as inputs and the image features (embeddings) from the encoder as contexts to produce output embeddings for the final detection stage. However, we don’t know precisely how to formulate object queries. So, DETR needs to learn such embeddings.</p>
+<p>Moreover, we must ensure all object queries are different since the decoder is permutation invariant, just like the encoder. In other words, we need some positional encoding in object queries. However, it does not seem easy to hand-engineer a mathematical formula to achieve that.</p>
+<p>Then, we should make the network learn such encoding.</p>
+</section>
+<section id="learned-positional-encoding" class="level3" data-number="1.5">
+<h3 data-number="1.5" class="anchored" data-anchor-id="learned-positional-encoding"><span class="header-section-number">1.5</span> Learned Positional Encoding</h3>
+<p>In DETR, they use learned embeddings, letting the network figure out how to differentiate N input embeddings and helping it produce the final predictions for multiple objects.</p>
+<blockquote class="blockquote">
+<p>These input embeddings are learned positional encodings that we refer to as object queries, and similarly to the encoder, we add them to the input of each attention layer. <cite>Source: <a href="https://arxiv.org/abs/2005.12872" target="_blank">the paper</a></cite></p>
+</blockquote>
+<p>The DETR defines the object queries as an embedding layer. Below is an excerpt from the <a href="https://github.com/facebookresearch/detr" target="_blank">DETR’s source code</a>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DETR(nn.Module:)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" This is the DETR module that performs object detection """</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, backbone, transformer, num_classes, num_queries, aux_loss<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">""" Initializes the model.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">        Parameters:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">            ...</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">            num_queries: number of object queries, ie detection slot. This is the maximal number of objects DETR can detect in a single image. For COCO, we recommend 100 queries.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">            ...</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        ...</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.query_embed <span class="op">=</span> nn.Embedding(num_queries, hidden_dim)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note: the hidden_dim parameter in the source code is the same as what I call dim_embed, and the query_embed object is the embedding that learns how to handle object queries.</p>
+<p>DETR adds object queries to the input of each multi-head attention layer, as shown in the below figure from the paper.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-10.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 10 of <a href="https://arxiv.org/abs/2005.12872" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>All in all, the decoder reasons all objects together using pair-wise relations between them, using the whole image as context via embeddings from the encoder.</p>
+</section>
+</section>
+<section id="detr-training" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="detr-training"><span class="header-section-number">2</span> DETR Training</h2>
+<section id="direct-set-prediction" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="direct-set-prediction"><span class="header-section-number">2.1</span> Direct Set Prediction</h3>
+<p>DETR infers a fixed-size set of N predictions in a single pass through the decoder. We must set N large enough to accommodate various numbers of objects in each image. This hyper-parameter encodes prior knowledge about the training images.</p>
+<p>DETR’s direct set prediction approach means it must find one-to-one matching between a predicted set of objects and the ground truth set. In other words, we need to uniquely assign each prediction to a ground truth object. DETR defines the matching loss to find the best matches between predicted and ground truth objects.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-1.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1 of <a href="https://arxiv.org/abs/2005.12872" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The matching process is similar to the heuristic assignment rules used to match proposals to ground truth objects in Faster R-CNN. However, DETR ﬁnds one-to-one matching for direct set prediction without duplicates and does not require post-processing to eliminate overlapping predictions.</p>
+</section>
+<section id="matching-process" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="matching-process"><span class="header-section-number">2.2</span> Matching Process</h3>
+<p>To assign each prediction to the closest ground truth, we define the matching loss and minimize the overall matching loss:</p>
+<p><span class="math display">\[
+\hat{\sigma} = \arg\min\limits_{\sigma \in \mathfrak{S}\_N} \sum_i^N \mathcal{L}_\text{match}(y_i, \hat{y}_{\sigma(i)})
+\]</span></p>
+<ul>
+<li><span class="math inline">\(y_i = (c_i, b_i)\)</span>: a ground truth object.</li>
+<li><span class="math inline">\(c_i\)</span> is a target class label which may be Ø.</li>
+<li><span class="math inline">\(b_i\)</span> is a vector for ground truth box coordinates (center x, center y, height, and width relative to the image size).</li>
+<li><span class="math inline">\(\{y_i\}\)</span> is a set of ground truth objects padded with ∅ (no object) when N &gt; the number of objects.</li>
+<li><span class="math inline">\(\hat{y}_i = (\hat{c}_i, \hat{b}_i)\)</span>: a predicted object.</li>
+<li><span class="math inline">\(\hat{c}_i\)</span> is a predicted class.</li>
+<li><span class="math inline">\(\hat{b}_i\)</span> is a predicted bounding box vector.</li>
+<li><span class="math inline">\(\sigma(i)\)</span> is an index within a particular permutation of N elements.</li>
+</ul>
+<p>We search for a permutation of N elements <span class="math inline">\(\sigma \in \mathfrak{S}_N\)</span> that best matches the ground truth set. The matching loss between a pair of a ground truth object and a predicted object is defined as follows:</p>
+<p><span class="math display">\[
+\mathcal{L}_\text{match}(y_i, \hat{y}_{\sigma(i)}) = -\mathbb{1}_{\{c_i \ne Ø\}} \hat{p}_{\sigma_i}(c_i) + \mathbb{1}_{\{ c_i \ne Ø\}} \mathcal{L}_{\text{box}} (b_i, \hat{b}_{\sigma(i)})
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\mathbb{1}_{\{c_i \ne Ø\}}\)</span> is 1 when <span class="math inline">\(c_i\)</span> is not ∅.</li>
+<li><span class="math inline">\(\hat{p}_{\sigma_i}(c_i)\)</span> is probability of class <span class="math inline">\(c_i\)</span>.</li>
+<li><span class="math inline">\(\mathcal{L}_{\text{box}}(b_i, \hat{b}_{\sigma(i)})\)</span> is a bounding-box loss.</li>
+</ul>
+<p>The bounding box loss is a linear combination of the L1 loss and <a href="https://arxiv.org/abs/1902.09630" target="_blank">the generalized IoU loss</a>:</p>
+<p><span class="math display">\[
+\mathcal{L}_{\text{box}}(b_i, \hat{b}_{\sigma(i)}) = \lambda_\text{iou} \mathcal{L}_{\text{iou}} (b_i, \hat{b}_{\sigma(i)}) + \lambda_{L1} \| b_i - \hat{b}_{\sigma(i)} \|_1
+\]</span></p>
+<p>L1 loss is commonly used but has different scales for small and large boxes, even when their relative errors are similar. As such, they added the IoU loss to mitigate the issue. The two lambdas are hyper-parameters to balance the two losses. Also, DETR training uses normalized losses (by the number of objects inside the batch).</p>
+<p>The matching loss uses <a href="https://arxiv.org/abs/1506.04878" target="_blank">the Hungarian algorithm</a> to optimally assign predictions to ground truth objects.</p>
+</section>
+<section id="hungarian-loss" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="hungarian-loss"><span class="header-section-number">2.3</span> Hungarian Loss</h3>
+<p>Once we find the best match permutation of predicted objects, we compute the Hungarian loss function. The Hungarian loss is a linear combination of a negative log-likelihood for class prediction and a box loss deﬁned above:</p>
+<p><span class="math display">\[
+\mathcal{L}_{\text{Hungarian}}(y, \hat{y}) = \sum_{i=1}^{N} \left[ -\log \hat{p}_{\hat{\sigma}(i)} (c_i) + \mathbb{1}_{c_i \ne Ø} \mathcal{L}_{\text{box}} (b_i, \hat{b}_{\hat{\sigma}}(i)) \right]
+\]</span></p>
+<p>In practice, they down-weight the log-probability term when <span class="math inline">\(c_i = ∅\)</span> by a factor of 10 to account for class imbalance. It is analogous to how the Faster R-CNN training procedure balances positive and negative proposals by subsampling.</p>
+<p>Note: in the previous section, the matching loss uses probabilities instead of log probabilities to keep the class prediction term commensurable to the box loss, and they observed better empirical performances.</p>
+</section>
+</section>
+<section id="detr-performance" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="detr-performance"><span class="header-section-number">3</span> DETR Performance</h2>
+<p>The below images are DETR’s sample outputs from the paper.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig-6.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 6 of <a href="https://arxiv.org/abs/2005.12872" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<p>The below table compares DETR with Faster R-CNN with a ResNet-50 and ResNet-101 backbones on the COCO validation set.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/tab-1.png" class="img-fluid figure-img"></p>
+<figcaption>Table 1 of <a href="https://arxiv.org/abs/2005.12872" target="_blank">the paper</a></figcaption>
+</figure>
+</div>
+<ul>
+<li>The top section shows results for Faster R-CNN models in Detectron2.</li>
+<li>The middle section shows results for Faster R-CNN models with:
+<ul>
+<li>GIoU (Generalized IoU)</li>
+<li>Random crops train-time augmentation</li>
+<li>Long 9x training schedule</li>
+</ul></li>
+<li>The bottom section shows DETR models:
+<ul>
+<li>DETR (ResNet-50)</li>
+<li>DETR-DC5 (ResNet-50 with dilated C5 stage)</li>
+<li>DETR-R101 (ResNet-101)</li>
+<li>DETR-DC5-R101 (ResNet-101 with dilated C5 stage)</li>
+</ul></li>
+</ul>
+<p>So, Faster R-CNN in the middle section is a heavily tuned version and performs better than the Detectron2 version. DC5 stands for dilated C5 stage, which increases the feature resolution, improving performance for small objects. Models with R101 use ResNet-101, and other models use ResNet-50. Overall, DETR achieved comparable results with the heavily tuned Faster R-CNN.</p>
+</section>
+<section id="references" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="references"><span class="header-section-number">4</span> References</h2>
+<ul>
+<li><a href="../../blog/2021-12-13-transformers-encoder-decoder/" target="_blank">Transformer’s Encoder-Decoder</a></li>
+<li><a href="../../blog/2022-07-11-faster-r-cnn-rpn/" target="_blank">Faster R-CNN</a></li>
+<li><a href="../../blog/2022-10-24-yolov3-2018/" target="_blank">YOLOv3</a></li>
+<li><a href="https://arxiv.org/abs/2005.12872" target="_blank">End-to-End Object Detection with Transformers</a><br>
+Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, Sergey Zagoruyko</li>
+<li><a href="https://arxiv.org/abs/1506.04878" target="_blank">End-to-end people detection in crowded scenes</a><br>
+Russell Stewart, Mykhaylo Andriluka</li>
+<li><a href="https://arxiv.org/abs/1902.09630" target="_blank">Generalized Intersection over Union: A Metric and A Loss for Bounding Box Regression</a><br>
+Hamid Rezatofighi, Nathan Tsoi, JunYoung Gwak, Amir Sadeghian, Ian Reid, Silvio Savarese</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function openLinksInNewTab() {
+    // 1. Only nav links in the <header>
+    const header = document.querySelector('header');
+    if (header) {
+      const headerNavLinks = header.querySelectorAll('a.nav-link');
+      headerNavLinks.forEach(link => link.setAttribute('target', '_blank'));
+    }
+
+    // 2. Grid links (cards)
+    document.querySelectorAll('a.quarto-grid-link').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+
+    // 3. Category filter links
+    document.querySelectorAll('.quarto-category a').forEach(link => {
+      link.setAttribute('target', '_blank');
+    });
+  }
+
+  openLinksInNewTab();
+
+  // Optional: observe changes to update dynamically loaded content
+  const observer = new MutationObserver(openLinksInNewTab);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="preferred_color_scheme">
+<input type="hidden" id="giscus-alt-theme" value="preferred_color_scheme">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "naokishibuya/naokishibuya.github.io";
+    script.dataset.repoId = "R_kgDOPTcwHA";
+    script.dataset.category = "Comments";
+    script.dataset.categoryId = "DIC_kwDOPTcwHM4CtefM";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "bottom";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2025, Naoki Shibuya • <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
