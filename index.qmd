@@ -9,11 +9,14 @@ listing:
   fields: [image, title, subtitle, date]
   grid-item-border: true
   grid-item-align: center
-  page-size: 9
+  grid-columns: 4
+  page-size: 200
   feed: false
-page-layout: full
 format:
   html:
     include-after-body: include-after-body.html
     katex: true
+    page-layout: full
+    grid:
+      body-width: 1000px
 ---

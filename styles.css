@@ -24,6 +24,11 @@ main {
   font-size: smaller;
 }
 
+.quarto-listing-category {
+  font-size: 15px!important;
+  line-height: 1.6;
+}
+
 .listing-subtitle {
   font-size: small;
   line-height: normal;
