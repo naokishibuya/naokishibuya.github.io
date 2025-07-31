@@ -186,6 +186,7 @@ a {
 blockquote {
   font-family: 'Courier New', Courier, monospace;
   font-size: 16px!important;
+  border-left:rgba(127, 127, 127, 0.2) solid 8px;
 }
 
 cite {
@@ -229,7 +230,7 @@ code:not(.sourceCode) {
 /* MathJax */
 .math.display mjx-container {
   overflow-x: auto;
-  overflow-y: auto;
+  overflow-y: clip;
   padding: 30px 30px 36px 30px!important;
   text-align: left!important;
 }
