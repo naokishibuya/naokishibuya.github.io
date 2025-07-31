@@ -5,6 +5,7 @@ _site/
 *.Rmd
 *.qmd~
 *.nb.html
+*.quarto_ipynb
 
 # Ignore OS & editor noise
 .DS_Store
