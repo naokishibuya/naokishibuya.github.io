@@ -228,8 +228,8 @@ code:not(.sourceCode) {
 
 /* MathJax */
 .math.display mjx-container {
-  overflow-x: scroll;
-  overflow-y: visible;
+  overflow-x: auto;
+  overflow-y: auto;
   padding: 30px 30px 36px 30px!important;
   text-align: left!important;
 }
