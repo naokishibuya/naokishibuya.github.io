@@ -33,7 +33,7 @@ So, we can imagine an image-to-image translation model is a generative model wit
 
 ## Conditional Adversarial Networks
 
-The latter half of the paper title is **with Conditional Adversarial Networks**, which indicates the use of a [CGAN (Conditional GAN)](/blog/2022-04-28-conditional-gan-2/). CGAN is an extension of [GAN](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) that generates images satisfying conditions given to the generator network. 
+The latter half of the paper title is **with Conditional Adversarial Networks**, which indicates the use of a [CGAN (Conditional GAN)](/blog/2022-04-28-conditional-gan/). CGAN is an extension of [GAN](/blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/) that generates images satisfying conditions given to the generator network. 
 
 In pix2pix, an input image is also a condition. 
 
@@ -138,7 +138,7 @@ Maybe it would have been better if we called it a “Fully Convolutional GAN” 
 <cite>[https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39)</cite>
 </blockquote>
 
-So, this is nothing new. We've discussed a discriminator with convolutional layers in the [DCGAN](/blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/) and [CGAN](/blog/2022-04-28-conditional-gan-2/) articles. Convolutional layers work a lot better than the **fully-connected-layer-only** version to extract features from images.
+So, this is nothing new. We've discussed a discriminator with convolutional layers in the [DCGAN](/blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/) and [CGAN](/blog/2022-04-28-conditional-gan/) articles. Convolutional layers work a lot better than the **fully-connected-layer-only** version to extract features from images.
 
 In the pix2pix paper, the author reasons that the discriminator only needs to penalize structure at the scale of patches (an area covered by a convolution kernel) by classifying each patch as real or fake and averaging all responses to provide the ultimate discriminator output since the L1 distance ensures the overall structural correctness. When the convolution kernel is 1x1, they call it the discriminator PixelGAN, and when the patch size is the same as the image size, they call it ImageGAN. In any case, they are convolutional neural networks and nothing more than that.
 
@@ -194,7 +194,7 @@ Lastly, I'd like to mention that even though the output images looked rough at t
 
 ## References
 
-- [CGAN (Conditional GAN): Specify What Images To Generate With 1 Simple Yet Powerful Change](/blog/2022-04-28-conditional-gan-2/)
+- [CGAN (Conditional GAN): Specify What Images To Generate With 1 Simple Yet Powerful Change](/blog/2022-04-28-conditional-gan/)
 - [CycleGAN: Turn a Horse into a Zebra and vice versa with the Magic of Self-Supervised Learning](/blog/2022-05-04-cyclegan-cycle-consistent-gan/)
 - [Image-to-Image Translation with Conditional Adversarial Networks](https://arxiv.org/abs/1611.07004) \
   Phillip Isola, Jun-Yan Zhu, Tinghui Zhou, Alexei A. Efros
