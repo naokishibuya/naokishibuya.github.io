@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2022-05-01">
+<meta name="dcterms.date" content="2022-04-22">
 
-<title>Pix2Pix – Naoki Shibuya</title>
+<title>Fashion GAN – Naoki Shibuya</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -72,35 +107,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -308,20 +314,11 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#image-to-image-translation" id="toc-image-to-image-translation" class="nav-link active" data-scroll-target="#image-to-image-translation"><span class="header-section-number">1</span> Image-to-image Translation</a></li>
-  <li><a href="#conditional-adversarial-networks" id="toc-conditional-adversarial-networks" class="nav-link" data-scroll-target="#conditional-adversarial-networks"><span class="header-section-number">2</span> Conditional Adversarial Networks</a></li>
-  <li><a href="#generator-network" id="toc-generator-network" class="nav-link" data-scroll-target="#generator-network"><span class="header-section-number">3</span> Generator Network</a>
-  <ul class="collapse">
-  <li><a href="#u-net" id="toc-u-net" class="nav-link" data-scroll-target="#u-net"><span class="header-section-number">3.1</span> U-Net</a></li>
-  <li><a href="#dropout" id="toc-dropout" class="nav-link" data-scroll-target="#dropout"><span class="header-section-number">3.2</span> Dropout</a></li>
-  <li><a href="#l1-distance" id="toc-l1-distance" class="nav-link" data-scroll-target="#l1-distance"><span class="header-section-number">3.3</span> L1 distance</a></li>
-  </ul></li>
-  <li><a href="#discriminator-network" id="toc-discriminator-network" class="nav-link" data-scroll-target="#discriminator-network"><span class="header-section-number">4</span> Discriminator Network</a>
-  <ul class="collapse">
-  <li><a href="#patchgan" id="toc-patchgan" class="nav-link" data-scroll-target="#patchgan"><span class="header-section-number">4.1</span> PatchGAN</a></li>
-  </ul></li>
-  <li><a href="#one-problem-with-pix2pix" id="toc-one-problem-with-pix2pix" class="nav-link" data-scroll-target="#one-problem-with-pix2pix"><span class="header-section-number">5</span> One Problem with Pix2Pix</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
+  <li><a href="#python-environment-setup" id="toc-python-environment-setup" class="nav-link active" data-scroll-target="#python-environment-setup"><span class="header-section-number">1</span> Python Environment Setup</a></li>
+  <li><a href="#download-the-pre-trained-fashion-gan" id="toc-download-the-pre-trained-fashion-gan" class="nav-link" data-scroll-target="#download-the-pre-trained-fashion-gan"><span class="header-section-number">2</span> Download the Pre-Trained Fashion GAN</a></li>
+  <li><a href="#generate-fashion-images" id="toc-generate-fashion-images" class="nav-link" data-scroll-target="#generate-fashion-images"><span class="header-section-number">3</span> Generate Fashion Images</a></li>
+  <li><a href="#source-code" id="toc-source-code" class="nav-link" data-scroll-target="#source-code"><span class="header-section-number">4</span> Source Code</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
   </ul>
 </nav>
 </nav>
@@ -335,8 +332,8 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Pix2Pix</h1>
-<p class="subtitle lead">Powerful Image-to-image Translation with a Conditional Adversarial Networks</p>
+<h1 class="title">Fashion GAN</h1>
+<p class="subtitle lead">Generating Colorful Fashion Images with DCGAN</p>
   <div class="quarto-categories">
     <div class="quarto-category">Generative Adversarial Networks</div>
   </div>
@@ -350,7 +347,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 1, 2022</p>
+      <p class="date">April 22, 2022</p>
     </div>
   </div>
   
@@ -362,238 +359,121 @@ window.Quarto = {
 </header>
 
 
-<p><img src="images/thumbnail.png" alt="CycleGAN: Powerful Image-to-image Translation with a Conditional Adversarial Networks"></p>
-<p>This article explains the mechanism of the pix2pix model, which <strong>translates</strong> an image to another one with a different look and feel. They use the word “translate” because of what it does, which is hard to explain in words, so I’d like you to watch the following video to see how the model translates images.</p>
-<iframe src="https://player.vimeo.com/video/260612034?h=1cf903469e" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="">
-</iframe>
-<p><a href="https://vimeo.com/memoakten" target="_blank">Memo Akten</a> is the artist who produced the video using pix2pix.</p>
-<p>Below is another example of a pix2pix application by <a href="https://github.com/christopherhesse" target="_blank">Christopher Hesse</a> (Open AI), which attracted people’s attention due to the <strong>rough technique</strong> of translating a sketch into an image with a cat.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/image-to-image-demo.png" class="img-fluid figure-img" style="width:75.0%"></p>
-<figcaption>Source: <a href="https://affinelayer.com/pixsrv/" target="_blank">Image-to-Image Demo by Christopher Hesse</a></figcaption>
-</figure>
-</div>
-<p>The above community-driven applications are eye-catching, but it may not be easy to see what’s going on behind the scene. Let’s examine what the image-to-image translation does and dive into how it works.</p>
-<section id="image-to-image-translation" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="image-to-image-translation"><span class="header-section-number">1</span> Image-to-image Translation</h2>
-<p>In <a href="https://cvpr2017.thecvf.com" target="_blank">CVPR2017</a>, Phillip Isola et al.&nbsp;(University of California, Berkeley) published the paper “<a href="https://arxiv.org/abs/1611.07004" target="_blank">Image-to-Image Translation with Conditional Adversarial Networks</a>”. The word “translation” is in the title. So, the choice of the word is intentional. The model converts one image to another while keeping visual features (especially the shapes) intact. As such, an image-to-image translation changes the feel and look of an input image without altering the structural composition, as shown in the below pairs of input and output images from the paper.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-1.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>For each pair of images, the left is an input image, and the right is a translated image. The input and the output have the same content, but the expressions are different, like a language translation that conveys the same content (meaning) but in different languages.</p>
-<p>So, we can imagine an image-to-image translation model is a generative model with a condition to keep the shapes in the input image.</p>
+<p><img src="images/thumbnail.png" alt="Fashion GAN: Generating Colorful Fashion Images with DCGAN"></p>
+<p>This article is a short follow-up on <a href="../2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/" target="_blank">DCGAN</a> (Deep Convolutional Generative Adversarial Network) applied for color fashion images (aka Fashion GAN). We’ll download a pre-trained DCGAN model from the Torch Hub and generate fashion images. The paper <a href="https://arxiv.org/abs/1511.06434" target="_blank">Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks</a> introduced the model. One of the authors, <a href="https://soumith.ch" target="_blank">Soumith Chintala</a>, is the main contributor to the PyTorch open-source project.</p>
+<p>We can feed random inputs into this DCGAN to generate realistic fashion images. Training GAN may be tricky, but it is straightforward to use it. So, let’s do it!</p>
+<section id="python-environment-setup" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="python-environment-setup"><span class="header-section-number">1</span> Python Environment Setup</h2>
+<p>First of all, we create a Python environment. We’ll use <code>venv</code> as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a project folder and move there</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mkdir dcgan</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>cd dcgan</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create and activate a Python environment using venv</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>python3 <span class="op">-</span>m venv venv</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>source venv<span class="op">/</span><span class="bu">bin</span><span class="op">/</span>activate</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># We should always upgrade pip as it's usually old version</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># that has older information about libraries</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>pip install <span class="op">--</span>upgrade pip</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># We install required libraries under the virtual environment</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>pip install torch torchvision matplotlib tqdm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The versions of installed libraries are as follows:</p>
+<pre><code>matplotlib==3.5.1
+torch==1.11.0
+torchvision==0.12.0
+tqdm==4.64.0</code></pre>
+<p>If you prefer <code>conda</code>, you can create an environment with that. Please make sure to install the required libraries.</p>
 </section>
-<section id="conditional-adversarial-networks" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="conditional-adversarial-networks"><span class="header-section-number">2</span> Conditional Adversarial Networks</h2>
-<p>The latter half of the paper title is <strong>with Conditional Adversarial Networks</strong>, which indicates the use of a <a href="../../blog/2022-04-28-conditional-gan/" target="_blank">CGAN (Conditional GAN)</a>. CGAN is an extension of <a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">GAN</a> that generates images satisfying conditions given to the generator network.</p>
-<p>In pix2pix, an input image is also a condition.</p>
-<p>As shown below, the generator takes an input image (a sketch of a shoe) as a condition to produce a generated realistic shoe image, and the discriminator also takes the same input image as the condition.</p>
+<section id="download-the-pre-trained-fashion-gan" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="download-the-pre-trained-fashion-gan"><span class="header-section-number">2</span> Download the Pre-Trained Fashion GAN</h2>
+<p>We’ll download the pre-trained DCGAN model from the Torch Hub.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>use_gpu <span class="op">=</span> <span class="va">True</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="va">False</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> torch.hub.load(<span class="st">'facebookresearch/pytorch_GAN_zoo:hub'</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'DCGAN'</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                       pretrained<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                       useGPU<span class="op">=</span>use_gpu)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The model can make use of GPU. If your machine has a GPU, <code>use_gpu</code> would be <code>True</code>. However, it requires no GPU if you only want to generate fashion images. If you plan to do transfer learning which involves training, you may want to do so on a machine with GPU. But that is not the topic of this article.</p>
+<p>The first time invoking the <code>torch.hub.load</code> method, it takes a while to download the pre-trained model, and it stores the model under <code>~/.cache/torch/hub</code>. After that, it will always load the model from the local cache, and it’s fast. If you can not resolve some problems, removing the downloaded model from the cache may be worthwhile. I do not expect anything to happen when we generate images using the downloaded model.</p>
+</section>
+<section id="generate-fashion-images" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="generate-fashion-images"><span class="header-section-number">3</span> Generate Fashion Images</h2>
+<p>As with any GAN model, we need to feed randomly generated inputs. The model provides a convenient noise data-generating method (<code>buildNoiseData</code>). The method is part of <a href="https://github.com/facebookresearch/pytorch_GAN_zoo/blob/b75dee40918caabb4fe7ec561522717bf096a8cb/models/base_GAN.py#L17" target="_blank">BaseGAN</a> class that <a href="https://github.com/facebookresearch/pytorch_GAN_zoo/blob/main/models/DCGAN.py" target="_blank">DCGAN</a> inherits. The PyTorch GAN Zoo GitHub repository has other GAN models inherited from the BaseGAN class.</p>
+<p>Here, we are creating 64 input noise data.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>noise, _ <span class="op">=</span> model.buildNoiseData(num_images)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(noise.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The last print statement prints the shape of the noise data (<code>torch.Size([64, 120])</code>, meaning there are 64 inputs, each having 120 random values.</p>
+<p>Let’s generate fashion images.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    generated_images <span class="op">=</span> model.test(noise)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We use <code>make_grid</code> from <code>torchvision.utils</code> to show images in a grid layout.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.utils <span class="im">import</span> make_grid</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>image_grid <span class="op">=</span> make_grid(generate_images, ncol<span class="op">=</span><span class="dv">8</span>) <span class="co"># Make images into a grid</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>image_grid <span class="op">=</span> image_grid.permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>)        <span class="co"># Move channel to the last</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>image_grid <span class="op">=</span> image_grid.cpu().numpy()           <span class="co"># Convert into Numpy</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>plt.imshow(image_grid)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>plt.xticks([])</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>plt.yticks([])</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below is the result. We fed 64 noise data into the model to generate 64 random fashion images.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/figure-2.png" class="img-fluid figure-img" style="width:75.0%"></p>
-<figcaption>Figure 2 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
+<p><img src="images/generated-1.png" class="img-fluid figure-img"></p>
+<figcaption>Fashion GAN output 1</figcaption>
 </figure>
 </div>
-<div class="table-80">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: center;">Symbol</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">x</td>
-<td>Input (condition) image</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">G</td>
-<td>Generator network</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">G(x)</td>
-<td>Generated image</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">y</td>
-<td>Label (target) image</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">D</td>
-<td>Discriminator network</td>
-</tr>
-</tbody>
-</table>
+<p>Below is the output of another run.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/generated-2.png" class="img-fluid figure-img"></p>
+<figcaption>Fashion GAN output 2</figcaption>
+</figure>
 </div>
-<p>We train the discriminator by feeding the same condition image x to classify the corresponding target image <code>y</code> as real and generated images <code>G(x)</code> as <code>fake</code>.</p>
-<p>We train the generator network <code>G</code> by feeding a condition image <code>x</code> to produce a generated image <code>G(x)</code> while expecting the discriminator to classify it as ‘real’.</p>
-<p>In turn, we train the discriminator and the generator so that both will be good at what they are doing. In short, pix2pix is a conditional GAN where input images are the conditions.</p>
-<p>However, pix2pix is different from GAN and CGAN in the following:</p>
+<p>As you can see, different random inputs generate different fashion images.</p>
+</section>
+<section id="source-code" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="source-code"><span class="header-section-number">4</span> Source Code</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.utils <span class="im">import</span> make_grid</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Download the model</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>use_gpu <span class="op">=</span> <span class="va">True</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="va">False</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> torch.hub.load(<span class="st">'facebookresearch/pytorch_GAN_zoo:hub'</span>, <span class="st">'DCGAN'</span>, pretrained<span class="op">=</span><span class="va">True</span>, useGPU<span class="op">=</span>use_gpu)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate random inputs</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>num_images <span class="op">=</span> <span class="dv">64</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>noise, _ <span class="op">=</span> model.buildNoiseData(num_images)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'noise shape'</span>, noise.shape)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'noise data'</span>, noise[<span class="dv">0</span>])</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate fashion images</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    generated_images <span class="op">=</span> model.test(noise)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Display images</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>plt.imshow(make_grid(generated_images).permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).cpu().numpy())</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>plt.xticks([])</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>plt.yticks([])</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>That’s it!</p>
+</section>
+<section id="references" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="references"><span class="header-section-number">5</span> References</h2>
 <ul>
-<li>Inputs are not random noise, unlike the original GAN or CGAN.</li>
-<li>We need pairs of a condition (input) image and the target (label) image for training.</li>
-<li>Condition images represent the contents (shapes) of the target (label) images.</li>
-</ul>
-<p>So, the generator network needs more than just a simple convolutional network because it needs to maintain the pixel-level details from input images into output images.</p>
-</section>
-<section id="generator-network" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="generator-network"><span class="header-section-number">3</span> Generator Network</h2>
-<section id="u-net" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="u-net"><span class="header-section-number">3.1</span> U-Net</h3>
-<p>The generator uses the <a href="https://arxiv.org/abs/1505.04597" target="_blank">U-Net</a> architecture. U-Net is a segmentation model for medical images that uses pixel-level details of an input image to produce an output image.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/U-net-figure-1.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1505.04597" target="_blank">the U-Net paper</a></figcaption>
-</figure>
-</div>
-<p>U-Net is an encoder-decoder model with skip connections between encoders and decoders. The skip connections make features available from each encoder layer to the corresponding decoder layer.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-3.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>Figure 3 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>So, the generator is a segmentation model, keeping shapes (pixel-level details) from an input to the output. However, U-Net would generate the same output image for the same input image every time because our inputs have no stochasticity. It is a problem because both the generator and the discriminator would see only those images available in the training dataset to learn the distribution of images. The distribution wouldn’t be smooth and become like a delta function with zeros everywhere except for images from the training dataset. What can we do here?</p>
-<p>Can we add random noise like the original GAN, which has no issue learning the mapping from unlimited noise variations to realistic images?</p>
-<p>The paper says this didn’t work well because the generator learned to ignore noises. It is probably because the pix2pix model must maintain a strong connection between input (condition) images and the target images.</p>
-<p>Then, how can we make the model robust against unseen input image variations?</p>
-</section>
-<section id="dropout" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="dropout"><span class="header-section-number">3.2</span> Dropout</h3>
-<p>Phillip Isola et al.&nbsp;decided to use dropouts in several generator layers. It should avoid over-fitting the training dataset by randomly ignoring a certain percentage of network nodes during training, making the network use a different set of nodes every time. For this reason, it has an effect similar to ensemble learning, including multiple networks, making the model robust to input variations. They also kept the dropout during test time, expecting increased output variations. However, this didn’t work as much as they had hoped for.</p>
-<blockquote class="blockquote">
-Despite the dropout noise, we observe only minor stochasticity in the output of our nets. Designing conditional GANs that produce highly stochastic output, and thereby capture the full entropy of the conditional distributions they model, is an important question left open by the present work. <cite>Source: <a href="https://arxiv.org/abs/1611.07004" target="_blank">pix2pix</a></cite>
-</blockquote>
-<p>That, again, is probably due to the strong connection required between the input and target images. Dropouts should still be valid to make the model robust against input image variations. As a result, the generator is a U-Net with dropouts. However, as it is, the generator network won’t be able to generate images with similar shapes to the target images. We need to devise a loss function for that purpose.</p>
-</section>
-<section id="l1-distance" class="level3" data-number="3.3">
-<h3 data-number="3.3" class="anchored" data-anchor-id="l1-distance"><span class="header-section-number">3.3</span> L1 distance</h3>
-<blockquote class="blockquote">
-To be real or not - that is not the only question. <cite>Source: me</cite>
-</blockquote>
-<p>The original GAN uses binary cross-entropy as a loss function to train the discriminator to distinguish real and fake images. We use the discriminator (with the same loss function) to train the generator to produce real (in terms of the target domain) images. However, we need more than just classifying real or not because the generator may produce a realistic image with completely different shapes than the input (condition) image.</p>
-<p>As such, we need an extra loss to tell how close a generated image is to the target (label) image. For that purpose, the pix2pix training uses the L1 distance between a generated image and the target image.</p>
-<p>L1 distance is the mean absolute pixel value differences between two images. If two images are the same, the L1 distance is zero. The total loss for the generator is as follows:</p>
-<p><span class="math display">\[
-\text{Loss} = \text{Binary-Cross-Entropy} + \lambda \, \text{L1}
-\]</span></p>
-<p><span class="math inline">\(\lambda\)</span> is a hyperparameter to adjust the balance between the binary cross-entropy and the L1 distance.</p>
-<ul>
-<li><span class="math inline">\(\lambda = 0\)</span> means the loss is simply the binary cross-entropy.</li>
-<li><span class="math inline">\(\lambda &gt; 0\)</span> means the loss includes L1 distance. If it’s too big, the binary cross-entropy loss has less effect.</li>
-<li><span class="math inline">\(\lambda &lt; 0\)</span> should not be used.</li>
-</ul>
-<p>The paper mentions the L2 distance (the root mean squared pixel value differences between two images) makes the generated images blurry. So, they use the L1 distance, which is better. However, there was still a problem. The L1 distance, as an average of all absolute pixel value differences, can still miss local details because the metric applies globally. As such, the generated images did not look real from the target domain point of view.</p>
-</section>
-</section>
-<section id="discriminator-network" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="discriminator-network"><span class="header-section-number">4</span> Discriminator Network</h2>
-<section id="patchgan" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="patchgan"><span class="header-section-number">4.1</span> PatchGAN</h3>
-<p>The paper introduced a discriminator network called PatchGAN, a convolutional neural network for binary classification. The below quote from Phillip Isola in a GitHub issue confirms it:</p>
-<blockquote class="blockquote">
-<p>In fact, a “PatchGAN” is just a convnet! Or you could say all convnets are patchnets: the power of convnets is that they process each image patch identically and independently, which makes things very cheap (# params, time, memory), and, amazingly, turns out to work.</p>
-<p>The difference between a PatchGAN and regular GAN discriminator is that rather the regular GAN maps from a 256×256 image to a single scalar output, which signifies “real” or “fake”, whereas the PatchGAN maps from 256×256 to an NxN array of outputs X, where each X_ij signifies whether the patch ij in the image is real or fake. Which is patch ij in the input? Well, output X_ij is just a neuron in a convnet, and we can trace back its receptive field to see which input pixels it is sensitive to. In the CycleGAN architecture, the receptive fields of the discriminator turn out to be 70×70 patches in the input image!</p>
-<p>This is all mathematically equivalent to if we had manually chopped up the image into 70×70 overlapping patches, run a regular discriminator over each patch, and averaged the results.</p>
-Maybe it would have been better if we called it a “Fully Convolutional GAN” like in FCNs… it’s the same idea :) <cite><a href="https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39" target="_blank">https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39</a></cite>
-</blockquote>
-<p>So, this is nothing new. We’ve discussed a discriminator with convolutional layers in the <a href="../../blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/" target="_blank">DCGAN</a> and <a href="../../blog/2022-04-28-conditional-gan/" target="_blank">CGAN</a> articles. Convolutional layers work a lot better than the <strong>fully-connected-layer-only</strong> version to extract features from images.</p>
-<p>In the pix2pix paper, the author reasons that the discriminator only needs to penalize structure at the scale of patches (an area covered by a convolution kernel) by classifying each patch as real or fake and averaging all responses to provide the ultimate discriminator output since the L1 distance ensures the overall structural correctness. When the convolution kernel is 1x1, they call it the discriminator PixelGAN, and when the patch size is the same as the image size, they call it ImageGAN. In any case, they are convolutional neural networks and nothing more than that.</p>
-<p>The below shows example outputs.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-6.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 6：<a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>In the description of the above figure, the paper mentions the following:</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th style="text-align: center;">
-Discriminator<br>(Patch Size)
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody style="vertical-align: middle;">
-<tr>
-<td style="text-align: center;">
-L1 Loss Only<br>(None)
-</td>
-<td>
-Uncertain regions become blurry and desaturated
-</td>
-</tr><tr>
-<td style="text-align: center;">
-PixelGAN<br>(1 x 1)
-</td>
-<td>
-Greater color diversity but has no effect on spatial statistics
-</td>
-</tr>
-<tr>
-<td style="text-align: center;">
-PatchGAN<br>(16 x 16)
-</td>
-<td>
-Locally sharp results, but also leads to tiling artifacts beyond the scale
-</td>
-</tr>
-<tr>
-<td style="text-align: center;">
-PatchGAN<br>(70 x 70)
-</td>
-<td>
-Sharp, even if incorrect, in both the spatial and spectral dimensions
-</td>
-</tr>
-<tr>
-<td style="text-align: center;">
-ImageGAN<br>(286 x 286)
-</td>
-<td>
-Visually similar to the 70x70 PatchGAN, but somewhat lower quality in FCN score
-</td>
-</tr>
-</tbody>
-</table>
-<p>Note: the idea of FCN score is that applying the same segmentation model (FCN-8) to a generated image and the target image should produce a similar result when they are look-a-like. They used this method because it is often difficult for the human eye to evaluate generated images quantitatively.</p>
-<p>So, the patch size is a hyperparameter that we must tune for the discriminator. Their experiment shows PatchGAN (70x70) works the best.</p>
-</section>
-</section>
-<section id="one-problem-with-pix2pix" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="one-problem-with-pix2pix"><span class="header-section-number">5</span> One Problem with Pix2Pix</h2>
-<p>The paper has an example that translates <a href="https://www.cityscapes-dataset.com" target="_blank">Cityscapes</a> segmentation label images back to photo-realistic images.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-13.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 13 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>This example makes use of the cityscape’s dataset. However, if we don’t have such a dataset, we must collect and make pairs of condition and target images, which takes a lot of time and effort. It is a critical problem with pix2pix. The researchers of pix2pix later published <a href="https://junyanz.github.io/CycleGAN/" target="_blank">CycleGAN</a>, which eliminated the need for such one-to-one pairs of images and ultimately solved the problem.</p>
-<p>Lastly, I’d like to mention that even though the output images looked rough at the time of the paper, it was already quite promising and paved the way for the future (now) when we generate a super-photo-realistic synthetic dataset and use it for training AI models.</p>
-</section>
-<section id="references" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
-<ul>
-<li><a href="../../blog/2022-04-28-conditional-gan/" target="_blank">CGAN (Conditional GAN): Specify What Images To Generate With 1 Simple Yet Powerful Change</a></li>
-<li><a href="../../blog/2022-05-04-cyclegan-cycle-consistent-gan/" target="_blank">CycleGAN: Turn a Horse into a Zebra and vice versa with the Magic of Self-Supervised Learning</a></li>
-<li><a href="https://arxiv.org/abs/1611.07004" target="_blank">Image-to-Image Translation with Conditional Adversarial Networks</a><br>
-Phillip Isola, Jun-Yan Zhu, Tinghui Zhou, Alexei A. Efros</li>
-<li><a href="https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix" target="_blank">CycleGAN and pix2pix in PyTorch</a><br>
-Jun-Yan Zhu, Taesung Park, Tongzhou Wang</li>
-<li><a href="https://paperswithcode.com/paper/image-to-image-translation-with-conditional" target="_blank">Image-to-Image Translation with Conditional Adversarial Networks</a><br>
-Paper With Code</li>
-<li><a href="https://blogs.nvidia.com/blog/2021/11/09/drive-sim-replicator-synthetic-data-generation/" target="_blank">NVIDIA Omniverse Replicator for DRIVE Sim Accelerates AV Development, Improves Perception Results</a></li>
+<li><a href="https://arxiv.org/abs/1511.06434" target="_blank">Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks</a><br>
+Alec Radford, Luke Metz, Soumith Chintala</li>
+<li><a href="https://pytorch.org/hub/facebookresearch_pytorch-gan-zoo_dcgan/" target="_blank">DCGAN on FashionGen, PyTorch</a></li>
 </ul>
 
 

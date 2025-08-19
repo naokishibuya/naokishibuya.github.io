@@ -6,9 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2022-05-01">
+<meta name="dcterms.date" content="2025-08-06">
+<meta name="keywords" content="LLM, RAG, Retrieval-Augmented Generation, Natural Language Processing">
+<meta name="description" content="How LLMs can be enhanced with RAG to improve the quality and relevance of responses.">
 
-<title>Pix2Pix – Naoki Shibuya</title>
+<title>LLM RAG Demo – Naoki Shibuya</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -72,35 +109,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -308,20 +316,10 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#image-to-image-translation" id="toc-image-to-image-translation" class="nav-link active" data-scroll-target="#image-to-image-translation"><span class="header-section-number">1</span> Image-to-image Translation</a></li>
-  <li><a href="#conditional-adversarial-networks" id="toc-conditional-adversarial-networks" class="nav-link" data-scroll-target="#conditional-adversarial-networks"><span class="header-section-number">2</span> Conditional Adversarial Networks</a></li>
-  <li><a href="#generator-network" id="toc-generator-network" class="nav-link" data-scroll-target="#generator-network"><span class="header-section-number">3</span> Generator Network</a>
+  <li><a href="#setting-up-the-environment" id="toc-setting-up-the-environment" class="nav-link active" data-scroll-target="#setting-up-the-environment"><span class="header-section-number">1</span> Setting Up the Environment</a>
   <ul class="collapse">
-  <li><a href="#u-net" id="toc-u-net" class="nav-link" data-scroll-target="#u-net"><span class="header-section-number">3.1</span> U-Net</a></li>
-  <li><a href="#dropout" id="toc-dropout" class="nav-link" data-scroll-target="#dropout"><span class="header-section-number">3.2</span> Dropout</a></li>
-  <li><a href="#l1-distance" id="toc-l1-distance" class="nav-link" data-scroll-target="#l1-distance"><span class="header-section-number">3.3</span> L1 distance</a></li>
+  <li><a href="#install-ollama" id="toc-install-ollama" class="nav-link" data-scroll-target="#install-ollama"><span class="header-section-number">1.1</span> Install Ollama</a></li>
   </ul></li>
-  <li><a href="#discriminator-network" id="toc-discriminator-network" class="nav-link" data-scroll-target="#discriminator-network"><span class="header-section-number">4</span> Discriminator Network</a>
-  <ul class="collapse">
-  <li><a href="#patchgan" id="toc-patchgan" class="nav-link" data-scroll-target="#patchgan"><span class="header-section-number">4.1</span> PatchGAN</a></li>
-  </ul></li>
-  <li><a href="#one-problem-with-pix2pix" id="toc-one-problem-with-pix2pix" class="nav-link" data-scroll-target="#one-problem-with-pix2pix"><span class="header-section-number">5</span> One Problem with Pix2Pix</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
   </ul>
 </nav>
 </nav>
@@ -335,13 +333,18 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Pix2Pix</h1>
-<p class="subtitle lead">Powerful Image-to-image Translation with a Conditional Adversarial Networks</p>
+<h1 class="title">LLM RAG Demo</h1>
+<p class="subtitle lead">A demonstration of Retrieval-Augmented Generation (RAG) system using LLMs</p>
   <div class="quarto-categories">
-    <div class="quarto-category">Generative Adversarial Networks</div>
+    <div class="quarto-category">Large Language Models</div>
   </div>
   </div>
 
+<div>
+  <div class="description">
+    How LLMs can be enhanced with RAG to improve the quality and relevance of responses.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -350,7 +353,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 1, 2022</p>
+      <p class="date">August 6, 2025</p>
     </div>
   </div>
   
@@ -358,245 +361,46 @@ window.Quarto = {
   </div>
   
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>LLM, RAG, Retrieval-Augmented Generation, Natural Language Processing</p>
+  </div>
+</div>
 
 </header>
 
 
-<p><img src="images/thumbnail.png" alt="CycleGAN: Powerful Image-to-image Translation with a Conditional Adversarial Networks"></p>
-<p>This article explains the mechanism of the pix2pix model, which <strong>translates</strong> an image to another one with a different look and feel. They use the word “translate” because of what it does, which is hard to explain in words, so I’d like you to watch the following video to see how the model translates images.</p>
-<iframe src="https://player.vimeo.com/video/260612034?h=1cf903469e" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="">
-</iframe>
-<p><a href="https://vimeo.com/memoakten" target="_blank">Memo Akten</a> is the artist who produced the video using pix2pix.</p>
-<p>Below is another example of a pix2pix application by <a href="https://github.com/christopherhesse" target="_blank">Christopher Hesse</a> (Open AI), which attracted people’s attention due to the <strong>rough technique</strong> of translating a sketch into an image with a cat.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/image-to-image-demo.png" class="img-fluid figure-img" style="width:75.0%"></p>
-<figcaption>Source: <a href="https://affinelayer.com/pixsrv/" target="_blank">Image-to-Image Demo by Christopher Hesse</a></figcaption>
-</figure>
-</div>
-<p>The above community-driven applications are eye-catching, but it may not be easy to see what’s going on behind the scene. Let’s examine what the image-to-image translation does and dive into how it works.</p>
-<section id="image-to-image-translation" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="image-to-image-translation"><span class="header-section-number">1</span> Image-to-image Translation</h2>
-<p>In <a href="https://cvpr2017.thecvf.com" target="_blank">CVPR2017</a>, Phillip Isola et al.&nbsp;(University of California, Berkeley) published the paper “<a href="https://arxiv.org/abs/1611.07004" target="_blank">Image-to-Image Translation with Conditional Adversarial Networks</a>”. The word “translation” is in the title. So, the choice of the word is intentional. The model converts one image to another while keeping visual features (especially the shapes) intact. As such, an image-to-image translation changes the feel and look of an input image without altering the structural composition, as shown in the below pairs of input and output images from the paper.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-1.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>For each pair of images, the left is an input image, and the right is a translated image. The input and the output have the same content, but the expressions are different, like a language translation that conveys the same content (meaning) but in different languages.</p>
-<p>So, we can imagine an image-to-image translation model is a generative model with a condition to keep the shapes in the input image.</p>
-</section>
-<section id="conditional-adversarial-networks" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="conditional-adversarial-networks"><span class="header-section-number">2</span> Conditional Adversarial Networks</h2>
-<p>The latter half of the paper title is <strong>with Conditional Adversarial Networks</strong>, which indicates the use of a <a href="../../blog/2022-04-28-conditional-gan/" target="_blank">CGAN (Conditional GAN)</a>. CGAN is an extension of <a href="../../blog/2022-04-21-gangenerative-adversarial-network-simple-implementation-with-pytorch/" target="_blank">GAN</a> that generates images satisfying conditions given to the generator network.</p>
-<p>In pix2pix, an input image is also a condition.</p>
-<p>As shown below, the generator takes an input image (a sketch of a shoe) as a condition to produce a generated realistic shoe image, and the discriminator also takes the same input image as the condition.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-2.png" class="img-fluid figure-img" style="width:75.0%"></p>
-<figcaption>Figure 2 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<div class="table-80">
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: center;">Symbol</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">x</td>
-<td>Input (condition) image</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">G</td>
-<td>Generator network</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">G(x)</td>
-<td>Generated image</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">y</td>
-<td>Label (target) image</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">D</td>
-<td>Discriminator network</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>We train the discriminator by feeding the same condition image x to classify the corresponding target image <code>y</code> as real and generated images <code>G(x)</code> as <code>fake</code>.</p>
-<p>We train the generator network <code>G</code> by feeding a condition image <code>x</code> to produce a generated image <code>G(x)</code> while expecting the discriminator to classify it as ‘real’.</p>
-<p>In turn, we train the discriminator and the generator so that both will be good at what they are doing. In short, pix2pix is a conditional GAN where input images are the conditions.</p>
-<p>However, pix2pix is different from GAN and CGAN in the following:</p>
+<p><img src="images/thumbnail.png" alt="LLM RAG Demo Thumbnail"></p>
+<p>We use the following components to build a Retrieval-Augmented Generation (RAG) system:</p>
 <ul>
-<li>Inputs are not random noise, unlike the original GAN or CGAN.</li>
-<li>We need pairs of a condition (input) image and the target (label) image for training.</li>
-<li>Condition images represent the contents (shapes) of the target (label) images.</li>
+<li><strong>Ollama</strong>: A platform for deploying and managing large language models (LLMs).</li>
+<li><strong>LangChain</strong>: A framework for building applications with LLMs, providing tools for chaining together components like prompts, models, and data retrieval.</li>
+<li><strong>FastAPI</strong>: A modern web framework for building APIs with Python, which we use to create an interface for our RAG system.</li>
 </ul>
-<p>So, the generator network needs more than just a simple convolutional network because it needs to maintain the pixel-level details from input images into output images.</p>
-</section>
-<section id="generator-network" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="generator-network"><span class="header-section-number">3</span> Generator Network</h2>
-<section id="u-net" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="u-net"><span class="header-section-number">3.1</span> U-Net</h3>
-<p>The generator uses the <a href="https://arxiv.org/abs/1505.04597" target="_blank">U-Net</a> architecture. U-Net is a segmentation model for medical images that uses pixel-level details of an input image to produce an output image.</p>
+<section id="setting-up-the-environment" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="setting-up-the-environment"><span class="header-section-number">1</span> Setting Up the Environment</h2>
+<section id="install-ollama" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="install-ollama"><span class="header-section-number">1.1</span> Install Ollama</h3>
+<p>Go to the <a href="https://ollama.com/" target="_blank">Ollama website</a> and follow the installation instructions for your operating system.</p>
+<p>You can find a list of downloadable models in <a href="https://ollama.com/search/" target="_blank">Ollama Models</a>. For example, we will use the Llama 3.2 model.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run llama3.2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This command will download and run the Llama 3.2 model locally if it is not already installed.</p>
+<p>Once the model is running, you can interact with it using the Ollama CLI:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/U-net-figure-1.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>Figure 1 of <a href="https://arxiv.org/abs/1505.04597" target="_blank">the U-Net paper</a></figcaption>
+<p><img src="images/ollama-cli-example.png" class="img-fluid figure-img"></p>
+<figcaption>Ollama CLI Example</figcaption>
 </figure>
 </div>
-<p>U-Net is an encoder-decoder model with skip connections between encoders and decoders. The skip connections make features available from each encoder layer to the corresponding decoder layer.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-3.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>Figure 3 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>So, the generator is a segmentation model, keeping shapes (pixel-level details) from an input to the output. However, U-Net would generate the same output image for the same input image every time because our inputs have no stochasticity. It is a problem because both the generator and the discriminator would see only those images available in the training dataset to learn the distribution of images. The distribution wouldn’t be smooth and become like a delta function with zeros everywhere except for images from the training dataset. What can we do here?</p>
-<p>Can we add random noise like the original GAN, which has no issue learning the mapping from unlimited noise variations to realistic images?</p>
-<p>The paper says this didn’t work well because the generator learned to ignore noises. It is probably because the pix2pix model must maintain a strong connection between input (condition) images and the target images.</p>
-<p>Then, how can we make the model robust against unseen input image variations?</p>
-</section>
-<section id="dropout" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="dropout"><span class="header-section-number">3.2</span> Dropout</h3>
-<p>Phillip Isola et al.&nbsp;decided to use dropouts in several generator layers. It should avoid over-fitting the training dataset by randomly ignoring a certain percentage of network nodes during training, making the network use a different set of nodes every time. For this reason, it has an effect similar to ensemble learning, including multiple networks, making the model robust to input variations. They also kept the dropout during test time, expecting increased output variations. However, this didn’t work as much as they had hoped for.</p>
-<blockquote class="blockquote">
-Despite the dropout noise, we observe only minor stochasticity in the output of our nets. Designing conditional GANs that produce highly stochastic output, and thereby capture the full entropy of the conditional distributions they model, is an important question left open by the present work. <cite>Source: <a href="https://arxiv.org/abs/1611.07004" target="_blank">pix2pix</a></cite>
-</blockquote>
-<p>That, again, is probably due to the strong connection required between the input and target images. Dropouts should still be valid to make the model robust against input image variations. As a result, the generator is a U-Net with dropouts. However, as it is, the generator network won’t be able to generate images with similar shapes to the target images. We need to devise a loss function for that purpose.</p>
-</section>
-<section id="l1-distance" class="level3" data-number="3.3">
-<h3 data-number="3.3" class="anchored" data-anchor-id="l1-distance"><span class="header-section-number">3.3</span> L1 distance</h3>
-<blockquote class="blockquote">
-To be real or not - that is not the only question. <cite>Source: me</cite>
-</blockquote>
-<p>The original GAN uses binary cross-entropy as a loss function to train the discriminator to distinguish real and fake images. We use the discriminator (with the same loss function) to train the generator to produce real (in terms of the target domain) images. However, we need more than just classifying real or not because the generator may produce a realistic image with completely different shapes than the input (condition) image.</p>
-<p>As such, we need an extra loss to tell how close a generated image is to the target (label) image. For that purpose, the pix2pix training uses the L1 distance between a generated image and the target image.</p>
-<p>L1 distance is the mean absolute pixel value differences between two images. If two images are the same, the L1 distance is zero. The total loss for the generator is as follows:</p>
-<p><span class="math display">\[
-\text{Loss} = \text{Binary-Cross-Entropy} + \lambda \, \text{L1}
-\]</span></p>
-<p><span class="math inline">\(\lambda\)</span> is a hyperparameter to adjust the balance between the binary cross-entropy and the L1 distance.</p>
-<ul>
-<li><span class="math inline">\(\lambda = 0\)</span> means the loss is simply the binary cross-entropy.</li>
-<li><span class="math inline">\(\lambda &gt; 0\)</span> means the loss includes L1 distance. If it’s too big, the binary cross-entropy loss has less effect.</li>
-<li><span class="math inline">\(\lambda &lt; 0\)</span> should not be used.</li>
-</ul>
-<p>The paper mentions the L2 distance (the root mean squared pixel value differences between two images) makes the generated images blurry. So, they use the L1 distance, which is better. However, there was still a problem. The L1 distance, as an average of all absolute pixel value differences, can still miss local details because the metric applies globally. As such, the generated images did not look real from the target domain point of view.</p>
-</section>
-</section>
-<section id="discriminator-network" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="discriminator-network"><span class="header-section-number">4</span> Discriminator Network</h2>
-<section id="patchgan" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="patchgan"><span class="header-section-number">4.1</span> PatchGAN</h3>
-<p>The paper introduced a discriminator network called PatchGAN, a convolutional neural network for binary classification. The below quote from Phillip Isola in a GitHub issue confirms it:</p>
-<blockquote class="blockquote">
-<p>In fact, a “PatchGAN” is just a convnet! Or you could say all convnets are patchnets: the power of convnets is that they process each image patch identically and independently, which makes things very cheap (# params, time, memory), and, amazingly, turns out to work.</p>
-<p>The difference between a PatchGAN and regular GAN discriminator is that rather the regular GAN maps from a 256×256 image to a single scalar output, which signifies “real” or “fake”, whereas the PatchGAN maps from 256×256 to an NxN array of outputs X, where each X_ij signifies whether the patch ij in the image is real or fake. Which is patch ij in the input? Well, output X_ij is just a neuron in a convnet, and we can trace back its receptive field to see which input pixels it is sensitive to. In the CycleGAN architecture, the receptive fields of the discriminator turn out to be 70×70 patches in the input image!</p>
-<p>This is all mathematically equivalent to if we had manually chopped up the image into 70×70 overlapping patches, run a regular discriminator over each patch, and averaged the results.</p>
-Maybe it would have been better if we called it a “Fully Convolutional GAN” like in FCNs… it’s the same idea :) <cite><a href="https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39" target="_blank">https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/issues/39</a></cite>
-</blockquote>
-<p>So, this is nothing new. We’ve discussed a discriminator with convolutional layers in the <a href="../../blog/2022-04-22-dcgan-deep-convolutional-gan-generates-mnist-like-images-with-dramatically-better-quality/" target="_blank">DCGAN</a> and <a href="../../blog/2022-04-28-conditional-gan/" target="_blank">CGAN</a> articles. Convolutional layers work a lot better than the <strong>fully-connected-layer-only</strong> version to extract features from images.</p>
-<p>In the pix2pix paper, the author reasons that the discriminator only needs to penalize structure at the scale of patches (an area covered by a convolution kernel) by classifying each patch as real or fake and averaging all responses to provide the ultimate discriminator output since the L1 distance ensures the overall structural correctness. When the convolution kernel is 1x1, they call it the discriminator PixelGAN, and when the patch size is the same as the image size, they call it ImageGAN. In any case, they are convolutional neural networks and nothing more than that.</p>
-<p>The below shows example outputs.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-6.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 6：<a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>In the description of the above figure, the paper mentions the following:</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th style="text-align: center;">
-Discriminator<br>(Patch Size)
-</th>
-<th>
-Description
-</th>
-</tr>
-</thead>
-<tbody style="vertical-align: middle;">
-<tr>
-<td style="text-align: center;">
-L1 Loss Only<br>(None)
-</td>
-<td>
-Uncertain regions become blurry and desaturated
-</td>
-</tr><tr>
-<td style="text-align: center;">
-PixelGAN<br>(1 x 1)
-</td>
-<td>
-Greater color diversity but has no effect on spatial statistics
-</td>
-</tr>
-<tr>
-<td style="text-align: center;">
-PatchGAN<br>(16 x 16)
-</td>
-<td>
-Locally sharp results, but also leads to tiling artifacts beyond the scale
-</td>
-</tr>
-<tr>
-<td style="text-align: center;">
-PatchGAN<br>(70 x 70)
-</td>
-<td>
-Sharp, even if incorrect, in both the spatial and spectral dimensions
-</td>
-</tr>
-<tr>
-<td style="text-align: center;">
-ImageGAN<br>(286 x 286)
-</td>
-<td>
-Visually similar to the 70x70 PatchGAN, but somewhat lower quality in FCN score
-</td>
-</tr>
-</tbody>
-</table>
-<p>Note: the idea of FCN score is that applying the same segmentation model (FCN-8) to a generated image and the target image should produce a similar result when they are look-a-like. They used this method because it is often difficult for the human eye to evaluate generated images quantitatively.</p>
-<p>So, the patch size is a hyperparameter that we must tune for the discriminator. Their experiment shows PatchGAN (70x70) works the best.</p>
-</section>
-</section>
-<section id="one-problem-with-pix2pix" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="one-problem-with-pix2pix"><span class="header-section-number">5</span> One Problem with Pix2Pix</h2>
-<p>The paper has an example that translates <a href="https://www.cityscapes-dataset.com" target="_blank">Cityscapes</a> segmentation label images back to photo-realistic images.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/figure-13.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 13 of <a href="https://arxiv.org/abs/1611.07004" target="_blank">the paper</a></figcaption>
-</figure>
-</div>
-<p>This example makes use of the cityscape’s dataset. However, if we don’t have such a dataset, we must collect and make pairs of condition and target images, which takes a lot of time and effort. It is a critical problem with pix2pix. The researchers of pix2pix later published <a href="https://junyanz.github.io/CycleGAN/" target="_blank">CycleGAN</a>, which eliminated the need for such one-to-one pairs of images and ultimately solved the problem.</p>
-<p>Lastly, I’d like to mention that even though the output images looked rough at the time of the paper, it was already quite promising and paved the way for the future (now) when we generate a super-photo-realistic synthetic dataset and use it for training AI models.</p>
-</section>
-<section id="references" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="references"><span class="header-section-number">6</span> References</h2>
-<ul>
-<li><a href="../../blog/2022-04-28-conditional-gan/" target="_blank">CGAN (Conditional GAN): Specify What Images To Generate With 1 Simple Yet Powerful Change</a></li>
-<li><a href="../../blog/2022-05-04-cyclegan-cycle-consistent-gan/" target="_blank">CycleGAN: Turn a Horse into a Zebra and vice versa with the Magic of Self-Supervised Learning</a></li>
-<li><a href="https://arxiv.org/abs/1611.07004" target="_blank">Image-to-Image Translation with Conditional Adversarial Networks</a><br>
-Phillip Isola, Jun-Yan Zhu, Tinghui Zhou, Alexei A. Efros</li>
-<li><a href="https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix" target="_blank">CycleGAN and pix2pix in PyTorch</a><br>
-Jun-Yan Zhu, Taesung Park, Tongzhou Wang</li>
-<li><a href="https://paperswithcode.com/paper/image-to-image-translation-with-conditional" target="_blank">Image-to-Image Translation with Conditional Adversarial Networks</a><br>
-Paper With Code</li>
-<li><a href="https://blogs.nvidia.com/blog/2021/11/09/drive-sim-replicator-synthetic-data-generation/" target="_blank">NVIDIA Omniverse Replicator for DRIVE Sim Accelerates AV Development, Improves Perception Results</a></li>
-</ul>
+<p>To quit the chat, you type <code>/bye</code>.</p>
+<p>At command line, you can find what models are locally installed as follows:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> ollama <span class="ex">list</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">NAME</span>               ID              SIZE      MODIFIED       </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">llama3.2:latest</span>    a80c4f17acd5    2.0 GB    32 minutes ago </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -713,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/naokishibuya\.github\.io\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
